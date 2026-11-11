@@ -23,6 +23,8 @@ _None yet. Add items as `- [ ] YYYY-MM-DD — instruction`._
   the Windows machine by Application Control. Options: (a) WSL2 on this machine, if
   policy allows; (b) a Linux lab server (needs access details). Blocks next data task 3
   (per-clone expression objects).
+  **Answer (2026-11-11, author):** run it in the Claude cloud workspace (Linux; public
+  SISBAR data only). Being acted on — see next log entry.
 
 ## Done
 
