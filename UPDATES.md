@@ -39,6 +39,27 @@
 - **Q4 (2026-11-11) — RQ1 settings.** Superseded by `ANALYSIS_PLAN.md` §0–1 (same
   defaults, plus within-replicate coupling, cost scaling, the 8,000-cell memory cap and the
   fixed OT setting for RQ2/RQ4). Answer by approving the plan.
+- **Q5 (2026-11-11) — Review of `ANALYSIS_PLAN.md` before approval (Claude, VS Code).**
+  Suggested edits; accept/reject each, then approve:
+  1. **RQ2 leakage via OT pairs (important).** §2(b) draws a training early cell's target
+     from its full OT row, which includes later sister cells of validation/test clones.
+     A test-clone cell's state can then be a training target. Proposed: restrict OT draws
+     (and §2(c) independent draws) to later cells of training clones plus unbarcoded cells.
+  2. **Ties in the kNN and independent couplings.** Independent coupling is uniform and kNN
+     is uniform over 10 cells, so AUROC and top-k recall are tie-dominated. Proposed:
+     AUROC with ties counted as 0.5 (Mann–Whitney); top-k by random tie-break, seed fixed,
+     averaged over 100 draws (or report the analytic expectation).
+  3. **Original P panel unnamed.** RQ3 representation (1) uses "the pluripotency panel"
+     but the genes are not listed. Name them (as in DT1/TCBB) so the plan is complete.
+  4. **Chance depends on the 8,000-cell cap.** m₀ and top-k chance change with how many
+     unbarcoded later cells are kept. Proposed: state that enrichment m/m₀ is the
+     primary RQ1 quantity because it is invariant to the cap, and report the cap's effect
+     once (e.g. one transition with no cap) if memory allows.
+  5. **RQ4 mismatch rate.** 1 − top-1 recall treats "heaviest later cell is not a sister"
+     as a mismatch. Fine, but say so explicitly and note that sisters are not the same
+     cell, so this is an upper bound on the pairing error relevant to perturbation models.
+  6. Minor: `paper/main.tex` now reads "data of ~\cite{You_2023}" — the space before `~`
+     gives a double space; use "data of~\cite{You_2023}". Not changed by Claude.
 
 ## Done
 
