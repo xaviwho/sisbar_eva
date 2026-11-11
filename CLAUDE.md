@@ -97,14 +97,18 @@ from the viral barcode there.
   ask the corresponding author. Do not tune filters to hit 559.
 - Provenance: commit the script first, then run it, so the recorded commit is the one
   that produced the output.
-- Scanpy is blocked on the Windows machine (Application Control blocks a numcodecs DLL).
-  Run expression/OT work in WSL2 or on a Linux lab server; do not try to bypass the
-  security policy. The stage-IV matching step needs only scipy.io.mmread + pandas.
+- Scanpy is blocked on the Windows machine (Application Control blocks a numcodecs DLL);
+  do not try to bypass the security policy. **Expression/OT work runs in the Claude
+  cloud workspace** (Linux), results committed to this repo. Only public SISBAR data
+  go there — never FOUNDIN-PD/PPMI data. Large outputs (.h5ad) stay in git-ignored
+  `data/`; scripts and small result tables are committed.
+- QC uses the paper's published thresholds (You et al. STAR Methods): ≥1,000 genes,
+  ≤30,000 UMIs, ≤15% mitochondrial UMIs. Not tuned.
 
 ### Next data tasks
 1. ~~Map each `_N` suffix (and stage-IV viral-barcode replicate) to its GSM library.~~ Done.
 2. ~~Resolve or document the Exp3 discrepancy (rule above).~~ Accepted as 555 / 2,692.
-3. Build the per-clone expression objects (needs WSL2 / Linux for scanpy).
+3. Build the per-clone expression objects (cloud workspace).
 
 ## Research questions
 
