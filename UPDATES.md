@@ -36,6 +36,8 @@ _None yet. Add items as `- [ ] YYYY-MM-DD — instruction`._
   Neither (a) 178,226 nor (b) 198,073 reproduces the paper's 173,564, because the paper
   also removed clusters not reproducible between replicates. Whichever rule is chosen
   is fixed before any RQ analysis and reported with this table. Blocks RQ1.
+  **Answer (2026-11-11, author): option (b).** Implemented in `scripts/04_qc_doublets.py`
+  (rule and doublet settings fixed in its docstring before running).
 
 ## Done
 

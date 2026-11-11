@@ -104,8 +104,11 @@ from the viral barcode there.
   `data/`; scripts and small result tables are committed.
 - QC: the paper's stated thresholds (≥1,000 genes, ≤30,000 UMIs, ≤15% mt) drop 9.9% of
   the authors' own clone-table cells, nearly all via the UMI cap (40% of stage-IV clone
-  cells). **QC rule is an open decision (UPDATES.md Q2); do not start RQ analyses until
-  it is answered.** Never tune it to hit a target count.
+  cells). **Decided (author, 2026-11-11, Q2 option b): keep cells with ≥1,000 genes and
+  ≤15% mt, no UMI cap, Scrublet-predicted doublets removed** (per library, raw counts,
+  random_state=0, expected rate 0.8% per 1,000 barcodes, auto threshold; fallback = top
+  expected-rate fraction). Final cell set: `results/04_qc/cell_qc.csv.gz` column `keep`.
+  Never tune it to hit a target count.
 
 ### Expression objects (2026-11-11, `scripts/03_build_objects.py`)
 - `data/processed/libs/<library>.h5ad` (cloud workspace only, git-ignored): raw counts,
