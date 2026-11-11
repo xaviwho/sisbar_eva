@@ -39,6 +39,33 @@ _None yet. Add items as `- [ ] YYYY-MM-DD — instruction`._
   **Answer (2026-11-11, author): option (b).** Implemented in `scripts/04_qc_doublets.py`
   (rule and doublet settings fixed in its docstring before running).
 
+- **Q3 (2026-11-11) — Scrublet is unstable here; how should doublets be handled?**
+  Running the pre-specified Scrublet step (per library, expected rate 0.8%/1,000
+  barcodes, auto threshold) gave 0–2 doublets in each of the first 6 libraries, then ran
+  out of memory. Diagnostics on two stage-I libraries:
+  - GSM6322990: 0 doublets with default settings; **2,434 (18%)** with
+    `mean_center=False` (needed to fit in memory). Same data, one internal option.
+  - GSM6889983: auto threshold 0.578 sits above 99.9% of simulated doublets → 0 flagged.
+  - Observed vs simulated doublet scores overlap heavily (observed median 0.10, q99 0.48;
+    simulated median 0.27–0.35, q90 0.48): cells within a stage are a continuum, so
+    homotypic doublets are not separable.
+  So the doublet step would remove 0–18% of cells depending on implementation detail.
+  Options:
+  (i) **Primary rule = genes ≥1,000 and mt ≤15% only; keep Scrublet scores as a
+      recorded column; pre-specify a sensitivity analysis for RQ1–RQ3 that drops each
+      library's top expected-rate fraction by score.** Recommended: the main result
+      does not hinge on an unstable step, and the sensitivity analysis shows whether
+      doublets could matter.
+  (ii) Remove the top expected-rate fraction by score in every library (the script's
+      pre-specified fallback, applied everywhere). Consistent, but removes ~5–12% of
+      cells on a score that barely separates doublets from singlets.
+  (iii) Keep the auto threshold as pre-specified and report that it removed almost
+      nothing. Honest, but the memory fix changes its output, so it is not reproducible.
+  No results from `04_qc_doublets.py` are committed; the script will be revised to the
+  chosen option (and to run each library in a separate process to fit in memory).
+  Cloud environment changed to make Scrublet run at all: scanpy 1.12.5, scipy 1.16.3
+  (scanpy 1.11.4 fails with scipy ≥1.16 sparse arrays).
+
 ## Done
 
 - [x] 2026-11-10 — Download both GEO series; confirm barcode-to-cell tables and sample
