@@ -51,6 +51,22 @@
 
 ## Log (newest first)
 
+### 2026-11-11 — Claude (VS Code) — TCBB manuscript template
+- Author: no thesis-style per-section files; use a TCBB template. Done:
+  **`paper/main.tex`** is the manuscript (IEEEtran v1.8b, `journal,compsoc` — the IEEE
+  Computer Society journal format TCBB uses). Title, authors, abstract/keywords, and the
+  CLAUDE.md outline (Intro … Limitations & Conclusion, Results subsections per RQ) with
+  comments marking what goes where. `paper/sections/` removed.
+- Data and Setup rewritten inline as journal prose: three subsections (data; clone
+  definition; cell filtering and doublets) instead of six. Same content and numbers.
+- Numbers still generated: `paper/generated/data_numbers.tex` (from
+  `scripts/05_section3_numbers.py`, run at `eab67aa`), table in `paper/tables/`.
+- Build: from `paper/`, `pdflatex main; bibtex main; pdflatex main; pdflatex main`
+  (`IEEEtran.bst` is in `paper/bibliography/`; set `BSTINPUTS` or copy it). Compiles
+  cleanly, ~1.5 pages so far. Working title is a placeholder — change freely.
+- `conference_041818.tex` and old images left untouched.
+- Commit: `dbac594`.
+
 ### 2026-11-11 — Claude (VS Code) — Section 3 draft
 - `paper/sections/03_data.tex`: six subsections (dataset and lineage design; clone
   definition and reproduction; library and replicate assignment; QC; doublets and the
