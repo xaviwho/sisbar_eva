@@ -15,9 +15,56 @@
 
 ## Open instructions (author → Claude)
 
-_None yet. Add items as `- [ ] YYYY-MM-DD — instruction`._
+- [ ] 2026-11-11 — **(VS Code session; no scanpy needed)** Draft the paper's Section 3,
+  *Data and setup*, as `paper/03_data.md` (IEEE style, plain, ~1 page). Use only committed
+  results: `results/01_*` (clone counts), `results/02_library_map/` (library map, Exp3
+  replicate-label swap, Exp3 gap), `results/03_objects/` and `results/04_qc/` (QC rule,
+  cell and clone counts, primary vs sensitivity sets). Include: dataset and design
+  (stages, days, sister-cell ground truth, one-step transitions); clone definition;
+  reproduced vs published counts with the 0.7% / 4.4% Exp3 discrepancy; the replicate
+  swap; the QC rule and why the paper's UMI cap was not used; the Scrublet finding and the
+  pre-specified doublet sensitivity analysis; a table of cells and cross-stage clones per
+  transition (published / all clone-table cells / primary / sensitivity). Every number
+  must be read from a results file, not typed from this note; add a short script that
+  generates the table. Do not start any RQ analysis.
+- [ ] 2026-11-11 — **(Cloud workspace; blocked on Q4)** Once Q4 is answered, implement RQ1
+  (coupling recovery) per CLAUDE.md and the Q4 settings: commit the script with settings
+  in its docstring before running; run on the primary set, then the doublet-sensitivity
+  set; write `results/05_rq1/` with provenance.
 
 ## Open questions (Claude → author)
+
+- **Q4 (2026-11-11) — Settings to fix before RQ1.** Proposed defaults, from TCBB and
+  CLAUDE.md; confirm or change:
+  - OT space: 30-PC PCA of 2,000 HVGs, fitted per transition on primary cells of both
+    stages pooled (all cells, barcoded or not).
+  - Entropic OT with ε ∈ {0.005, 0.01, 0.05, 0.1}, balanced and unbalanced (τ = 0.9);
+    the grid is reported in full, not tuned on clone recovery.
+  - Recovery scored on barcoded cells only: own-clone mass vs chance, clone-retrieval
+    AUROC, top-k recall (k = 1, 5, 10); nearest-neighbour coupling as baseline.
+  - Uncertainty: bootstrap over clones (1,000 resamples), by replicate as well as pooled.
+
+## Done
+
+- [x] 2026-11-10 — Download both GEO series; confirm barcode-to-cell tables and sample
+  mapping. → `c738aea`
+- [x] 2026-11-10 — Reproduce published clone counts. → `c738aea`
+- [x] 2026-11-11 — Map `_N` suffixes / stage-IV replicate to GSM libraries. → `ef11252`
+- [x] 2026-11-11 — Resolve or document Exp3 discrepancy (one pass). → `ef11252`
+- [x] 2026-11-11 — Q1 (where expression work runs): cloud workspace. → `56ddc72`
+- [x] 2026-11-11 — Build per-library expression objects with QC metrics. → `d45f505`
+  (script), results in `460fdf0`.
+- [x] 2026-11-11 — Q2/Q3 QC rule applied; final cell set. → `92a0df7` (script), results in
+  the commit after it.
+
+---
+
+## Log (newest first)
+
+### 2026-11-11 — Claude (cloud workspace) — Final QC cell set
+- Q2 → option (b), Q3 → option (i), both author decisions; rules fixed in the script
+  docstring and committed (`92a0df7`) before the run.
+- Answered questions, moved here from *Open questions*:
 
 - **Q2 (2026-11-11) — Which QC rule defines the analysis cell set?** The paper's stated
   thresholds (≥1,000 genes, ≤30,000 UMIs, ≤15% mt) drop **11,350 of the authors' own
@@ -71,36 +118,6 @@ _None yet. Add items as `- [ ] YYYY-MM-DD — instruction`._
   top expected-rate fraction per library, used only for the pre-specified sensitivity
   re-run of RQ1–RQ3.
 
-- **Q4 (2026-11-11) — Settings to fix before RQ1.** Proposed defaults, from TCBB and
-  CLAUDE.md; confirm or change:
-  - OT space: 30-PC PCA of 2,000 HVGs, fitted per transition on primary cells of both
-    stages pooled (all cells, barcoded or not).
-  - Entropic OT with ε ∈ {0.005, 0.01, 0.05, 0.1}, balanced and unbalanced (τ = 0.9);
-    the grid is reported in full, not tuned on clone recovery.
-  - Recovery scored on barcoded cells only: own-clone mass vs chance, clone-retrieval
-    AUROC, top-k recall (k = 1, 5, 10); nearest-neighbour coupling as baseline.
-  - Uncertainty: bootstrap over clones (1,000 resamples), by replicate as well as pooled.
-
-## Done
-
-- [x] 2026-11-10 — Download both GEO series; confirm barcode-to-cell tables and sample
-  mapping. → `c738aea`
-- [x] 2026-11-10 — Reproduce published clone counts. → `c738aea`
-- [x] 2026-11-11 — Map `_N` suffixes / stage-IV replicate to GSM libraries. → `ef11252`
-- [x] 2026-11-11 — Resolve or document Exp3 discrepancy (one pass). → `ef11252`
-- [x] 2026-11-11 — Q1 (where expression work runs): cloud workspace. → `56ddc72`
-- [x] 2026-11-11 — Build per-library expression objects with QC metrics. → `d45f505`
-  (script), results in `460fdf0`.
-- [x] 2026-11-11 — Q2/Q3 QC rule applied; final cell set. → `92a0df7` (script), results in
-  the commit after it.
-
----
-
-## Log (newest first)
-
-### 2026-11-11 — Claude (cloud workspace) — Final QC cell set
-- Q2 → option (b), Q3 → option (i), both author decisions; rules fixed in the script
-  docstring and committed (`92a0df7`) before the run.
 - **Primary cell set** (≥1,000 genes, ≤15% mt): **198,073 cells**; 114,667 of 115,046
   clone-table cells kept (99.7%). Cross-stage clones: I→II **756 / 2,696**, II→III
   **1,208 / 5,817**, III→IV **549 / 2,667** (published 768 / 1,213 / 559).
