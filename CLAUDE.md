@@ -28,11 +28,17 @@ differentiation", Cell Stem Cell 2023, DOI 10.1016/j.stem.2023.02.007 (PMID 3693
 Method: SISBAR (single-cell split barcoding). One hESC line (H9), ventral
 midbrain–hindbrain differentiation.
 
-| Transition | Days     | Cross-stage clones | Cells | GEO                      |
-|------------|----------|--------------------|-------|--------------------------|
-| I → II     | 13 → 21  | 768                | 2,762 | GSE207921 (replicate 1)  |
-| II → III   | 21 → 30  | 1,213              | 5,856 | GSE221592 (replicates 2–3) |
-| III → IV   | 30 → 45  | 559                | 2,816 | GSE221592                |
+| Transition | Days     | Cross-stage clones | Cells |
+|------------|----------|--------------------|-------|
+| I → II     | 13 → 21  | 768                | 2,762 |
+| II → III   | 21 → 30  | 1,213              | 5,856 |
+| III → IV   | 30 → 45  | 559                | 2,816 |
+
+Counts are pooled over all three biological replicates. GEO: **GSE207921 = replicate 1,
+all four stages; GSE221592 = replicates 2–3, all four stages** (plus the clone table).
+Viral barcodes end in `-R-E` (replicate, experiment); the cell-barcode `_N` suffix is
+the 10x library, except in the stage-IV sheet where it is missing — use the replicate
+from the viral barcode there.
 
 - 173,564 cells total; 26% barcoded, in 10,702 clones; 2,540 clones span two stages.
 - **No clone spans three stages.** All forecasting is one-step (t → t+1).
@@ -42,11 +48,42 @@ midbrain–hindbrain differentiation.
   few (72 from the stage-III ventral midbrain progenitor) → DA analyses are secondary.
 - Supporting data: Jerber et al. 2021 (D11/D30/D52) for transfer of the fate axis.
 
-### First data tasks (do these before any modelling)
-1. Download both GEO series; confirm whether barcode-to-cell tables are deposited
-   and which samples map to which experiment.
-2. Reproduce the published clone counts (768 / 1,213 / 559) as a sanity check.
-   If they don't match, stop and report — don't tune until they do.
+### Data check results (2026-11-11)
+- Clone table: `GSE221592_Virusbar_processed_data_combined.xlsx` (GSE221592 suppl;
+  SHA-256 ec64e23ff7ccf2c0e3d245bdb14e16444a948b70d52918892554e56a3961eb2b).
+  Six sheets (Clone_stage_I_Exp#1 … Clone_stage_IV_Exp#3); columns Cell.Barcode,
+  Virus.Barcode (`;`-separated when a cell carries several), Cluster.Id. Covers all
+  three replicates; the `_N` suffix on Cell.Barcode is the library index.
+- **Clone definition that reproduces the paper:** a clone = the exact set of viral
+  barcodes on a cell (the full Virus.Barcode string), NOT each barcode separately.
+  ~36–53% of cells carry more than one viral barcode.
+- Reproduced exactly: Exp1 I→II 768 clones / 2,762 cells; Exp2 II→III 1,213 / 5,856.
+- Exp3 III→IV gives 555 / 2,692 vs published 559 / 2,816. Stage-IV cell barcodes have
+  no library suffix; ~18 barcodes appear in more than one of the three stage-IV
+  libraries (GSM6322995, GSM6889988, GSM6889994). Resolve before RQ1.
+- **Only 8 stage-IV mDA cells sit in cross-stage clones** (and 21 mGluts). DA-endpoint
+  analyses are not feasible; treat DA as progenitor fate bias (III-NPvMB clones), not
+  as a forecast target.
+- Expression: per-library 10x matrices (barcodes/features/matrix) on GEO; replicate 1
+  in GSE207921, replicates 2–3 in GSE221592. Library-suffix → GSM mapping still to do.
+
+### Decisions (2026-11-11)
+- **Exp3 gap: Option 2, time-boxed.** Match stage-IV cells to the replicate 1–3
+  expression matrices using the replicate from the viral barcode. This can resolve
+  ambiguous cells but cannot recover cells absent from the deposited table. If the
+  gap is not closed after this one pass, stop: accept 555 / 2,692 as the deposited-data
+  count, report the 0.7% clone / 4.4% cell discrepancy in the Data section, and (optional)
+  ask the corresponding author. Do not tune filters to hit 559.
+- Provenance: commit the script first, then run it, so the recorded commit is the one
+  that produced the output.
+- Scanpy is blocked on the Windows machine (Application Control blocks a numcodecs DLL).
+  Run expression/OT work in WSL2 or on a Linux lab server; do not try to bypass the
+  security policy. The stage-IV matching step needs only scipy.io.mmread + pandas.
+
+### Next data tasks
+1. Map each `_N` suffix (and stage-IV viral-barcode replicate) to its GSM library.
+2. Resolve or document the Exp3 discrepancy (rule above).
+3. Only then build the per-clone expression objects.
 
 ## Research questions
 
