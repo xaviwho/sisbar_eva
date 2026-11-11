@@ -102,13 +102,23 @@ from the viral barcode there.
   cloud workspace** (Linux), results committed to this repo. Only public SISBAR data
   go there — never FOUNDIN-PD/PPMI data. Large outputs (.h5ad) stay in git-ignored
   `data/`; scripts and small result tables are committed.
-- QC uses the paper's published thresholds (You et al. STAR Methods): ≥1,000 genes,
-  ≤30,000 UMIs, ≤15% mitochondrial UMIs. Not tuned.
+- QC: the paper's stated thresholds (≥1,000 genes, ≤30,000 UMIs, ≤15% mt) drop 9.9% of
+  the authors' own clone-table cells, nearly all via the UMI cap (40% of stage-IV clone
+  cells). **QC rule is an open decision (UPDATES.md Q2); do not start RQ analyses until
+  it is answered.** Never tune it to hit a target count.
+
+### Expression objects (2026-11-11, `scripts/03_build_objects.py`)
+- `data/processed/libs/<library>.h5ad` (cloud workspace only, git-ignored): raw counts,
+  33,694 genes; EGFP removed from genes and stored as `obs.egfp_counts`.
+- `results/03_objects/cell_obs.csv.gz`: all 215,960 barcodes with library, stage, exp,
+  rep (viral), QC metrics, `qc_pass` (paper thresholds), clone, cluster. Cell ID =
+  `<library>:<core barcode>`.
 
 ### Next data tasks
 1. ~~Map each `_N` suffix (and stage-IV viral-barcode replicate) to its GSM library.~~ Done.
 2. ~~Resolve or document the Exp3 discrepancy (rule above).~~ Accepted as 555 / 2,692.
-3. Build the per-clone expression objects (cloud workspace).
+3. ~~Build the per-clone expression objects (cloud workspace).~~ Done (`d45f505`).
+4. Apply the QC rule chosen in Q2; add doublet scores if option (b).
 
 ## Research questions
 

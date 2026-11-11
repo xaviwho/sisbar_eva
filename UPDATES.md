@@ -19,12 +19,23 @@ _None yet. Add items as `- [ ] YYYY-MM-DD — instruction`._
 
 ## Open questions (Claude → author)
 
-- **Q1 (2026-11-11) — Where should scanpy / expression work run?** Scanpy is blocked on
-  the Windows machine by Application Control. Options: (a) WSL2 on this machine, if
-  policy allows; (b) a Linux lab server (needs access details). Blocks next data task 3
-  (per-clone expression objects).
-  **Answer (2026-11-11, author):** run it in the Claude cloud workspace (Linux; public
-  SISBAR data only). Being acted on — see next log entry.
+- **Q2 (2026-11-11) — Which QC rule defines the analysis cell set?** The paper's stated
+  thresholds (≥1,000 genes, ≤30,000 UMIs, ≤15% mt) drop **11,350 of the authors' own
+  115,046 clone-table cells (9.9%)**, almost all through the UMI cap (10,973 cells; 40%
+  of stage-IV clone cells exceed 30,000 UMIs, as mature neurons are large). III→IV
+  falls from 555 to 437 clones. The authors evidently did not apply the UMI cap to
+  their lineage table. Options:
+  (a) **Paper thresholds as stated** — consistent with the text; loses 21% of III→IV
+      clones and biases against mature neurons.
+  (b) **Genes ≥1,000 and mt ≤15%, no UMI cap, plus doublet scoring (Scrublet) as the
+      doublet control** — keeps all but 379 clone-table cells; 198,073 cells pass.
+      Recommended: same rule for barcoded and background cells, and doublets are
+      handled by a method designed for them rather than a size cap.
+  (c) Use the authors' clone table as-is for barcoded cells and paper thresholds for
+      the rest — not recommended (two different rules in one OT problem).
+  Neither (a) 178,226 nor (b) 198,073 reproduces the paper's 173,564, because the paper
+  also removed clusters not reproducible between replicates. Whichever rule is chosen
+  is fixed before any RQ analysis and reported with this table. Blocks RQ1.
 
 ## Done
 
@@ -33,10 +44,32 @@ _None yet. Add items as `- [ ] YYYY-MM-DD — instruction`._
 - [x] 2026-11-10 — Reproduce published clone counts. → `c738aea`
 - [x] 2026-11-11 — Map `_N` suffixes / stage-IV replicate to GSM libraries. → `ef11252`
 - [x] 2026-11-11 — Resolve or document Exp3 discrepancy (one pass). → `ef11252`
+- [x] 2026-11-11 — Q1 (where expression work runs): cloud workspace. → `56ddc72`
+- [x] 2026-11-11 — Build per-library expression objects with QC metrics. → `d45f505`
+  (script), results in the commit after it.
 
 ---
 
 ## Log (newest first)
+
+### 2026-11-11 — Claude (cloud workspace) — Expression objects and QC
+- **Q1 answered by author:** expression/OT work runs in the Claude cloud workspace
+  (Linux). Recorded in CLAUDE.md (`56ddc72`, `325c880`).
+- RAW tars and clone table re-downloaded there; SHA-256 identical to the Windows copies.
+- Replicates 2–3 have one extra feature, **EGFP** (lineage-vector reporter); removed from
+  the gene matrix and kept as `egfp_counts`. All 22 libraries share the same 33,694 genes.
+- `scripts/03_build_objects.py` (committed `d45f505` before running): 22 per-library
+  AnnData objects with raw counts in git-ignored `data/processed/libs/` (2.1 GB); every
+  barcode's QC metrics, replicate (from viral barcode), clone and cluster in
+  `results/03_objects/cell_obs.csv.gz`. Join on (library, core barcode): all 115,046
+  clone-table cells matched.
+- With all clone-table cells, cross-stage counts reproduce 768 / 1,213 / 555 as before.
+- **Paper QC thresholds conflict with the authors' clone table** — see Q2. 178,226
+  barcodes pass the stated thresholds (paper: 173,564), but 9.9% of clone-table cells
+  fail them, nearly all on the 30,000-UMI cap. After that QC: I→II 706 / 2,462,
+  II→III 1,099 / 5,010, III→IV 437 / 1,989 (`clone_counts_after_qc.csv`).
+- Package versions in the cloud differ from `requirements.txt` pins (pandas 3.0.5,
+  numpy 2.5.3, scipy 1.18.1, Python 3.13); exact versions recorded in provenance.
 
 ### 2026-11-11 — Claude — Library map and Exp3 gap
 - Every clone-table cell is found in the library its suffix/replicate predicts (100%

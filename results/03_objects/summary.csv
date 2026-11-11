@@ -1,0 +1,10 @@
+,value
+libraries,22
+genes,33694
+barcodes,215960
+qc_pass,178226
+published_hq_cells,173564
+clone_table_cells_matched,115046
+clone_table_cells_total,115046
+clone_table_cells_failing_paper_qc,11350
+thresholds,genes>=1000; UMI<=30000; mt%<=15.0

@@ -1,0 +1,7 @@
+git_commit d45f505bcbb1b1fbbfc91db60ddfc007a055b633
+python 3.13.18 scanpy 1.11.4 anndata 0.13.4 pandas 3.0.5 numpy 2.5.3 scipy 1.18.1
+environment: Claude cloud workspace (Linux)
+input GSE207921_RAW.tar sha256 8409ac36991415e2f3ff803829423fb6b3ffb6c8d5e7d7e0d3028f995f67a554
+input GSE221592_RAW.tar sha256 f74f7eb925f7f990433987fbea78896ce203faf85119ac18f5f91c2ef1f2b2fa
+input results/02_library_map/cell_library_map.csv.gz sha256 b02c4332c0d99f410764e1befcec53e6061b112c4ecca5c6c0b56d85f052da86
+input results/02_library_map/library_coverage.csv sha256 23ce7fec883b046012e2c1e6cf499515ae9b79dd01607e75d751a0beb89429f8

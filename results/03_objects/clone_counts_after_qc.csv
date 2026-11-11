@@ -1,0 +1,7 @@
+transition,cells_used,clones,cells,published_clones,published_cells
+I->II,all_clone_table_cells,768,2762,768,2762
+I->II,qc_pass_only,706,2462,768,2762
+II->III,all_clone_table_cells,1213,5856,1213,5856
+II->III,qc_pass_only,1099,5010,1213,5856
+III->IV,all_clone_table_cells,555,2692,559,2816
+III->IV,qc_pass_only,437,1989,559,2816
