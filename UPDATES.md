@@ -16,7 +16,7 @@
 ## Open instructions (author → Claude)
 
 - [ ] 2026-11-11 — **(VS Code session; no scanpy needed)** Draft the paper's Section 3,
-  *Data and setup*, as `paper/03_data.md` (IEEE style, plain, ~1 page). Use only committed
+  *Data and setup*, as `paper/sections/03_data.tex` (IEEEtran, ~1 page). Use only committed
   results: `results/01_*` (clone counts), `results/02_library_map/` (library map, Exp3
   replicate-label swap, Exp3 gap), `results/03_objects/` and `results/04_qc/` (QC rule,
   cell and clone counts, primary vs sensitivity sets). Include: dataset and design
@@ -26,7 +26,7 @@
   pre-specified doublet sensitivity analysis; a table of cells and cross-stage clones per
   transition (published / all clone-table cells / primary / sensitivity). Every number
   must be read from a results file, not typed from this note; add a short script that
-  generates the table. Do not start any RQ analysis.
+  generates the LaTeX table (`paper/tables/`). Do not start any RQ analysis.
 - [ ] 2026-11-11 — **(Cloud workspace; blocked on Q4)** Once Q4 is answered, implement RQ1
   (coupling recovery) per CLAUDE.md and the Q4 settings: commit the script with settings
   in its docstring before running; run on the primary set, then the doublet-sensitivity
