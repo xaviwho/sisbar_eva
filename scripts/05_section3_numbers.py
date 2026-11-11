@@ -14,6 +14,7 @@ Consistency checks: cross-stage counts recomputed from per-cell tables must equa
 results/04_qc/clone_counts.csv; otherwise the script stops.
 """
 import hashlib
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -163,6 +164,12 @@ def main():
         "nCloneTableSensitivity": n(qcs["clone_table_sensitivity"]),
         "nDACellsCrossStage": n(len(da_iv)),
     }
+    # rule constants, parsed from the committed rule strings (not typed)
+    m = re.search(r"genes>=(\d+); mt%<=([\d.]+)", qcs["primary_rule"])
+    M["minGenes"], M["maxMt"] = n(m.group(1)), f"{float(m.group(2)):g}"
+    m = re.search(r"top ([\d.]+)%-per-([\d,]+)-barcodes", qcs["sensitivity_rule"])
+    M["dblRatePct"], M["dblRatePer"] = m.group(1), m.group(2)
+    assert re.search(rf"genes>={m and M['minGenes'].replace(',', '')}", thr)
     for s, d in DAYS.items():
         M[f"day{s.replace('IV', 'Four').replace('III', 'Three').replace('II', 'Two').replace('I', 'One')}"] = str(d)
 
