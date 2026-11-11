@@ -3,6 +3,14 @@
 Context for Claude Code sessions on this repository. Author: Victor Ikenna Kanu,
 Network Systems Lab, Kumoh National Institute of Technology (PI: Prof. Dong-Seong Kim).
 
+## Session workflow — read first
+
+1. `git pull`, then read **UPDATES.md**. Work its *Open instructions* in order.
+2. At the end of each work session, add a dated entry to UPDATES.md's *Log*, move
+   finished instructions to *Done* (with commit hash), and list blocking decisions
+   under *Open questions*. Commit and push.
+3. Copy durable facts and decisions into this file too.
+
 ## What this project is
 
 An evaluation paper (target: IEEE TCBB, fallback IEEE JBHI) that uses measured
