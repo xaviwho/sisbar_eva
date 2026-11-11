@@ -62,7 +62,10 @@ def pct(a, b, d=1):
 
 
 def summary(p):
-    return pd.read_csv(p, index_col=0)["value"]
+    s = pd.read_csv(p, index_col=0, dtype=str)["value"]
+    num = pd.to_numeric(s, errors="coerce")
+    return pd.Series([v if pd.isna(x) else x for v, x in zip(s, num)], index=s.index,
+                     dtype=object)
 
 
 def cross_stage(cells):
