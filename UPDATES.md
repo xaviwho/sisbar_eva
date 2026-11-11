@@ -80,11 +80,40 @@ _None yet. Add items as `- [ ] YYYY-MM-DD — instruction`._
 - [x] 2026-11-11 — Resolve or document Exp3 discrepancy (one pass). → `ef11252`
 - [x] 2026-11-11 — Q1 (where expression work runs): cloud workspace. → `56ddc72`
 - [x] 2026-11-11 — Build per-library expression objects with QC metrics. → `d45f505`
-  (script), results in the commit after it.
+  (script), results in `460fdf0`.
+- [x] 2026-11-11 — Q2/Q3 QC rule applied; final cell set. → `92a0df7` (script), results in
+  the commit after it.
 
 ---
 
 ## Log (newest first)
+
+### 2026-11-11 — Claude (cloud workspace) — Final QC cell set
+- Q2 → option (b), Q3 → option (i), both author decisions; rules fixed in the script
+  docstring and committed (`92a0df7`) before the run.
+- **Primary cell set** (≥1,000 genes, ≤15% mt): **198,073 cells**; 114,667 of 115,046
+  clone-table cells kept (99.7%). Cross-stage clones: I→II **756 / 2,696**, II→III
+  **1,208 / 5,817**, III→IV **549 / 2,667** (published 768 / 1,213 / 559).
+- **Sensitivity set** (also excluding `doublet_flag`): 181,018 cells; clones 689 / 1,172 /
+  519. Flagged cells have about twice the median UMIs of kept cells in every library.
+- Scrublet's own auto threshold, recorded only, flagged 0 to 2,434 cells per library
+  (5,896 total; 0 in 12 of 22 libraries), confirming Q3.
+- Doublet score vs UMI count: Spearman 0.18 (weak; the flag is not just a size cap).
+- Outputs: `results/04_qc/` (cell_qc.csv.gz, qc_by_library.csv, clone_counts.csv,
+  summary.csv, provenance.txt). Per-library score caches in git-ignored
+  `data/interim/scrublet/`.
+- **Data preparation is complete. Next: RQ1 (coupling recovery).** Before RQ1, the
+  author still needs to fix the open decisions in CLAUDE.md that RQ1 depends on (see Q4).
+
+- **Q4 (2026-11-11) — Settings to fix before RQ1.** Proposed defaults, from TCBB and
+  CLAUDE.md; confirm or change:
+  - OT space: 30-PC PCA of 2,000 HVGs, fitted per transition on primary cells of both
+    stages pooled (all cells, barcoded or not).
+  - Entropic OT with ε ∈ {0.005, 0.01, 0.05, 0.1}, balanced and unbalanced (τ = 0.9);
+    the grid is reported in full, not tuned on clone recovery.
+  - Recovery scored on barcoded cells only: own-clone mass vs chance, clone-retrieval
+    AUROC, top-k recall (k = 1, 5, 10); nearest-neighbour coupling as baseline.
+  - Uncertainty: bootstrap over clones (1,000 resamples), by replicate as well as pooled.
 
 ### 2026-11-11 — Claude (cloud workspace) — Expression objects and QC
 - **Q1 answered by author:** expression/OT work runs in the Claude cloud workspace

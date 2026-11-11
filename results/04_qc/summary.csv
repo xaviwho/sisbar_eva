@@ -1,0 +1,12 @@
+,value
+primary_rule,genes>=1000; mt%<=15.0; no UMI cap; no doublet removal
+sensitivity_rule,"exclude top 0.8%-per-1,000-barcodes fraction by Scrublet score per library"
+barcodes,215960
+primary_cells,198073
+sensitivity_cells,181018
+published_hq_cells,173564
+clone_table_cells,115046
+clone_table_primary,114667
+clone_table_sensitivity,103049
+scrublet_auto_predicted_total,5896
+doublet_score_vs_umi_spearman,0.183

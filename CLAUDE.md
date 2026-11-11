@@ -125,7 +125,9 @@ from the viral barcode there.
 1. ~~Map each `_N` suffix (and stage-IV viral-barcode replicate) to its GSM library.~~ Done.
 2. ~~Resolve or document the Exp3 discrepancy (rule above).~~ Accepted as 555 / 2,692.
 3. ~~Build the per-clone expression objects (cloud workspace).~~ Done (`d45f505`).
-4. Apply the QC rule chosen in Q2; add doublet scores if option (b).
+4. ~~Apply the QC rule chosen in Q2/Q3.~~ Done (`92a0df7`): primary 198,073 cells;
+   cross-stage clones 756 / 1,208 / 549 (primary), 689 / 1,172 / 519 (sensitivity).
+5. RQ1 settings (UPDATES.md Q4) to be confirmed before running RQ1.
 
 ## Research questions
 

@@ -1,0 +1,10 @@
+transition,cell_set,clones,cells,published_clones,published_cells
+I->II,all_clone_table_cells,768,2762,768,2762
+II->III,all_clone_table_cells,1213,5856,1213,5856
+III->IV,all_clone_table_cells,555,2692,559,2816
+I->II,primary,756,2696,768,2762
+II->III,primary,1208,5817,1213,5856
+III->IV,primary,549,2667,559,2816
+I->II,sensitivity_doublets_excluded,689,2364,768,2762
+II->III,sensitivity_doublets_excluded,1172,5532,1213,5856
+III->IV,sensitivity_doublets_excluded,519,2459,559,2816
