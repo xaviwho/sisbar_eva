@@ -15,18 +15,6 @@
 
 ## Open instructions (author → Claude)
 
-- [ ] 2026-11-11 — **(VS Code session; no scanpy needed)** Draft the paper's Section 3,
-  *Data and setup*, as `paper/sections/03_data.tex` (IEEEtran, ~1 page). Use only committed
-  results: `results/01_*` (clone counts), `results/02_library_map/` (library map, Exp3
-  replicate-label swap, Exp3 gap), `results/03_objects/` and `results/04_qc/` (QC rule,
-  cell and clone counts, primary vs sensitivity sets). Include: dataset and design
-  (stages, days, sister-cell ground truth, one-step transitions); clone definition;
-  reproduced vs published counts with the 0.7% / 4.4% Exp3 discrepancy; the replicate
-  swap; the QC rule and why the paper's UMI cap was not used; the Scrublet finding and the
-  pre-specified doublet sensitivity analysis; a table of cells and cross-stage clones per
-  transition (published / all clone-table cells / primary / sensitivity). Every number
-  must be read from a results file, not typed from this note; add a short script that
-  generates the LaTeX table (`paper/tables/`). Do not start any RQ analysis.
 - [ ] 2026-11-11 — **(Cloud workspace; blocked on Q4)** Once Q4 is answered, implement RQ1
   (coupling recovery) per CLAUDE.md and the Q4 settings: commit the script with settings
   in its docstring before running; run on the primary set, then the doublet-sensitivity
@@ -56,10 +44,39 @@
   (script), results in `460fdf0`.
 - [x] 2026-11-11 — Q2/Q3 QC rule applied; final cell set. → `92a0df7` (script), results in
   the commit after it.
+- [x] 2026-11-11 — Draft Section 3 (*Data and setup*) in LaTeX with generated numbers and
+  table. → `f0a8a37` (generator), `d640917` (section, table, numbers, bib).
 
 ---
 
 ## Log (newest first)
+
+### 2026-11-11 — Claude (VS Code) — Section 3 draft
+- `paper/sections/03_data.tex`: six subsections (dataset and lineage design; clone
+  definition and reproduction; library and replicate assignment; QC; doublets and the
+  sensitivity set; analysis cell sets) + Table I. About one IEEE double-column page.
+- **No numbers typed in the prose.** `scripts/05_section3_numbers.py` reads `results/01–04`
+  and writes `paper/sections/03_data_numbers.tex` (one `\newcommand` per number, incl. the
+  QC thresholds and doublet rate parsed from the committed rule strings) and
+  `paper/tables/tab_data_counts.tex`. It also recomputes cross-stage counts from the
+  per-cell tables and stops if they differ from `results/04_qc/clone_counts.csv` (all
+  match). Provenance: `results/05_section3/` (generator run at `f0a8a37`).
+- Table I rows: published / all clone-table cells / paper thresholds (not used) /
+  primary / doublet sensitivity. I added the paper-thresholds row because the UMI-cap
+  argument cites it; drop it if you prefer the four rows you listed.
+- Citations in new `paper/sisbar_refs.bib` (You 2023, Wolock 2019; metadata from Crossref).
+- Compiled cleanly in an IEEEtran journal test wrapper (no overfull boxes, no undefined
+  references). Not wired into a main `.tex`; the section `\input`s its numbers and table
+  with paths relative to `paper/`.
+- Text that is not from results files: design facts from You et al. (three experiments,
+  three replicates, split after three to four divisions) and the statement that the
+  published 173,564 reflects further filtering we do not replicate (deliberately vague;
+  the cloud log mentions removal of non-reproducible clusters — confirm against the
+  paper's methods if you want that stated).
+- Two numbers in the cloud log are not in any results file and are left out: Scrublet's
+  default-settings result (0 vs 18% in GSM6322990) and the observed/simulated score
+  quantiles. The text describes those findings qualitatively. If you want them quoted,
+  they need writing to `results/04_qc/` first.
 
 ### 2026-11-11 — Claude (cloud workspace) — Final QC cell set
 - Q2 → option (b), Q3 → option (i), both author decisions; rules fixed in the script
