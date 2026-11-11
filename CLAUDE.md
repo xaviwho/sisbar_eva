@@ -65,7 +65,20 @@ from the viral barcode there.
   analyses are not feasible; treat DA as progenitor fate bias (III-NPvMB clones), not
   as a forecast target.
 - Expression: per-library 10x matrices (barcodes/features/matrix) on GEO; replicate 1
-  in GSE207921, replicates 2–3 in GSE221592. Library-suffix → GSM mapping still to do.
+  in GSE207921, replicates 2–3 in GSE221592. 22 libraries, 215,960 barcodes in total
+  (unfiltered vs the paper's 173,564 post-QC cells).
+- **Library map done** (`scripts/02_library_map.py` → `results/02_library_map/`): every
+  clone-table cell is found in exactly the library its suffix/replicate predicts (100%
+  overlap; runner-up ≤0.6%). Per-cell map: `results/02_library_map/cell_library_map.csv.gz`.
+- **Exp3 replicate labels 2↔3 are swapped** between the viral barcode and the GEO sample
+  name, consistently in stage III and IV (viral rep 2 → GSM6889993 "Rep3", GSM6889994
+  "Rep3"; viral rep 3 → GSM6889987 "Rep2", GSM6889988 "Rep2"). Clone pairing is
+  unaffected. Use the viral-barcode replicate as the replicate ID everywhere; never
+  the GEO sample name.
+- **Exp3 gap: not closed — accepted.** All 5,329 stage-IV cells are in their own matrix;
+  matching changes nothing (still 555 / 2,692). 20 stage-IV cell barcodes occur in
+  more than one stage-IV library (chance collisions; resolved by replicate). Report
+  555 / 2,692 vs 559 / 2,816 (0.7% clones, 4.4% cells) in the Data section.
 
 ### Decisions (2026-11-11)
 - **Exp3 gap: Option 2, time-boxed.** Match stage-IV cells to the replicate 1–3
@@ -81,9 +94,9 @@ from the viral barcode there.
   security policy. The stage-IV matching step needs only scipy.io.mmread + pandas.
 
 ### Next data tasks
-1. Map each `_N` suffix (and stage-IV viral-barcode replicate) to its GSM library.
-2. Resolve or document the Exp3 discrepancy (rule above).
-3. Only then build the per-clone expression objects.
+1. ~~Map each `_N` suffix (and stage-IV viral-barcode replicate) to its GSM library.~~ Done.
+2. ~~Resolve or document the Exp3 discrepancy (rule above).~~ Accepted as 555 / 2,692.
+3. Build the per-clone expression objects (needs WSL2 / Linux for scanpy).
 
 ## Research questions
 
