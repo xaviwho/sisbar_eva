@@ -39,27 +39,61 @@
 - **Q4 (2026-11-11) — RQ1 settings.** Superseded by `ANALYSIS_PLAN.md` §0–1 (same
   defaults, plus within-replicate coupling, cost scaling, the 8,000-cell memory cap and the
   fixed OT setting for RQ2/RQ4). Answer by approving the plan.
-- **Q5 (2026-11-11) — Review of `ANALYSIS_PLAN.md` before approval (Claude, VS Code).**
-  Suggested edits; accept/reject each, then approve:
-  1. **RQ2 leakage via OT pairs (important).** §2(b) draws a training early cell's target
-     from its full OT row, which includes later sister cells of validation/test clones.
-     A test-clone cell's state can then be a training target. Proposed: restrict OT draws
-     (and §2(c) independent draws) to later cells of training clones plus unbarcoded cells.
-  2. **Ties in the kNN and independent couplings.** Independent coupling is uniform and kNN
-     is uniform over 10 cells, so AUROC and top-k recall are tie-dominated. Proposed:
-     AUROC with ties counted as 0.5 (Mann–Whitney); top-k by random tie-break, seed fixed,
-     averaged over 100 draws (or report the analytic expectation).
-  3. **Original P panel unnamed.** RQ3 representation (1) uses "the pluripotency panel"
-     but the genes are not listed. Name them (as in DT1/TCBB) so the plan is complete.
-  4. **Chance depends on the 8,000-cell cap.** m₀ and top-k chance change with how many
-     unbarcoded later cells are kept. Proposed: state that enrichment m/m₀ is the
-     primary RQ1 quantity because it is invariant to the cap, and report the cap's effect
-     once (e.g. one transition with no cap) if memory allows.
-  5. **RQ4 mismatch rate.** 1 − top-1 recall treats "heaviest later cell is not a sister"
-     as a mismatch. Fine, but say so explicitly and note that sisters are not the same
-     cell, so this is an upper bound on the pairing error relevant to perturbation models.
-  6. Minor: `paper/main.tex` now reads "data of ~\cite{You_2023}" — the space before `~`
-     gives a double space; use "data of~\cite{You_2023}". Not changed by Claude.
+- **Q5 (2026-11-11, revised with evidence) — Recommendations on `ANALYSIS_PLAN.md`.**
+  Evidence: `scripts/05a_plan_checks.py` (committed `6120fea` before running) →
+  `results/05a_plan_checks/`. Descriptive only — no coupling fitted, no model trained, no
+  early feature related to a later fate. Accept/reject each, then approve.
+  1. **RQ2: restrict OT and independent draws to training clones + background (adopt).**
+     Cross-stage sister cells are 4.0–22.9% of each later-stage pool (`C_leakage_exposure`;
+     highest II→III rep 1). With 30% of clones in val/test, ~1–7% of the pool are
+     held-out sisters, and OT mass concentrates on transcriptionally similar cells, so
+     draws hit them more often than their share. Fix costs nothing. Also disclose that the
+     coupling's PCA sees test cells' features (unsupervised; per CLAUDE.md "fit on all").
+  2. **Ties: use analytic chance and Mann–Whitney AUROC (adopt).** Independent coupling →
+     AUROC = 0.5 exactly with ties as ½; top-k chance = 1 − C(n−s,k)/C(n,k) per early cell
+     (s = own-clone later cells). kNN: AUROC with ties as ½; top-k (k ≤ 10) by the
+     hypergeometric expectation within the 10 neighbours. No random tie-breaking.
+     Chance is tiny: top-1 0.01–0.18%, top-10 0.09–1.7% (`D_chance_vs_cap`).
+  3. **P panel: name it and say what it measures here (adopt).** TCBB P = POU5F1, NANOG,
+     SOX2, UTF1, TDGF1. Here POU5F1/NANOG/UTF1/TDGF1 are detected in ≤0.8% of cells at
+     every stage; P without SOX2 has mean ≤0.002. **The TCBB P score is a SOX2 score**
+     (SOX2 detected in 54–85%), not a silent one, and SOX2 is also in Pg. So the plan's
+     wording "shows the panel is degenerate" should become "reduces to SOX2". Keep
+     representation (1) for continuity. Keep Pg as proposed: it varies (mean 1.49/1.51/1.68
+     at I–III, 0.94 at IV).
+  4. **D panel: keep, but describe it honestly (adopt).** SLC6A3 ≤0.5% and DRD2 ≤4.5%
+     detected; D is carried by FOXA2 (15–54%), DDC (12–40%), LMX1A (1–20%), and is zero in
+     30–37% of later cells (`B_score_spread`). In this system D is a floor-plate/ventral-
+     midbrain identity score, not a DA-neuron score. Unchanged for TCBB comparability.
+  5. **Equivalence margin: keep δ = 0.01 (adopt as is), and also report Δ as % of the
+     constant-median MAE.** On later cells of cross-stage clones, the constant-median MAE
+     of (Pg, D) is 0.108 / 0.117 / 0.081 (I→II / II→III / III→IV), so δ = 9.3% / 8.6% /
+     12.4% of the baseline error — the same order as TCBB's constant-vs-model gaps (6–7%),
+     and the TCBB value (`coupling_protocol.py: EQ_MARGIN = 0.01`). A smaller δ would
+     make equivalence unreachable with ~100–600 test clones; a larger one would hide
+     TCBB-sized effects. Note III→IV is the most lenient.
+  6. **Cap: correction to my earlier point.** I said m/m₀ is invariant to the cap; it is
+     not (OT mass shifts when distractors are removed). The cap only binds in I→II (all
+     reps) and II→III reps 2–3; elsewhere the pool is already under 8,000. Where it binds,
+     chance changes up to 3× (I→II rep 2: top-10 0.28% capped vs 0.09% uncapped).
+     Recommend: report chance per replicate from the capped pool actually used, and run
+     **one uncapped check on I→II rep 2** (24,391 later cells) as a pre-specified
+     robustness analysis.
+  7. **Cap: state who is "background" (adopt).** The plan keeps every cross-stage-clone
+     cell and caps "unbarcoded" cells, but many later cells are barcoded in clones that
+     are not cross-stage (e.g. 16,532 in I→II rep 3). Specify: they are background,
+     subsampled with unbarcoded cells, never positives.
+  8. **RQ4 mismatch rate: use 1 − own-clone mass as primary (change).** RQ2's OT pairs are
+     made by drawing from the OT row, so the probability that a drawn partner is a true
+     sister is exactly the own-clone mass m. 1 − m is therefore the mismatch rate the
+     pairing actually produces; 1 − top-1 recall (argmax pairing) stays as secondary.
+     With chance top-1 ≤0.18%, both will likely be near 1, so RQ4 should also show the
+     full m ∈ [0, 1] curve (already planned).
+  9. **RQ3 classes confirmed** (`F_fate_classes`): ≥30-clone fates and "6 III→IV clones
+     end as mDA" match the plan exactly. I→II GABAs has 28 clones (just under 30) — fine,
+     the threshold is fixed in advance.
+  10. Minor: `paper/main.tex` reads "data of ~\cite{You_2023}" (double space); use
+      "data of~\cite{You_2023}". Not changed by Claude.
 
 ## Done
 

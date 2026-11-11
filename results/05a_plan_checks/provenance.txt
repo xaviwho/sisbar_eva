@@ -1,0 +1,7 @@
+git_commit 6120fea70b37178bd3e86110161affe128a132f4
+python 3.11.9 pandas 2.3.3 numpy 2.4.6 scipy 1.17.1
+environment: Windows (scipy.io.mmread only; no scanpy)
+input data/raw/GSE207921/GSE207921_RAW.tar sha256 8409ac36991415e2f3ff803829423fb6b3ffb6c8d5e7d7e0d3028f995f67a554
+input data/raw/GSE221592/GSE221592_RAW.tar sha256 f74f7eb925f7f990433987fbea78896ce203faf85119ac18f5f91c2ef1f2b2fa
+input results/03_objects/cell_obs.csv.gz sha256 c4a43ad240fb68c4ebaec31080e4e4e85eb50c9ea1c68e037baac999cac34ae4
+input results/04_qc/cell_qc.csv.gz sha256 7f821c13c3df65c7a0d388da8b20b6fbc3a9fed79bfeb9213bfdfb26584de0b2
