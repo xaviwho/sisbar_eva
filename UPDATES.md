@@ -71,6 +71,16 @@ _None yet. Add items as `- [ ] YYYY-MM-DD — instruction`._
   top expected-rate fraction per library, used only for the pre-specified sensitivity
   re-run of RQ1–RQ3.
 
+- **Q4 (2026-11-11) — Settings to fix before RQ1.** Proposed defaults, from TCBB and
+  CLAUDE.md; confirm or change:
+  - OT space: 30-PC PCA of 2,000 HVGs, fitted per transition on primary cells of both
+    stages pooled (all cells, barcoded or not).
+  - Entropic OT with ε ∈ {0.005, 0.01, 0.05, 0.1}, balanced and unbalanced (τ = 0.9);
+    the grid is reported in full, not tuned on clone recovery.
+  - Recovery scored on barcoded cells only: own-clone mass vs chance, clone-retrieval
+    AUROC, top-k recall (k = 1, 5, 10); nearest-neighbour coupling as baseline.
+  - Uncertainty: bootstrap over clones (1,000 resamples), by replicate as well as pooled.
+
 ## Done
 
 - [x] 2026-11-10 — Download both GEO series; confirm barcode-to-cell tables and sample
@@ -104,16 +114,6 @@ _None yet. Add items as `- [ ] YYYY-MM-DD — instruction`._
   `data/interim/scrublet/`.
 - **Data preparation is complete. Next: RQ1 (coupling recovery).** Before RQ1, the
   author still needs to fix the open decisions in CLAUDE.md that RQ1 depends on (see Q4).
-
-- **Q4 (2026-11-11) — Settings to fix before RQ1.** Proposed defaults, from TCBB and
-  CLAUDE.md; confirm or change:
-  - OT space: 30-PC PCA of 2,000 HVGs, fitted per transition on primary cells of both
-    stages pooled (all cells, barcoded or not).
-  - Entropic OT with ε ∈ {0.005, 0.01, 0.05, 0.1}, balanced and unbalanced (τ = 0.9);
-    the grid is reported in full, not tuned on clone recovery.
-  - Recovery scored on barcoded cells only: own-clone mass vs chance, clone-retrieval
-    AUROC, top-k recall (k = 1, 5, 10); nearest-neighbour coupling as baseline.
-  - Uncertainty: bootstrap over clones (1,000 resamples), by replicate as well as pooled.
 
 ### 2026-11-11 — Claude (cloud workspace) — Expression objects and QC
 - **Q1 answered by author:** expression/OT work runs in the Claude cloud workspace
