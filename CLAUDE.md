@@ -127,7 +127,7 @@ from the viral barcode there.
 3. ~~Build the per-clone expression objects (cloud workspace).~~ Done (`d45f505`).
 4. ~~Apply the QC rule chosen in Q2/Q3.~~ Done (`92a0df7`): primary 198,073 cells;
    cross-stage clones 756 / 1,208 / 549 (primary), 689 / 1,172 / 519 (sensitivity).
-5. RQ1 settings (UPDATES.md Q4) to be confirmed before running RQ1.
+5. RQ1–RQ4 settings: `ANALYSIS_PLAN.md` (pending author approval). No RQ run before it is APPROVED.
 
 ## Research questions
 
@@ -169,7 +169,9 @@ from the viral barcode there.
 - Journal: TCBB vs JBHI.
 - P/D marker panels for a midbrain–hindbrain system.
 - Equivalence margin value.
-- Whether to pre-register thresholds before RQ2–RQ3.
+- Whether to pre-register thresholds before RQ2–RQ3. → Proposed: `ANALYSIS_PLAN.md`, approved by
+  commit before any RQ run (pending author approval). It also proposes the P/D panel
+  (D unchanged; P replaced by a neural-progenitor score) and δ = 0.01.
 
 ## Related, separate project — do not mix
 

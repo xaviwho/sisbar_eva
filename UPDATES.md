@@ -15,22 +15,30 @@
 
 ## Open instructions (author → Claude)
 
-- [ ] 2026-11-11 — **(Cloud workspace; blocked on Q4)** Once Q4 is answered, implement RQ1
-  (coupling recovery) per CLAUDE.md and the Q4 settings: commit the script with settings
-  in its docstring before running; run on the primary set, then the doublet-sensitivity
-  set; write `results/05_rq1/` with provenance.
+- [ ] 2026-11-11 — **Author: approve `ANALYSIS_PLAN.md`.** It fixes every setting for
+  RQ1–RQ4 before any result exists (answers Q4 and the CLAUDE.md open decisions on the
+  P/D panel, the equivalence margin and pre-registration). Reply "approved" (or edit the
+  file). Claude then changes its status line to APPROVED and commits: that commit is the
+  pre-registration record. **Instructions below wait for this.**
+- [ ] 2026-11-11 — **(Cloud) RQ1 coupling recovery** → `scripts/06_rq1_coupling.py`,
+  `results/06_rq1/`. ANALYSIS_PLAN §0–1. Primary set, then sensitivity set.
+- [ ] 2026-11-11 — **(Cloud) RQ2 forecasting on true lineage** → `scripts/07_rq2_forecast.py`,
+  `results/07_rq2/`. ANALYSIS_PLAN §2. Uses the RQ1 OT coupling (balanced, ε = 0.05).
+- [ ] 2026-11-11 — **(Cloud) RQ3 state adequacy** → `scripts/08_rq3_fate.py`,
+  `results/08_rq3/`. ANALYSIS_PLAN §3. Can run in parallel with RQ2.
+- [ ] 2026-11-11 — **(Cloud) RQ4 perturbation consequence** → `scripts/09_rq4_mismatch.py`,
+  `results/09_rq4/`. ANALYSIS_PLAN §4. Needs RQ1's measured mismatch rates.
+- [ ] 2026-11-11 — **(VS Code) Results sections, as each RQ lands:** write the matching
+  Results subsection in `paper/main.tex`, with figures and numbers generated from
+  `results/06–09` by scripts (no typed numbers). Report nulls as fully as positives.
+- [ ] Later — Jerber D30 transfer of the RQ3 fate-bias axis (needs Jerber data; separate
+  plan amendment).
 
 ## Open questions (Claude → author)
 
-- **Q4 (2026-11-11) — Settings to fix before RQ1.** Proposed defaults, from TCBB and
-  CLAUDE.md; confirm or change:
-  - OT space: 30-PC PCA of 2,000 HVGs, fitted per transition on primary cells of both
-    stages pooled (all cells, barcoded or not).
-  - Entropic OT with ε ∈ {0.005, 0.01, 0.05, 0.1}, balanced and unbalanced (τ = 0.9);
-    the grid is reported in full, not tuned on clone recovery.
-  - Recovery scored on barcoded cells only: own-clone mass vs chance, clone-retrieval
-    AUROC, top-k recall (k = 1, 5, 10); nearest-neighbour coupling as baseline.
-  - Uncertainty: bootstrap over clones (1,000 resamples), by replicate as well as pooled.
+- **Q4 (2026-11-11) — RQ1 settings.** Superseded by `ANALYSIS_PLAN.md` §0–1 (same
+  defaults, plus within-replicate coupling, cost scaling, the 8,000-cell memory cap and the
+  fixed OT setting for RQ2/RQ4). Answer by approving the plan.
 
 ## Done
 
