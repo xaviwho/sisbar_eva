@@ -65,6 +65,11 @@ _None yet. Add items as `- [ ] YYYY-MM-DD — instruction`._
   chosen option (and to run each library in a separate process to fit in memory).
   Cloud environment changed to make Scrublet run at all: scanpy 1.12.5, scipy 1.16.3
   (scanpy 1.11.4 fails with scipy ≥1.16 sparse arrays).
+  **Answer (2026-11-11, author): option (i).** Script revised before running: primary
+  cell set = genes ≥1,000 and mt ≤15%; Scrublet scores recorded with fixed settings
+  (`mean_center=False`, `random_state=0`, one process per library); `doublet_flag` =
+  top expected-rate fraction per library, used only for the pre-specified sensitivity
+  re-run of RQ1–RQ3.
 
 ## Done
 

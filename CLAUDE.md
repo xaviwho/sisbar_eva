@@ -104,11 +104,15 @@ from the viral barcode there.
   `data/`; scripts and small result tables are committed.
 - QC: the paper's stated thresholds (≥1,000 genes, ≤30,000 UMIs, ≤15% mt) drop 9.9% of
   the authors' own clone-table cells, nearly all via the UMI cap (40% of stage-IV clone
-  cells). **Decided (author, 2026-11-11, Q2 option b): keep cells with ≥1,000 genes and
-  ≤15% mt, no UMI cap, Scrublet-predicted doublets removed** (per library, raw counts,
-  random_state=0, expected rate 0.8% per 1,000 barcodes, auto threshold; fallback = top
-  expected-rate fraction). Final cell set: `results/04_qc/cell_qc.csv.gz` column `keep`.
-  Never tune it to hit a target count.
+  cells). **Decided (author, 2026-11-11, Q2 option b + Q3 option i):**
+  - Primary cell set: ≥1,000 genes and ≤15% mt; no UMI cap; no doublet removal.
+    `results/04_qc/cell_qc.csv.gz` column `keep`.
+  - Scrublet is unstable here (0–18% flagged depending on settings), so it is NOT a
+    filter. Scores are recorded (`mean_center=False`, `random_state=0`, per library);
+    `doublet_flag` = top expected-rate fraction (0.8% per 1,000 barcodes) per library.
+  - **Every RQ1–RQ3 analysis is re-run excluding `doublet_flag` cells as a
+    pre-specified sensitivity analysis**, reported alongside the primary result.
+  - Never tune QC to hit a target count.
 
 ### Expression objects (2026-11-11, `scripts/03_build_objects.py`)
 - `data/processed/libs/<library>.h5ad` (cloud workspace only, git-ignored): raw counts,
