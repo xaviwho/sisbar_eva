@@ -15,11 +15,6 @@
 
 ## Open instructions (author → Claude)
 
-- [ ] 2026-11-11 — **Author: approve `ANALYSIS_PLAN.md`.** It fixes every setting for
-  RQ1–RQ4 before any result exists (answers Q4 and the CLAUDE.md open decisions on the
-  P/D panel, the equivalence margin and pre-registration). Reply "approved" (or edit the
-  file). Claude then changes its status line to APPROVED and commits: that commit is the
-  pre-registration record. **Instructions below wait for this.**
 - [ ] 2026-11-11 — **(Cloud) RQ1 coupling recovery** → `scripts/06_rq1_coupling.py`,
   `results/06_rq1/`. ANALYSIS_PLAN §0–1. Primary set, then sensitivity set.
 - [ ] 2026-11-11 — **(Cloud) RQ2 forecasting on true lineage** → `scripts/07_rq2_forecast.py`,
@@ -35,6 +30,43 @@
   plan amendment).
 
 ## Open questions (Claude → author)
+
+_None._
+
+## Done
+
+- [x] 2026-11-10 — Download both GEO series; confirm barcode-to-cell tables and sample
+  mapping. → `c738aea`
+- [x] 2026-11-10 — Reproduce published clone counts. → `c738aea`
+- [x] 2026-11-11 — Map `_N` suffixes / stage-IV replicate to GSM libraries. → `ef11252`
+- [x] 2026-11-11 — Resolve or document Exp3 discrepancy (one pass). → `ef11252`
+- [x] 2026-11-11 — Q1 (where expression work runs): cloud workspace. → `56ddc72`
+- [x] 2026-11-11 — Build per-library expression objects with QC metrics. → `d45f505`
+  (script), results in `460fdf0`.
+- [x] 2026-11-11 — Q2/Q3 QC rule applied; final cell set. → `92a0df7` (script), results in
+  the commit after it.
+- [x] 2026-11-11 — Draft Section 3 (*Data and setup*) in LaTeX with generated numbers and
+  table. → `f0a8a37` (generator), `d640917` (section, table, numbers, bib).
+- [x] 2026-11-11 — Author approved `ANALYSIS_PLAN.md` with Q5 items 1–9 merged. →
+  `65cd70d` (pre-registration record).
+
+---
+
+## Log (newest first)
+
+### 2026-11-11 — Claude (VS Code) — Analysis plan approved
+- **Author: "approved"** — read as accepting all Q5 recommendations (items 1–9) and the
+  plan. Merged into `ANALYSIS_PLAN.md` before approval, then status set to APPROVED in a
+  commit containing only that file: **`65cd70d` is the pre-registration record.** No RQ
+  result exists at that commit. Later changes go under *Amendments* with date and reason.
+- Merged: RQ2 OT/independent draws restricted to training clones + background; analytic
+  chance and Mann–Whitney ties; background defined for the cap; uncapped I→II rep 2
+  robustness check; P panel named (reduces to SOX2); D described as floor-plate/vMB
+  identity; δ = 0.01 kept and every Δ also reported as % of constant-median MAE; RQ4
+  primary mismatch = 1 − own-clone mass.
+- Item 10 applied: `paper/main.tex` "data of~\cite{You_2023}".
+- **Next: RQ1 in the cloud workspace** (`scripts/06_rq1_coupling.py`), then RQ2–RQ4.
+- Answered questions, moved here from *Open questions*:
 
 - **Q4 (2026-11-11) — RQ1 settings.** Superseded by `ANALYSIS_PLAN.md` §0–1 (same
   defaults, plus within-replicate coupling, cost scaling, the 8,000-cell memory cap and the
@@ -94,25 +126,7 @@
      the threshold is fixed in advance.
   10. Minor: `paper/main.tex` reads "data of ~\cite{You_2023}" (double space); use
       "data of~\cite{You_2023}". Not changed by Claude.
-
-## Done
-
-- [x] 2026-11-10 — Download both GEO series; confirm barcode-to-cell tables and sample
-  mapping. → `c738aea`
-- [x] 2026-11-10 — Reproduce published clone counts. → `c738aea`
-- [x] 2026-11-11 — Map `_N` suffixes / stage-IV replicate to GSM libraries. → `ef11252`
-- [x] 2026-11-11 — Resolve or document Exp3 discrepancy (one pass). → `ef11252`
-- [x] 2026-11-11 — Q1 (where expression work runs): cloud workspace. → `56ddc72`
-- [x] 2026-11-11 — Build per-library expression objects with QC metrics. → `d45f505`
-  (script), results in `460fdf0`.
-- [x] 2026-11-11 — Q2/Q3 QC rule applied; final cell set. → `92a0df7` (script), results in
-  the commit after it.
-- [x] 2026-11-11 — Draft Section 3 (*Data and setup*) in LaTeX with generated numbers and
-  table. → `f0a8a37` (generator), `d640917` (section, table, numbers, bib).
-
----
-
-## Log (newest first)
+  **Answer (2026-11-11, author): approved (all items).**
 
 ### 2026-11-11 — Claude (VS Code) — TCBB manuscript template
 - Author: no thesis-style per-section files; use a TCBB template. Done:

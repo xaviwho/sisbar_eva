@@ -127,7 +127,8 @@ from the viral barcode there.
 3. ~~Build the per-clone expression objects (cloud workspace).~~ Done (`d45f505`).
 4. ~~Apply the QC rule chosen in Q2/Q3.~~ Done (`92a0df7`): primary 198,073 cells;
    cross-stage clones 756 / 1,208 / 549 (primary), 689 / 1,172 / 519 (sensitivity).
-5. RQ1–RQ4 settings: `ANALYSIS_PLAN.md` (pending author approval). No RQ run before it is APPROVED.
+5. ~~RQ1–RQ4 settings.~~ `ANALYSIS_PLAN.md` APPROVED 2026-11-11 (`65cd70d`). Follow it
+   exactly; any deviation is a dated amendment in that file, never silent.
 
 ## Research questions
 
@@ -167,11 +168,13 @@ from the viral barcode there.
 ## Open decisions (ask the author, don't assume)
 
 - Journal: TCBB vs JBHI.
-- P/D marker panels for a midbrain–hindbrain system.
-- Equivalence margin value.
-- Whether to pre-register thresholds before RQ2–RQ3. → Proposed: `ANALYSIS_PLAN.md`, approved by
-  commit before any RQ run (pending author approval). It also proposes the P/D panel
-  (D unchanged; P replaced by a neural-progenitor score) and δ = 0.01.
+
+Decided 2026-11-11 by approving `ANALYSIS_PLAN.md` (pre-registration commit `65cd70d`):
+- Pre-registration: yes — the approved plan; changes only as dated amendments.
+- Panels: D unchanged (TH, DDC, SLC6A3, DRD2, LMX1A, FOXA2; here a floor-plate/vMB identity
+  score); P replaced by Pg = SOX2, NES, HES1, HES5, VIM; TCBB P kept only as RQ3 baseline
+  (reduces to SOX2 here).
+- Equivalence margin δ = 0.01 MAE (TCBB value); Δ also reported as % of constant-median MAE.
 
 ## Related, separate project — do not mix
 
