@@ -1,4 +1,4 @@
-git_commit 32688d130d6a21e06923168f6ae0e0728fbe3e35
+git_commit fbca3d0d3f71f8d9b1e4fcf643727791250349d8
 plan: ANALYSIS_PLAN.md approved at 65cd70d
 python 3.13.18 scanpy 1.12.5 POT 0.9.7.post1 numpy 2.5.3 scipy 1.16.3 sklearn 1.9.1 pandas 3.0.5
 environment: Claude cloud workspace (Linux, 2 CPU, 7 GB)

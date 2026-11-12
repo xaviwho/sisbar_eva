@@ -129,6 +129,12 @@ from the viral barcode there.
    cross-stage clones 756 / 1,208 / 549 (primary), 689 / 1,172 / 519 (sensitivity).
 5. ~~RQ1–RQ4 settings.~~ `ANALYSIS_PLAN.md` APPROVED 2026-11-11 (`65cd70d`). Follow it
    exactly; any deviation is a dated amendment in that file, never silent.
+6. ~~Run RQ1–RQ4.~~ Done 2026-11-13: primary, sensitivity and the uncapped cap check are
+   final in `results/06_rq1` … `results/09_rq4`. Amendment A1 (block-wise Sinkhorn, uncapped
+   job only) was validated before use. The sensitivity set changes no conclusion; the cap
+   leaves AUROC unchanged (0.654 vs 0.656) but lowers absolute mass and top-k with chance.
+   Only the Jerber transfer remains (needs its own amendment and data).
+   Cloud lesson: the workspace has a 5.8 GB memory limit and 2 CPUs; run one OT job at a time.
 
 ## Research questions
 

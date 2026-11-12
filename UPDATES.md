@@ -15,15 +15,11 @@
 
 ## Open instructions (author → Claude)
 
-- [ ] 2026-11-11 — **(Cloud) RQ1 coupling recovery** → `scripts/06_rq1_coupling.py`,
-  `results/06_rq1/`. ANALYSIS_PLAN §0–1. Primary set, then sensitivity set.
-- [ ] 2026-11-11 — **(Cloud) RQ2 forecasting on true lineage** → `scripts/07_rq2_forecast.py`,
-  `results/07_rq2/`. ANALYSIS_PLAN §2. Uses the RQ1 OT coupling (balanced, ε = 0.05).
-- [ ] 2026-11-12 — **(VS Code) RQ1, RQ2 (primary) and RQ4 are final; write them now.**
-  `results/06_rq1/` (primary rows final; sensitivity rows still filling in),
-  `results/07_rq2/` (primary final), `results/09_rq4/` (complete). Use primary rows for the
-  main text; sensitivity goes in a supplementary table once the cloud log says it is done.
-  See the 2026-11-12 evening log entry for points to state carefully.
+- [ ] 2026-11-13 — **(VS Code) All RQ1–RQ4 results are final (primary, sensitivity, cap
+  check). `git pull`, then write the Results.** Primary rows → main text; sensitivity rows
+  (`cellset == "sensitivity"`) → one supplementary table per RQ; the uncapped I→II rep-2
+  rows (`uncapped == True`) → a supplementary cap-robustness comparison, citing amendment
+  A1. See the 2026-11-13 and 2026-11-12 evening log entries for points to state carefully.
 - [ ] 2026-11-12 — **(VS Code) Start now with RQ3:** `results/08_rq3/` is complete (primary
   and sensitivity). Write the RQ3 Results subsection and Fig 5 from it. The RQ4 grid part
   (`results/09_rq4/grid_*`) is also final; its RQ1-measured points follow RQ1.
@@ -39,6 +35,11 @@ _None._
 
 ## Done
 
+- [x] 2026-11-11 — RQ1 coupling recovery (cloud), primary + sensitivity + uncapped cap
+  check (amendment A1 `4ad508f`, validation `fbca3d0`). → scripts `12fade6`, `22dad01`,
+  `b576f19`; final results in the 2026-11-13 commit.
+- [x] 2026-11-11 — RQ2 forecasting (cloud), primary + sensitivity. → scripts `fd29545`,
+  `dfdb11c`, `a46d264`; final results in the 2026-11-13 commit.
 - [x] 2026-11-12 — RQ4 perturbation consequence (cloud). → script `fe16ad2`, results this commit.
 - [x] 2026-11-12 — RQ3 state adequacy (cloud). → script `6bde8cb`, results `fa1564c`.
 
@@ -60,6 +61,35 @@ _None._
 ---
 
 ## Log (newest first)
+
+### 2026-11-13 — Claude (cloud workspace) — RQ1/RQ2 sensitivity and cap check done; all RQs final
+- **RQ1 complete:** 19 jobs (9 primary, 9 sensitivity, 1 uncapped), 145 OT solves, all
+  converged (`results/06_rq1/solves.csv`).
+- **RQ1 sensitivity (doublet-flagged cells excluded) changes no conclusion.** Pooled, OT
+  balanced ε = 0.05, forward (`enrichment` column): own-clone mass 4.67× / 4.13× / 2.74×
+  chance (I→II / II→III / III→IV; primary 3.99× / 4.17× / 2.78×); AUROC 0.61 / 0.65 / 0.61
+  (primary 0.61 / 0.64 / 0.59); kNN AUROC ≈ 0.50 throughout. Fate TVD keeps the primary
+  pattern: OT below independent for most I→II and II→III clusters (I-NPvMB 0.06 vs 0.46,
+  II-NPvMB 0.10 vs 0.39), but worse for I-NbpHB (0.38 vs 0.25) and II-Motors (0.62 vs 0.30);
+  at III→IV OT is worse than independent for III-NPpHB (0.58 vs 0.53) and III-NPaHB (0.32 vs
+  0.13), better for III-NPvMB (0.43 vs 0.65), III-Motors (0.24 vs 0.61) and III-Gluts
+  (0.29 vs 0.45).
+- **Cap robustness (ANALYSIS_PLAN §1; amendment A1).** Uncapped I→II replicate 2 (24,391
+  later cells, blocked solver validated against POT, rel. plan difference 6e-6): AUROC
+  0.654 vs 0.656 capped; enrichment 2.16× vs 3.48×; top-1 recall 0 vs 0.34%. Chance m₀ falls
+  from 2.7e-4 to 9.2e-5 with the larger pool, so absolute mass falls too. The cap does not
+  drive the AUROC result; top-k and absolute mass depend on pool size and should be read
+  together with chance. kNN is unchanged (AUROC 0.50).
+- **RQ2 sensitivity changes no conclusion.** With true lineage, Ridge/RF/Transformer beat
+  the constant median by 0.9–5.0% of its MAE (primary 0.9–3.1%), every CI inside ±δ
+  (equivalent). Transformer is equivalent to RF in all 9 transition × coupling cells.
+  Non-equivalent rows are the same as in primary: at III→IV, OT/independent models beat
+  their own constant median by 9–11% (constant MAE 0.172 / 0.163 vs 0.130 for the
+  true-coupling constant), the artefact described in the 2026-11-12 evening entry; and
+  ConstMean vs RF at II→III true (8.3%).
+- **RQ4:** measured step re-run against the final RQ1 summary (for provenance; the summary
+  file now includes sensitivity rows). Numbers identical to the 2026-11-12 run.
+- Nothing pending in the cloud except the Jerber transfer (needs a plan amendment + data).
 
 ### 2026-11-12 evening — Claude (cloud workspace) — RQ1/RQ2 primary and RQ4 done
 - **RQ1 primary: all 9 jobs, 88 OT solves, all converged** (`results/06_rq1/`, summary at
