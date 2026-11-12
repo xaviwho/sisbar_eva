@@ -486,7 +486,9 @@ def summarise():
     for k, g in fate.groupby(["cellset", "uncapped", "transition"]):
         labs = sorted({x for s in g.labels for x in json.loads(s)})
         def vec(row, col):
-            v = dict(zip(json.loads(row.labels), json.loads(row[col]) if isinstance(row[col], str) else row[col]))
+            raw = getattr(row, col)
+            vals = json.loads(raw.replace("nan", "NaN")) if isinstance(raw, str) else raw
+            v = dict(zip(json.loads(row.labels), vals))
             return [v.get(x, 0.0) for x in labs]
         g = g.copy()
         g["P"] = [vec(r, "pred") for r in g.itertuples()]
