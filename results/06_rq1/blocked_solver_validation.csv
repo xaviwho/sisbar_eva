@@ -1,0 +1,2 @@
+job,eps,iters_blocked,err_blocked,iters_pot,max_rel_plan_diff,mean_abs_diff_m,mean_abs_diff_auroc,mean_abs_diff_top1,mean_m_blocked,mean_m_pot,mean_auroc_blocked,mean_auroc_pot,passed
+primary_I-II_r2,0.05,122,9.088162189811932e-07,81,5.740587766922545e-06,2.3089680832700326e-09,0.0,0.0,0.0007467247759389195,0.0007467230768444007,0.6480348624517236,0.6480348624517236,True
