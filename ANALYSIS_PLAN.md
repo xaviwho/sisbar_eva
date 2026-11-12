@@ -178,4 +178,13 @@ accuracy, how much error does mismatching add to the estimated response?
 
 ## Amendments
 
-_None._
+- **A1 (2026-11-13) — solver for the uncapped robustness job only.** §1 names POT's
+  log-domain Sinkhorn. For the pre-specified uncapped I→II replicate-2 check (11,278 ×
+  24,391 cells, a 1.1 GB cost matrix), POT keeps several full-size copies and the job was
+  killed at the workspace's 5.8 GB memory limit. That job alone uses a block-wise
+  implementation of the same algorithm (same updates, update order, column-marginal error
+  every 10th iteration, stopThr 1e-6), and a sparse kNN matrix. Before use it is validated
+  against POT on the capped I→II replicate-2 job with a pass rule fixed in advance
+  (`scripts/06b_validate_blocked_solver.py`: mean |Δ own-clone mass| < 1e-5, mean
+  |Δ AUROC| < 1e-3, max relative plan difference < 1e-2). If validation fails, the uncapped
+  check is reported as not run. No primary result and no setting changes.

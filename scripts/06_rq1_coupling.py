@@ -132,7 +132,7 @@ def transfer_labels(X, d, stage):
 
 
 # ----------------------------------------------------------------------------- OT
-def solve_balanced(M, eps, warm, tag, budget_end):
+def solve_balanced(M, eps, warm, tag, budget_end, blocked=False):
     import ot
     n0, n1 = M.shape
     a = np.full(n0, 1 / n0, dtype=np.float32)
@@ -148,6 +148,12 @@ def solve_balanced(M, eps, warm, tag, budget_end):
     else:
         lu, lv, it = np.zeros(n0, np.float32), np.zeros(n1, np.float32), 0
     err = np.inf
+    if blocked:
+        lu, lv, n_it, err = sinkhorn_log_blocked(M, eps, lu, lv, STOP, MAX_ITER)
+        state = dict(log_u=lu, log_v=lv, niter=it + n_it + 1, err=err, done=True,
+                     converged=err < STOP, solver="blocked")
+        np.savez(ck, **state)
+        return state
     while it < MAX_ITER:
         if time.time() > budget_end:
             np.savez(ck, log_u=lu, log_v=lv, niter=it, err=err, done=False)
@@ -164,6 +170,51 @@ def solve_balanced(M, eps, warm, tag, budget_end):
     state = dict(log_u=lu, log_v=lv, niter=it, err=err, done=True, converged=err < STOP)
     np.savez(ck, **state)
     return state
+
+
+def sinkhorn_log_blocked(M, eps, u, v, stop, max_iter, block=1024):
+    """Same algorithm, update order and stopping rule as POT `sinkhorn_log` (v-update,
+    u-update, column-marginal L2 error every 10th iteration), computed over row blocks
+    so that no full-size temporary is created. Uniform marginals. Used only where POT
+    does not fit in memory (uncapped I->II rep-2 check; ANALYSIS_PLAN amendment A1)."""
+    n0, n1 = M.shape
+    loga, logb = np.float32(-np.log(n0)), np.float32(-np.log(n1))
+    s_eps = np.float32(-1.0 / eps)
+    blocks = [slice(k, min(k + block, n0)) for k in range(0, n0, block)]
+
+    def col_lse(u):
+        m = s = None
+        for b in blocks:
+            A = M[b] * s_eps + u[b, None]
+            mb = A.max(0)
+            if m is None:
+                m, s = mb, np.exp(A - mb).sum(0)
+            else:
+                nm = np.maximum(m, mb)
+                s = s * np.exp(m - nm) + np.exp(A - nm).sum(0)
+                m = nm
+        return m + np.log(s)
+
+    def row_lse(v):
+        out = np.empty(n0, dtype=np.float32)
+        for b in blocks:
+            A = M[b] * s_eps + v[None, :]
+            am = A.max(1)
+            out[b] = am + np.log(np.exp(A - am[:, None]).sum(1))
+        return out
+
+    err, ii = np.inf, 0
+    for ii in range(max_iter):
+        v = (logb - col_lse(u)).astype(np.float32)
+        u = (loga - row_lse(v)).astype(np.float32)
+        if ii % 10 == 0:
+            tmp2 = np.zeros(n1, dtype=np.float64)
+            for b in blocks:
+                tmp2 += np.exp(M[b] * s_eps + u[b, None] + v[None, :]).sum(0)
+            err = float(np.linalg.norm(tmp2 - 1.0 / n1))
+            if err < stop:
+                break
+    return u, v, ii, err
 
 
 def plan_from_potentials(M, eps, lu, lv):
@@ -281,17 +332,18 @@ def independent_metrics(early_idx, clone_early, clone_late):
     return rows
 
 
-def backward_metrics(W, late_idx, clone_early_all, clone_late, coupling):
+def backward_metrics(W, late_idx, clone_early_all, clone_late, coupling, cell_ids=None):
     """Column-normalised: later fg cell -> mass on own-clone early cells."""
     rows = []
     col = np.asarray(W[:, late_idx], dtype=np.float64)
     n0 = W.shape[0]
+    ids = late_idx if cell_ids is None else cell_ids
     for c, j in enumerate(late_idx):
         w = col[:, c]
         tot = w.sum()
         pos = clone_early_all == clone_late[j]
         s = int(pos.sum())
-        rec = dict(cell=j, coupling=coupling, n_earlier=n0, s=s, m0=s / n0)
+        rec = dict(cell=ids[c], coupling=coupling, n_earlier=n0, s=s, m0=s / n0)
         if tot <= 0 or not np.isfinite(tot):
             rec.update(m=np.nan, auroc=np.nan)
         else:
@@ -351,7 +403,12 @@ def run_job(obs, cellset, transition, rep, budget_end, uncapped=False):
     labels = sorted(set(late_labels))
 
     from scipy.spatial.distance import cdist
-    M = cdist(X0, X1, "sqeuclidean").astype(np.float32)
+    if uncapped:   # chunked float32 (same values as cdist -> float32), to fit in memory
+        M = np.empty((len(X0), len(X1)), dtype=np.float32)
+        for k in range(0, len(X0), 1000):
+            M[k:k + 1000] = cdist(X0[k:k + 1000], X1, "sqeuclidean")
+    else:
+        M = cdist(X0, X1, "sqeuclidean").astype(np.float32)
     M /= np.float32(np.median(M))
 
     fwd, bwd, fate, solves = [], [], [], []
@@ -361,10 +418,12 @@ def run_job(obs, cellset, transition, rep, budget_end, uncapped=False):
     # kNN as a matrix for backward/fate metrics
     from sklearn.neighbors import NearestNeighbors
     nb = NearestNeighbors(n_neighbors=KNN_K).fit(X1).kneighbors(X0, return_distance=False)
-    Wk = np.zeros(M.shape, dtype=np.float32)
-    Wk[np.repeat(np.arange(len(X0)), KNN_K), nb.ravel()] = 1 / KNN_K
-    bwd += backward_metrics(Wk, late_fg, clone_early_all, clone_late, "kNN")
-    fate += fate_vectors(Wk[early_fg], early_fg, clone_early, clone_late, late_labels, labels, "kNN")
+    import scipy.sparse as _sp
+    Wk = _sp.csr_matrix((np.full(nb.size, 1 / KNN_K, dtype=np.float32),
+                         (np.repeat(np.arange(len(X0)), KNN_K), nb.ravel())), shape=M.shape)
+    bwd += backward_metrics(Wk[:, late_fg].toarray(), np.arange(len(late_fg)), clone_early_all,
+                            clone_late[late_fg], "kNN", cell_ids=late_fg)
+    fate += fate_vectors(Wk[early_fg].toarray(), early_fg, clone_early, clone_late, late_labels, labels, "kNN")
     del Wk
     Wi = np.full((len(early_fg), len(X1)), 1 / len(X1), dtype=np.float32)
     fate += fate_vectors(Wi, early_fg, clone_early, clone_late, late_labels, labels, "independent")
@@ -376,7 +435,7 @@ def run_job(obs, cellset, transition, rep, budget_end, uncapped=False):
     for eps in (EPS if not uncapped else [0.1, 0.05]):
         if prev_eps is not None and warm is not None:
             warm = (warm[0] * prev_eps / eps, warm[1] * prev_eps / eps)
-        stt = solve_balanced(M, eps, warm, tag, budget_end)
+        stt = solve_balanced(M, eps, warm, tag, budget_end, blocked=uncapped)
         if stt is None:
             return False
         warm, prev_eps = (stt["log_u"], stt["log_v"]), eps
