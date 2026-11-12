@@ -1,0 +1,6 @@
+git_commit abeeb2a8706fb3f9f9284ccdb3409f7a867b8c9b
+plan: ANALYSIS_PLAN.md approved at 65cd70d
+python 3.13.18 torch 2.15.0+cpu sklearn 1.9.1 numpy 2.5.3 scipy 1.16.3 pandas 3.0.5
+environment: Claude cloud workspace (Linux, 2 CPU, 7 GB)
+input data/interim/cell_scores.csv.gz sha256 a80e4c6c2f0de2d90552f629deb1aa53962082ce6356a052ca1aff09f75ceeae
+input OT potentials: data/interim/rq1/*_bal_0.05.npz and *_emb.npz (RQ1)
