@@ -10,7 +10,10 @@ before any run:
   * Unbalanced: KL-relaxed entropic OT (same objective as POT `sinkhorn_unbalanced`,
     reg_type 'kl'), reg_m = ε·τ/(1−τ), τ = 0.9, solved by log-domain unbalanced Sinkhorn:
     log_u ← φ(log a − LSE_j(−M/ε + log_v)), log_v ← φ(log b − LSE_i(−M/ε + log_u)),
-    φ = reg_m/(reg_m+ε) = τ. Stop when max |Δ log_u|, |Δ log_v| < 1e-6; max MAX_ITER.
+    φ = reg_m/(reg_m+ε) = τ. Stop when the max relative change |Δ log_u|/(1+|log_u|)
+    (and for log_v) < 1e-6; max MAX_ITER. (Revised from an absolute 1e-6, which is below
+    float32 resolution for these potentials; solves that met the absolute criterion also
+    meet this one, so earlier converged results are unchanged.)
     (Revision before any unbalanced result existed: POT's `sinkhorn_stabilized` did not
     finish ε = 0.1 on the smallest job in 20 min; the objective is unchanged.)
   * HVGs: seurat_v3 on raw counts needs ≥2 batches with variance; batch_key = library.
@@ -196,7 +199,9 @@ def solve_unbalanced(M, eps, tag, budget_end):
             return None, None
         lu_new = phi * (la - logsumexp(logK + lv[None, :], axis=1)).astype(np.float32)
         lv_new = phi * (lb - logsumexp(logK + lu_new[:, None], axis=0)).astype(np.float32)
-        err = float(max(np.abs(lu_new - lu).max(), np.abs(lv_new - lv).max()))
+        # relative change: an absolute 1e-6 is below float32 resolution for |log u| >~ 8
+        err = float(max((np.abs(lu_new - lu) / (1 + np.abs(lu))).max(),
+                        (np.abs(lv_new - lv) / (1 + np.abs(lv))).max()))
         lu, lv, it = lu_new, lv_new, it + 1
         if err < STOP:
             break
