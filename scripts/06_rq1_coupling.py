@@ -7,8 +7,12 @@ before any run:
     max MAX_ITER iterations; the ε grid is solved from large to small ε, each warm-started
     from the previous ε's potentials rescaled by ε_old/ε_new (changes speed, not the
     solution). Iterations and convergence are recorded per solve.
-  * Unbalanced: POT `sinkhorn_unbalanced`, method `sinkhorn_stabilized`, KL marginals,
-    reg_m = ε·τ/(1−τ), τ = 0.9, stopThr 1e-6, max MAX_ITER.
+  * Unbalanced: KL-relaxed entropic OT (same objective as POT `sinkhorn_unbalanced`,
+    reg_type 'kl'), reg_m = ε·τ/(1−τ), τ = 0.9, solved by log-domain unbalanced Sinkhorn:
+    log_u ← φ(log a − LSE_j(−M/ε + log_v)), log_v ← φ(log b − LSE_i(−M/ε + log_u)),
+    φ = reg_m/(reg_m+ε) = τ. Stop when max |Δ log_u|, |Δ log_v| < 1e-6; max MAX_ITER.
+    (Revision before any unbalanced result existed: POT's `sinkhorn_stabilized` did not
+    finish ε = 0.1 on the smallest job in 20 min; the objective is unchanged.)
   * HVGs: seurat_v3 on raw counts needs ≥2 batches with variance; batch_key = library.
   * Fate labels of unlabelled later cells: kNN (k = 15) majority vote from clone-table
     cells of the same stage and replicate; ties broken by the smallest summed distance.
@@ -170,29 +174,36 @@ def plan_from_potentials(M, eps, lu, lv):
 
 
 def solve_unbalanced(M, eps, tag, budget_end):
-    import ot
-    ck = CACHE / f"{tag}_unb_{eps}.npy"
-    meta = CACHE / f"{tag}_unb_{eps}.json"
+    from scipy.special import logsumexp
+    ck = CACHE / f"{tag}_unb_{eps}.npz"
     if ck.exists():
-        return np.load(ck), json.loads(meta.read_text())
+        z = np.load(ck)
+        if bool(z["done"]):
+            info = dict(niter=int(z["niter"]), err=float(z["err"]), converged=bool(z["converged"]))
+            return plan_from_potentials(M, eps, z["log_u"], z["log_v"]), info
+        lu, lv, it = z["log_u"], z["log_v"], int(z["niter"])
+    else:
+        lu, lv, it = np.zeros(M.shape[0], np.float32), np.zeros(M.shape[1], np.float32), 0
     n0, n1 = M.shape
-    if time.time() > budget_end:
-        return None, None
-    a = np.full(n0, 1 / n0)
-    b = np.full(n1, 1 / n1)
+    la, lb = np.float32(-np.log(n0)), np.float32(-np.log(n1))
     reg_m = eps * TAU / (1 - TAU)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        P, log = ot.unbalanced.sinkhorn_unbalanced(a, b, M.astype(np.float64), eps, reg_m,
-                                                   method="sinkhorn_stabilized",
-                                                   numItermax=MAX_ITER, stopThr=STOP, log=True)
-    P = P.astype(np.float32)
-    info = dict(niter=int(log.get("niter", -1)), err=float(log["err"][-1]) if log.get("err") else None)
-    info["converged"] = info["err"] is not None and info["err"] < STOP
-    info["finite"] = bool(np.isfinite(P).all())
-    np.save(ck, P)
-    meta.write_text(json.dumps(info))
-    return P, info
+    phi = np.float32(reg_m / (reg_m + eps))
+    logK = (M / np.float32(-eps)).astype(np.float32)
+    err = np.inf
+    while it < MAX_ITER:
+        if it % CHUNK == 0 and time.time() > budget_end:
+            np.savez(ck, log_u=lu, log_v=lv, niter=it, err=err, done=False, converged=False)
+            return None, None
+        lu_new = phi * (la - logsumexp(logK + lv[None, :], axis=1)).astype(np.float32)
+        lv_new = phi * (lb - logsumexp(logK + lu_new[:, None], axis=0)).astype(np.float32)
+        err = float(max(np.abs(lu_new - lu).max(), np.abs(lv_new - lv).max()))
+        lu, lv, it = lu_new, lv_new, it + 1
+        if err < STOP:
+            break
+    del logK
+    info = dict(niter=it, err=err, converged=err < STOP)
+    np.savez(ck, log_u=lu, log_v=lv, niter=it, err=err, done=True, converged=err < STOP)
+    return plan_from_potentials(M, eps, lu, lv), info
 
 
 # ----------------------------------------------------------------------------- metrics
