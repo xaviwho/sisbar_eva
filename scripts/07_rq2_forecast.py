@@ -78,11 +78,14 @@ def compute_scores():
         a = ad.read_h5ad(LIBS / f"{lib}.h5ad")
         a = a[[c in ids for c in a.obs_names]].copy()
         tot = np.asarray(a.X.sum(1)).ravel()
-        sym = pd.Index(a.var.symbol)
+        sym = a.var.symbol.to_numpy()
         rec = {"cell_id": a.obs_names}
         for name, genes in PANELS.items():
-            cols = sym.get_indexer(genes)
-            assert (cols >= 0).all(), (name, genes)
+            cols = []
+            for gname in genes:     # panel symbols are unique; other symbols may repeat
+                hit = np.where(sym == gname)[0]
+                assert len(hit) == 1, (name, gname, len(hit))
+                cols.append(hit[0])
             X = a.X[:, cols].toarray() / tot[:, None] * 1e4
             rec[name] = np.log1p(X).mean(1)
         out.append(pd.DataFrame(rec))
