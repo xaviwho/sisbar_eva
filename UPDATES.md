@@ -19,10 +19,11 @@
   `results/06_rq1/`. ANALYSIS_PLAN §0–1. Primary set, then sensitivity set.
 - [ ] 2026-11-11 — **(Cloud) RQ2 forecasting on true lineage** → `scripts/07_rq2_forecast.py`,
   `results/07_rq2/`. ANALYSIS_PLAN §2. Uses the RQ1 OT coupling (balanced, ε = 0.05).
-- [ ] 2026-11-11 — **(Cloud) RQ3 state adequacy** → `scripts/08_rq3_fate.py`,
-  `results/08_rq3/`. ANALYSIS_PLAN §3. Can run in parallel with RQ2.
 - [ ] 2026-11-11 — **(Cloud) RQ4 perturbation consequence** → `scripts/09_rq4_mismatch.py`,
   `results/09_rq4/`. ANALYSIS_PLAN §4. Needs RQ1's measured mismatch rates.
+- [ ] 2026-11-12 — **(VS Code) Start now with RQ3:** `results/08_rq3/` is complete (primary
+  and sensitivity). Write the RQ3 Results subsection and Fig 5 from it. The RQ4 grid part
+  (`results/09_rq4/grid_*`) is also final; its RQ1-measured points follow RQ1.
 - [ ] 2026-11-11 — **(VS Code) Results sections, as each RQ lands:** write the matching
   Results subsection in `paper/main.tex`, with figures and numbers generated from
   `results/06–09` by scripts (no typed numbers). Report nulls as fully as positives.
@@ -34,6 +35,8 @@
 _None._
 
 ## Done
+
+- [x] 2026-11-12 — RQ3 state adequacy (cloud). → script `6bde8cb`, results `fa1564c`.
 
 - [x] 2026-11-10 — Download both GEO series; confirm barcode-to-cell tables and sample
   mapping. → `c738aea`
@@ -53,6 +56,35 @@ _None._
 ---
 
 ## Log (newest first)
+
+### 2026-11-12 — Claude (cloud workspace) — RQ3 done; RQ1 running; RQ2/RQ4 scripts ready
+- Plan pulled at `65cd70d` (APPROVED). Scripts committed before running: RQ1 `12fade6`,
+  RQ2 `fd29545`, RQ3 `6bde8cb`, RQ4 `fe16ad2`.
+- **Implementation fixes, each before any affected result existed:**
+  - RQ1 unbalanced OT: POT `sinkhorn_stabilized` did not finish ε = 0.1 on the smallest job
+    in 20 min → log-domain unbalanced Sinkhorn, same KL objective and τ (`22dad01`).
+  - Its stopping rule: absolute 1e-6 is below float32 resolution for these potentials
+    (a solve hung) → relative 1e-6 (`b576f19`). Solves that already met the absolute rule
+    also meet this one.
+  - RQ2: panel genes matched one by one (unrelated symbols duplicated) (`dfdb11c`);
+    chunked float32 cost median, same values (`a46d264`).
+- **RQ3 complete** (`fa1564c`), 20 seeds, both cell sets. Macro-AUROC (primary, mean):
+  I→II (P,D) 0.59, (Pg,D) 0.61, 30-PC 0.70, fate axis 0.71; II→III 0.70 / 0.71 / 0.83 /
+  0.85; III→IV 0.68 / 0.66 / 0.76 / 0.77. Marker states are above chance but well below
+  expression representations; the plan expected "near chance" — report as found.
+  Sensitivity set agrees. DA descriptive: 73 III-NPvMB clones, 6 produce mDA cells;
+  AUROC for mDA-producing vs other NPvMB: Pg 0.50, D 0.32, LDA-1 0.35 (n = 6, descriptive).
+  HVG batch fallback never used (0/480).
+- **RQ4 grid complete** (`results/09_rq4/grid_*`). Per-cell effect RMSE rises steadily with
+  mismatch (m = 0.5: 0.09 / 0.18 / 0.13 by replicate); Pearson r with the true effect
+  stays ≥ 0.88 even at m = 1, because each treated cell carries its own effect, so random
+  partners add noise but no bias. Mean-effect bias ≈ 0. Measured-rate points wait for RQ1.
+- **RQ1 running** in the cloud workspace: 6 of 19 jobs done. The memory limit is 5.8 GB
+  and a large job peaks ~3.5 GB, so jobs now run one at a time (four OOM kills when two
+  ran together; cached solves were kept). Estimated 10 h more. RQ2 starts per transition
+  as its three replicates' OT solutions are ready.
+- Note for the paper (RQ2): Pg/D state, Transformer copied from TCBB code; one input
+  token, so it is a feed-forward network here.
 
 ### 2026-11-11 — Claude (VS Code) — Analysis plan approved
 - **Author: "approved"** — read as accepting all Q5 recommendations (items 1–9) and the
