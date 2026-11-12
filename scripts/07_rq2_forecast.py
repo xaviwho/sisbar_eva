@@ -105,7 +105,12 @@ def load_pool(cellset, transition, rep, obs):
     e_ids, l_ids = ids[st == s0], ids[st == s1]
     X0, X1 = z["X"][st == s0], z["X"][st == s1]
     from scipy.spatial.distance import cdist
-    med = np.float32(np.median(cdist(X0, X1, "sqeuclidean").astype(np.float32)))
+    # same values as RQ1 (cdist -> float32 -> median), computed in row chunks to save memory
+    M = np.empty((len(X0), len(X1)), dtype=np.float32)
+    for k in range(0, len(X0), 1000):
+        M[k:k + 1000] = cdist(X0[k:k + 1000], X1, "sqeuclidean")
+    med = np.float32(np.median(M))
+    del M
     return dict(e_ids=e_ids, l_ids=l_ids, X0=X0, X1=X1, med=med,
                 lu=pot["log_u"], lv=pot["log_v"], rep=rep)
 
@@ -212,7 +217,7 @@ def fit_models(Xtr, ytr, Xva, yva, seed):
 def run(cellset, transition):
     import torch
     torch.set_num_threads(1)
-    obs = pd.read_csv(OBS, low_memory=False).set_index("cell_id")
+    obs = pd.read_csv(OBS, usecols=["cell_id", "stage", "clone"], low_memory=False).set_index("cell_id")
     sc_ = pd.read_csv(SCORES).set_index("cell_id")
     s0, s1, e = TRANSITIONS[transition]
     pools = {r: load_pool(cellset, transition, r, obs) for r in (1, 2, 3)}
