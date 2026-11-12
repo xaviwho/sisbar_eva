@@ -1,0 +1,7 @@
+git_commit 6bde8cb3a0736023e8ea8efa09fe9e42953566cc
+plan: ANALYSIS_PLAN.md approved at 65cd70d
+python 3.13.18 scanpy 1.12.5 sklearn 1.9.1 numpy 2.5.3 pandas 3.0.5
+environment: Claude cloud workspace (Linux, 2 CPU, 7 GB)
+input data/interim/cell_scores.csv.gz sha256 a80e4c6c2f0de2d90552f629deb1aa53962082ce6356a052ca1aff09f75ceeae
+input results/03_objects/cell_obs.csv.gz sha256 c4a43ad240fb68c4ebaec31080e4e4e85eb50c9ea1c68e037baac999cac34ae4
+input results/04_qc/cell_qc.csv.gz sha256 7f821c13c3df65c7a0d388da8b20b6fbc3a9fed79bfeb9213bfdfb26584de0b2
