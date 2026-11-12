@@ -6,3 +6,4 @@ scanpy==1.12.5
 anndata==0.13.4
 scikit-misc==0.5.3
 POT==0.9.7.post1
+torch==2.15.0
