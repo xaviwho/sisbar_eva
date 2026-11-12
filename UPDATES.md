@@ -19,8 +19,11 @@
   `results/06_rq1/`. ANALYSIS_PLAN §0–1. Primary set, then sensitivity set.
 - [ ] 2026-11-11 — **(Cloud) RQ2 forecasting on true lineage** → `scripts/07_rq2_forecast.py`,
   `results/07_rq2/`. ANALYSIS_PLAN §2. Uses the RQ1 OT coupling (balanced, ε = 0.05).
-- [ ] 2026-11-11 — **(Cloud) RQ4 perturbation consequence** → `scripts/09_rq4_mismatch.py`,
-  `results/09_rq4/`. ANALYSIS_PLAN §4. Needs RQ1's measured mismatch rates.
+- [ ] 2026-11-12 — **(VS Code) RQ1, RQ2 (primary) and RQ4 are final; write them now.**
+  `results/06_rq1/` (primary rows final; sensitivity rows still filling in),
+  `results/07_rq2/` (primary final), `results/09_rq4/` (complete). Use primary rows for the
+  main text; sensitivity goes in a supplementary table once the cloud log says it is done.
+  See the 2026-11-12 evening log entry for points to state carefully.
 - [ ] 2026-11-12 — **(VS Code) Start now with RQ3:** `results/08_rq3/` is complete (primary
   and sensitivity). Write the RQ3 Results subsection and Fig 5 from it. The RQ4 grid part
   (`results/09_rq4/grid_*`) is also final; its RQ1-measured points follow RQ1.
@@ -36,6 +39,7 @@ _None._
 
 ## Done
 
+- [x] 2026-11-12 — RQ4 perturbation consequence (cloud). → script `fe16ad2`, results this commit.
 - [x] 2026-11-12 — RQ3 state adequacy (cloud). → script `6bde8cb`, results `fa1564c`.
 
 - [x] 2026-11-10 — Download both GEO series; confirm barcode-to-cell tables and sample
@@ -56,6 +60,35 @@ _None._
 ---
 
 ## Log (newest first)
+
+### 2026-11-12 evening — Claude (cloud workspace) — RQ1/RQ2 primary and RQ4 done
+- **RQ1 primary: all 9 jobs, 88 OT solves, all converged** (`results/06_rq1/`, summary at
+  `32688d1`; summary-only bug fix `32688d1`). Pooled, clone-weighted, OT balanced ε = 0.05:
+  own-clone mass 3.99× / 4.17× / 2.78× chance (I→II / II→III / III→IV), but absolute mass
+  0.14% / 0.26% / 0.07%; top-1 recall 0.33% / 0.40% / 0.06%; AUROC 0.61 / 0.64 / 0.59.
+  kNN AUROC ≈ 0.50 (only 10 non-zero weights). Unbalanced OT is lower, near chance at
+  III→IV. **Cell-level lineage is not recovered.**
+- **Fate level (TVD, lower = better), OT ε = 0.05 vs independent:** earlier transitions
+  recover clonal fate distributions for progenitors (I-NPvMB 0.10 vs 0.34; II-NPvMB 0.08 vs
+  0.36; II-NPaHB 0.10 vs 0.27), but at III→IV OT is no better or worse than independent
+  (III-NPpHB 0.59 vs 0.51; III-NPaHB 0.35 vs 0.14; III-NPvMB 0.42 vs 0.55). Matches the
+  pre-stated expectation: worst where fates branch.
+- **RQ2 primary** (`8d5c2cb`): with true lineage, Ridge/RF/Transformer beat the constant
+  median by only 1.3–3.1% of its MAE; every CI lies inside ±δ (equivalent). Transformer is
+  equivalent to the random forest in all 9 transition × coupling cells.
+  **State carefully:** each coupling's constant is fitted to that coupling's targets. At
+  III→IV, OT/independent targets are mostly background cells, so their constant is far off
+  for true sisters (MAE 0.169 / 0.162 vs 0.124 for the true-coupling constant) and models
+  "beat" it by ~10–13%. Against the true-coupling constant those models are worse
+  (MAE 0.14–0.15). Report the pre-specified comparisons, plus this cross-coupling
+  contrast from `mae_summary.csv` as a descriptive table.
+- **RQ4 complete** (`results/09_rq4/`). Measured mismatch rates are 0.996–0.999 (1 − own-
+  clone mass and 1 − top-1 recall alike), i.e. OT pairing is effectively random at cell
+  level; per-cell effect RMSE sits at the m = 1 ceiling (0.12 / 0.26 / 0.18 by replicate),
+  mean-effect bias ≈ 0. Pearson r stays ≈ 0.88–0.91 even at m = 1 because each treated
+  cell carries its own effect (simulation design, ANALYSIS_PLAN §4) — say so.
+- **Still running:** RQ1 sensitivity jobs (2 of 9 done) and the uncapped I→II rep-2 check,
+  then RQ2 sensitivity (queued automatically). One OT job runs at a time (5.8 GB limit).
 
 ### 2026-11-12 — Claude (cloud workspace) — RQ3 done; RQ1 running; RQ2/RQ4 scripts ready
 - Plan pulled at `65cd70d` (APPROVED). Scripts committed before running: RQ1 `12fade6`,
