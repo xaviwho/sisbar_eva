@@ -135,6 +135,12 @@ from the viral barcode there.
    leaves AUROC unchanged (0.654 vs 0.656) but lowers absolute mass and top-k with chance.
    Only the Jerber transfer remains (needs its own amendment and data).
    Cloud lesson: the workspace has a 5.8 GB memory limit and 2 CPUs; run one OT job at a time.
+7. ~~Results text.~~ Done 2026-11-14: `scripts/10_results_paper.py` → macros
+   `paper/generated/results_numbers.tex`, Figs 2–6, Table 2, Tables S1–S5. Rerun it whenever
+   `results/06–09` change; never edit generated files. Key findings: OT recovers ancestry
+   above chance (AUROC ≈ 0.59–0.64, 3–4× chance mass) but not cell-level lineage (mismatch
+   ≥ 0.996); RQ2 gains under true lineage are within δ; marker states predict fate above
+   chance but far below 30-PC.
 
 ## Research questions
 

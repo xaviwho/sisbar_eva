@@ -19,6 +19,7 @@
 \hyphenation{op-tical net-works semi-conduc-tor}
 
 \input{generated/data_numbers}
+\input{generated/results_numbers}
 
 \begin{document}
 
@@ -143,20 +144,287 @@ dopaminergic fate as progenitor fate bias at stage~III rather than as a forecast
 % ---------------------------------------------------------------------------
 \section{Results}\label{sec:results}
 
+Primary-set results are reported below; the doublet-sensitivity set and the cap-robustness
+check are in the supplementary tables (Tables~\ref{tab:s1}--\ref{tab:s5}). Where a
+pre-specified expectation (stated in the analysis plan before any result) was not met, we
+say so.
+
 \subsection{Coupling recovery}\label{sec:rq1}
-% RQ1 (Fig. 2).
+For each barcoded early cell in a cross-stage clone we measured the share of its forward
+coupling mass that lands on later cells of its own clone (Fig.~\ref{fig:rq1}). The targets
+are sister cells, not the cell's own future state, so this measures recovery of shared
+ancestry three to four divisions back. With the OT coupling fixed in advance for RQ2 and
+RQ4 (balanced, $\varepsilon=0.05$), own-clone mass was \rqOneEnrOne, \rqOneEnrTwo{}
+and \rqOneEnrThree{} times chance for I$\to$II, II$\to$III and III$\to$IV (95\% CIs
+\rqOneEnrLoOne--\rqOneEnrHiOne, \rqOneEnrLoTwo--\rqOneEnrHiTwo{} and
+\rqOneEnrLoThree--\rqOneEnrHiThree), and the clone-retrieval AUROC was \rqOneAUROCOne{}
+[\rqOneAUROCLoOne, \rqOneAUROCHiOne], \rqOneAUROCTwo{} [\rqOneAUROCLoTwo,
+\rqOneAUROCHiTwo] and \rqOneAUROCThree{} [\rqOneAUROCLoThree, \rqOneAUROCHiThree]. In
+absolute terms the coupling is far from lineage. An early cell placed
+\rqOneMassPctOne\%, \rqOneMassPctTwo\% and \rqOneMassPctThree\% of its mass on its
+sisters (chance \rqOneChancePctOne\%, \rqOneChancePctTwo\% and \rqOneChancePctThree\%).
+The heaviest later cell was a sister for \rqOneTopOnePctOne\%, \rqOneTopOnePctTwo\% and
+\rqOneTopOnePctThree\% of early cells, and a sister was among the ten heaviest for
+\rqOneTopTenPctOne\%, \rqOneTopTenPctTwo\% and \rqOneTopTenPctThree\% (chance
+\rqOneTopTenChancePctOne\%, \rqOneTopTenChancePctTwo\% and \rqOneTopTenChancePctThree\%).
+Cell-level lineage is therefore not recovered.
+
+The conclusion does not depend on the entropy setting: across the full grid the balanced
+coupling's AUROC ranged from \rqOneBalAUROCMin{} to \rqOneBalAUROCMax. Unbalanced
+couplings ($\tau=0.9$) ranked sisters less well, with AUROC
+\rqOneUnbAUROCMinOne--\rqOneUnbAUROCMaxOne{} at I$\to$II and
+\rqOneUnbAUROCMinThree--\rqOneUnbAUROCMaxThree{} at III$\to$IV, where
+\rqOneUnbThreeLoCIBelowHalf{} of \rqOneUnbThreeN{} intervals extend below 0.5. The kNN
+coupling put a similar share of mass on sisters as OT (\rqOneKnnEnrOne, \rqOneKnnEnrTwo{}
+and \rqOneKnnEnrThree{} times chance, with overlapping CIs) and had similar top-10 recall
+(\rqOneKnnTopTenPctOne\%, \rqOneKnnTopTenPctTwo\% and \rqOneKnnTopTenPctThree\%). Its
+AUROC, however, was \rqOneKnnAUROCMinAll--\rqOneKnnAUROCMaxAll, because it weights only
+ten later cells and ties the rest. The AUROC advantage of OT thus reflects how it orders
+the bulk of later cells, not better nearest matches. These results match the pre-stated
+expectation: above chance, far from perfect, lowest at III$\to$IV, and OT not clearly
+better than kNN where it matters for pairing.
+
+The backward direction (later$\to$early) gave AUROC \rqOneBwdAUROCOne, \rqOneBwdAUROCTwo{}
+and \rqOneBwdAUROCThree. Per replicate, the fixed coupling's AUROC ranged from
+\rqOneRepAUROCMin{} to \rqOneRepAUROCMax{} and its enrichment from \rqOneRepEnrMin{} to
+\rqOneRepEnrMax{} (Table~\ref{tab:s5}). Excluding doublet-flagged cells gave enrichments
+of \rqOneSensEnrOne, \rqOneSensEnrTwo{} and \rqOneSensEnrThree{} and AUROCs of
+\rqOneSensAUROCOne, \rqOneSensAUROCTwo{} and \rqOneSensAUROCThree{} (Table~\ref{tab:s1}).
+
+The pre-specified cap check reran I$\to$II replicate~2 with all \capNLaterUncapped{} later
+cells instead of \capNLaterCapped{} (Table~\ref{tab:s4}). The uncapped solve did not fit
+in memory with POT, so it used a block-wise implementation of the same Sinkhorn iterations
+(plan amendment A1). Before use, this implementation was validated against POT on the
+capped job, with maximum relative plan difference $\valMaxRelPlanDiff$. The AUROC was
+unchanged (\capUncapAUROC{} uncapped vs.\ \capCapAUROC{} capped). Enrichment fell from
+\capCapEnr{} to \capUncapEnr{} and top-1 recall from \capCapTopOnePct\% to
+\capUncapTopOnePct\%, while chance fell from $\capCapChanceSci$ to $\capUncapChanceSci$.
+Absolute mass and top-$k$ recall scale with the size of the later pool and must be read
+against chance; the AUROC result is not an artefact of the cap. All \nOTSolves{} OT solves
+converged.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig2_coupling_recovery.pdf}
+\caption{Coupling recovery (RQ1, primary set, pooled over replicates, forward direction).
+Top: clone-retrieval AUROC, in which later cells are ranked by coupling weight and the early
+cell's own-clone sisters are the positives. Bottom: own-clone mass divided by its analytic
+chance (log scale). Points: OT over the entropy grid; bars: 95\% bootstrap CIs over clones.
+Dashed: kNN ($k=10$); dotted: independent coupling, equal to chance by construction.
+$\varepsilon=0.05$ (balanced) was fixed in advance for RQ2 and RQ4.}
+\label{fig:rq1}
+\end{figure*}
 
 \subsection{Fate-level agreement}\label{sec:fate}
-% RQ1, stage-III progenitors (Fig. 3).
+For each early cluster with at least 20 cross-stage clones we compared two distributions
+over later clusters (Fig.~\ref{fig:fate}). One is predicted by transporting the cluster's
+barcoded cells with the coupling. The other is measured on the clones' sister cells. We
+compared them by total-variation distance (TVD). Later cells outside the clone table carry
+labels transferred by a $k$-nearest-neighbour vote. OT ($\varepsilon=0.05$) was closer to
+the clonal distribution than the independent coupling for \fateNBetterOne{} of
+\fateNClustersOne{} clusters at I$\to$II, \fateNBetterTwo{} of \fateNClustersTwo{} at
+II$\to$III and \fateNBetterThree{} of \fateNClustersThree{} at III$\to$IV. The clearest
+gains were for the ventral-midbrain progenitors: I-NPvMB (TVD \tvdOTOneNPvMB{} vs.\
+\tvdIndOneNPvMB) and II-NPvMB (\tvdOTTwoNPvMB{} vs.\ \tvdIndTwoNPvMB). II-NPaHB
+(\tvdOTTwoNPaHB{} vs.\ \tvdIndTwoNPaHB) and II-NPMHB (\tvdOTTwoNPMHB{} vs.\
+\tvdIndTwoNPMHB) also gained. OT was worse than independent for I-NbpHB (\tvdOTOneNbpHB{}
+vs.\ \tvdIndOneNbpHB) and II-Motors (\tvdOTTwoMotors{} vs.\ \tvdIndTwoMotors;
+\tvdClonesTwoMotors{} clones).
+
+At III$\to$IV, where fates branch, OT's TVDs ranged from \fateOTMinThree{} to
+\fateOTMaxThree. At I$\to$II and II$\to$III the lowest were \fateOTMinOne{} and
+\fateOTMinTwo. For III-NPvMB, the midbrain dopaminergic progenitor, OT gave
+\tvdOTThreeNPvMB{} [\tvdOTLoThreeNPvMB, \tvdOTHiThreeNPvMB] against \tvdIndThreeNPvMB{}
+for the independent coupling, and kNN gave \tvdKnnThreeNPvMB. OT was worse than
+independent for the two largest III$\to$IV hindbrain progenitor clusters: III-NPpHB
+(\tvdOTThreeNPpHB{} vs.\ \tvdIndThreeNPpHB) and III-NPaHB (\tvdOTThreeNPaHB{} vs.\
+\tvdIndThreeNPaHB). OT thus recovers population-level fate composition for early
+progenitors but not reliably at the latest transition, again as expected. In the
+sensitivity set the OT-vs.-independent ordering was the same for \fateSensAgreeAll{} of
+\fateSensNAll{} clusters.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig3_fate_agreement.pdf}
+\caption{Fate-level agreement (RQ1). TVD between the later-cluster distribution predicted by
+each coupling and the measured distribution of the clones' sister cells, for early clusters
+with $\geq 20$ cross-stage clones ($n$ = clones). Lower is better; bars: 95\% bootstrap CIs
+over clones. Bold: ventral-midbrain progenitor (NPvMB) clusters, which at stage~III contain
+the dopaminergic progenitor.}
+\label{fig:fate}
+\end{figure*}
 
 \subsection{Forecasting on true lineage}\label{sec:rq2}
-% RQ2 (Fig. 4, Table 2).
+Models mapped an early cell's two-dimensional state (Pg, D) to its sister's later state. The
+same models were trained on one of three kinds of pairs: true clonal pairs, pairs drawn from
+the OT coupling, or independent pairs. Every model was then tested on the same held-out true
+clonal pairs: \rqTwoNTestOne, \rqTwoNTestTwo{} and \rqTwoNTestThree{} clones per split, from
+\rqTwoNTrainOne, \rqTwoNTrainTwo{} and \rqTwoNTrainThree{} training clones
+(Table~\ref{tab:rq2}, Fig.~\ref{fig:rq2}).
+
+With true lineage, every model beat the constant median: all \rqTwoTrueN{} paired CIs lie
+below zero. The gains were \rqTwoTrueGainMinPct--\rqTwoTrueGainMaxPct\% of the constant's
+MAE. For the random forest they were $\Delta=\rqTwoRFDeltaOne\times10^{-3}$
+[\rqTwoRFDeltaLoOne, \rqTwoRFDeltaHiOne], $\rqTwoRFDeltaTwo\times10^{-3}$
+[\rqTwoRFDeltaLoTwo, \rqTwoRFDeltaHiTwo] and $\rqTwoRFDeltaThree\times10^{-3}$
+[\rqTwoRFDeltaLoThree, \rqTwoRFDeltaHiThree] MAE. All \rqTwoTrueN{} intervals lie inside
+the pre-specified margin $\pm\delta$ ($\delta=\rqTwoDeltaMAE$, i.e.
+\rqTwoDeltaPctOne--\rqTwoDeltaPctThree\% of the constant MAE), so by the pre-specified
+criterion the models are practically equivalent to the constant. This holds even though
+\rqTwoTrueNSig{} of \rqTwoTrueN{} differences are significant after Holm correction
+(Cohen's $d_z$ \rqTwoTrueDzMin--\rqTwoTrueDzMax). Measured lineage gives the marker-state
+forecast a real but small signal.
+
+No model beat the random forest under true lineage (\rqTwoTrueBeatRFN{} of \rqTwoTrueVsRFN{} intervals
+below zero). The Transformer was equivalent to the random forest in all \rqTwoTrfRFN{}
+transition $\times$ coupling cells; with a single input token it reduces to a feed-forward
+network. Across all couplings, Ridge or the Transformer had an interval below the random
+forest in \rqTwoBeatRFN{} of \rqTwoBeatRFTotal{} comparisons, by at most
+\rqTwoBeatRFMaxPct\% of the constant MAE.
+
+Independent pairs behaved as Proposition~1 of~\cite{Kanu_TCBB} predicts. At I$\to$II and
+II$\to$III every model trained on them was worse than its own constant median
+(\rqTwoIndNWorse{} of \rqTwoIndN; $+$\rqTwoIndPctMin{} to $+$\rqTwoIndPctMax\%). Models
+trained on OT pairs at these transitions gained \rqTwoOTGainMinPct--\rqTwoOTGainMaxPct\%
+over their constant, similar to true lineage. For this two-dimensional state, OT pairs carry
+as much usable signal as sister pairs.
+
+III$\to$IV needs care. Each constant is fitted to its own training targets, and at
+III$\to$IV the OT and independent targets are mostly background cells. Their constants are
+therefore far from the true sisters: MAE \rqTwoThreeConstOt{} (OT) and
+\rqTwoThreeConstIndependent{} (independent) against \rqTwoThreeConstTrue{} for the
+true-lineage constant. Models trained on these pairs beat their own constant by
+\rqTwoThreeOIGainMinPct--\rqTwoThreeOIGainMaxPct\%, and these are the only
+\rqTwoNNonEquivThree{} non-equivalent model-vs.-constant results. Yet their MAE
+(\rqTwoThreeOIMin--\rqTwoThreeOIMax) is worse than the true-lineage constant and the
+true-lineage models (\rqTwoThreeTrueMin--\rqTwoThreeTrueMax; Table~\ref{tab:rq2}, a
+descriptive contrast that was not pre-specified). Of the \rqTwoNComparisons{} pre-specified
+comparisons, the only other non-equivalent one is \rqTwoNEOtherDesc{}
+($+$\rqTwoNEOtherPct\%).
+
+In the sensitivity set the true-lineage gains were
+\rqTwoSensTrueGainMinPct--\rqTwoSensTrueGainMaxPct\%, \rqTwoSensTrueNEquiv{} of
+\rqTwoTrueN{} were equivalent to the constant, and the non-equivalent comparisons were
+\rqTwoSensSameNonEquiv{} (Table~\ref{tab:s2}). The pre-stated expectations held: true and
+OT pairs beat the constant, independent pairs did not, and the Transformer showed no
+advantage. The qualification is that beating the constant here means a gain smaller than
+the margin we fixed in advance.
+
+\input{tables/tab_rq2_mae}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig4_forecasting.pdf}
+\caption{Forecasting on true lineage (RQ2, primary set). Paired difference in MAE between
+each model and the constant median trained on the same pairs (negative = model better),
+tested on held-out true sister pairs; mean over \rqTwoSeeds{} clone-level splits with
+percentile bootstrap 95\% CIs. Shaded: equivalence margin $\pm\delta$. At III$\to$IV the OT
+and independent constants are fitted to mostly background targets, so the reference itself
+is poor (Table~\ref{tab:rq2}).}
+\label{fig:rq2}
+\end{figure*}
 
 \subsection{State adequacy}\label{sec:rq3}
-% RQ3 and Jerber transfer (Fig. 5).
+A clone's fate was the majority cluster of its later sister cells. There were
+\rqThreeClassesOne, \rqThreeClassesTwo{} and \rqThreeClassesThree{} classes per transition,
+including a pooled ``other''; every named class had at least 30 clones, as pre-specified.
+The same multinomial logistic regression predicted fate from four representations of the
+early sister cell (Fig.~\ref{fig:rq3}). Macro-AUROC for I$\to$II, II$\to$III and
+III$\to$IV was:
+\begin{itemize}
+\item TCBB (P, D): \rqThreeAUCPDOne, \rqThreeAUCPDTwo{} and \rqThreeAUCPDThree;
+\item (Pg, D): \rqThreeAUCPgDOne, \rqThreeAUCPgDTwo{} and \rqThreeAUCPgDThree;
+\item 30-PC: \rqThreeAUCPCOne, \rqThreeAUCPCTwo{} and \rqThreeAUCPCThree;
+\item lineage-derived fate-bias axis: \rqThreeAUCFateOne, \rqThreeAUCFateTwo{} and
+\rqThreeAUCFateThree.
+\end{itemize}
+
+Marker states carry fate information: (Pg, D) exceeded chance by \rqThreeDPgChanceOne{}
+[\rqThreeDPgChanceLoOne, \rqThreeDPgChanceHiOne], \rqThreeDPgChanceTwo{}
+[\rqThreeDPgChanceLoTwo, \rqThreeDPgChanceHiTwo] and \rqThreeDPgChanceThree{}
+[\rqThreeDPgChanceLoThree, \rqThreeDPgChanceHiThree]. This contradicts the pre-stated
+expectation of near-chance performance. They carry much less than expression, however.
+Against 30-PC, (Pg, D) differed by \rqThreeDPgPCOne{} [\rqThreeDPgPCLoOne,
+\rqThreeDPgPCHiOne], \rqThreeDPgPCTwo{} [\rqThreeDPgPCLoTwo, \rqThreeDPgPCHiTwo] and
+\rqThreeDPgPCThree{} [\rqThreeDPgPCLoThree, \rqThreeDPgPCHiThree] ($d_z$
+\rqThreeDzPgPCOne, \rqThreeDzPgPCTwo{} and \rqThreeDzPgPCThree). All
+\rqThreeMarkerNSig{} of \rqThreeMarkerN{} marker-vs.-expression comparisons were
+significant after Holm correction, with gaps of \rqThreeMarkerGapMin--\rqThreeMarkerGapMax.
+Balanced accuracy shows the same picture. For (Pg, D) it was \rqThreeBaccPgDOne,
+\rqThreeBaccPgDTwo{} and \rqThreeBaccPgDThree; for 30-PC it was \rqThreeBaccPCOne,
+\rqThreeBaccPCTwo{} and \rqThreeBaccPCThree; chance was \rqThreeChanceBaccOne,
+\rqThreeChanceBaccTwo{} and \rqThreeChanceBaccThree.
+
+Replacing the pluripotency score P by the progenitor score Pg changed macro-AUROC by at
+most \rqThreePDPgMaxAbs{} (\rqThreeDPDPgOne, \rqThreeDPDPgTwo{} and \rqThreeDPDPgThree{} for (P, D) minus
+(Pg, D)). The choice of marker panel is therefore not what limits the marker state. The
+fate-bias axis, an LDA fitted on training clones, added only
+\rqThreePCFateMin--\rqThreePCFateMax{} over the 30 PCs it is built from. In the
+sensitivity set, (Pg, D) reached \rqThreeSensAUCPgDOne, \rqThreeSensAUCPgDTwo{} and
+\rqThreeSensAUCPgDThree{} and 30-PC reached \rqThreeSensAUCPCOne, \rqThreeSensAUCPCTwo{}
+and \rqThreeSensAUCPCThree; marker states were again lower in \rqThreeSensMarkerNSig{} of
+\rqThreeMarkerN{} comparisons (Table~\ref{tab:s3}).
+
+\emph{Dopaminergic lineage (descriptive).} Of \daNPvMBClones{} cross-stage clones whose
+stage-III cells are mostly III-NPvMB, only \daNmDA{} produced any stage-IV dopaminergic
+cell. The sisters of III-NPvMB clones were mostly \daTopFate{} (\daTopFatePct\% of cells)
+and \daSecondFate{} (\daSecondFatePct\%); \daMDAPct\% were dopaminergic. With six
+positives, clone-mean Pg, D and the first LDA axis separated dopaminergic-producing from
+other NPvMB clones with AUROC \daAUCPg, \daAUCD{} and \daAUCLDA. We draw no inferential
+conclusion; in these data, a stage-III marker state does not identify which ventral-midbrain
+progenitors will make dopaminergic neurons. A test of the fate-bias axis on independent
+data~\cite{Jerber_2021} is left to a later amendment.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig5_state_adequacy.pdf}
+\caption{State adequacy (RQ3, primary set). Macro-AUROC for predicting a clone's later fate
+from its early sister cell, with an identical classifier for each representation. Small
+points: \rqThreeSeeds{} clone-level splits; large markers: mean $\pm$ SD. (P, D): TCBB
+panels; (Pg, D): progenitor score replacing pluripotency; fate-bias axis: LDA on 30 PCs
+fitted on training clones.}
+\label{fig:rq3}
+\end{figure}
 
 \subsection{Consequence for perturbation models}\label{sec:rq4}
-% RQ4 (Fig. 6).
+In the simulation, real II$\to$III later-stage cells served as controls. Treated cells were
+the same cells with a heterogeneous effect added: a mean shift of \rqFourEffectMean{} log
+units over 200 genes, varying linearly with PC1. Each treated cell was paired with its true
+control except for a fraction $m$ of cells, which were paired with random controls
+(Fig.~\ref{fig:rq4}).
+
+The per-cell effect RMSE rose steadily with $m$: at $m=0.1$ it was \rqFourRMSETenthA,
+\rqFourRMSETenthB{} and \rqFourRMSETenthC{} for replicates 1--3. At $m=0.5$ it was
+\rqFourRMSEHalfA, \rqFourRMSEHalfB{} and \rqFourRMSEHalfC, and at $m=1$ it was
+\rqFourRMSEOneA, \rqFourRMSEOneB{} and \rqFourRMSEOneC. The population mean effect stayed
+unbiased (largest $|$bias$|$ $\rqFourMaxAbsBias$).
+
+The mismatch rates measured in RQ1 for the fixed OT coupling were
+\rqFourMeasMin--\rqFourMeasMax. These are the primary rate, 1 $-$ own-clone mass
+(\rqFourMassOne, \rqFourMassTwo{} and \rqFourMassThree{} for the three transitions), and
+the secondary rate, 1 $-$ top-1 recall. At these rates the per-cell RMSE was
+\rqFourRatioMinPct--\rqFourRatioMaxPct\% of its value under fully random pairing. Pairing
+by OT is thus, at the level of the individual cell, indistinguishable from pairing at
+random. Because sisters are not the same cell, these rates are upper bounds on the pairing
+error that matters for perturbation models; but they show that OT agreement at the
+population level does not establish cell-level correspondence. The correlation between
+estimated and true per-cell effects stayed at \rqFourROneMin--\rqFourROneMax{} even at
+$m=1$. This follows from the design: each treated cell carries its own effect, so a random
+partner adds noise that is uncorrelated with the effect but no bias. The correlation is
+therefore not evidence that pairing works. As expected, the mean effect was robust to
+mismatch, the per-cell effect degraded steadily, and the measured rate sits at the degraded
+end.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig6_perturbation.pdf}
+\caption{Consequence of pair mismatch for a perturbation model (RQ4; II$\to$III later-stage
+cells, 100 simulation seeds per point, bands: 95\% intervals). Left: RMSE of the estimated
+per-cell effect. Right: its Pearson correlation with the true effect, which stays high by
+design because each treated cell carries its own effect. Stars: mismatch rates measured in
+RQ1 for the fixed OT coupling (1 $-$ own-clone mass), all within \rqFourMeasGap{} of $m=1$.}
+\label{fig:rq4}
+\end{figure}
 
 % ---------------------------------------------------------------------------
 \section{Discussion}\label{sec:discussion}
@@ -164,6 +432,20 @@ dopaminergic fate as progenitor fate bias at stage~III rather than as a forecast
 
 % ---------------------------------------------------------------------------
 \section{Limitations and Conclusion}\label{sec:conclusion}
+
+% ---------------------------------------------------------------------------
+\appendices
+\section{Supplementary Results}\label{app:supp}
+Pre-specified sensitivity analyses (doublet-flagged cells excluded), the cap-robustness check
+and per-replicate coupling recovery. All tables are generated from the saved result files.
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theHtable}{S\arabic{table}}
+\setcounter{table}{0}
+\input{tables/tab_s1_rq1_sensitivity}
+\input{tables/tab_s2_rq2_sensitivity}
+\input{tables/tab_s3_rq3_sensitivity}
+\input{tables/tab_s4_cap}
+\input{tables/tab_s5_rq1_replicates}
 
 % ---------------------------------------------------------------------------
 \ifCLASSOPTIONcompsoc
