@@ -66,12 +66,20 @@ COL1, COL2 = 3.45, 7.0  # IEEE column / page widths (in)
 M = {}  # macro name -> LaTeX text
 
 
+def minus(s):
+    """Typeset a leading minus as a true minus sign in text, math and tables."""
+    return r"\ensuremath{-}" + s[1:] if s.startswith("-") else s
+
+
 def f(x, d=2):
-    return f"{x:.{d}f}"
+    s = f"{x:.{d}f}"
+    if float(s) == 0:
+        s = s.lstrip("-")
+    return minus(s)
 
 
 def pct(x, d=1):
-    return f"{100 * x:.{d}f}"
+    return f(100 * x, d)
 
 
 def put(name, val):
