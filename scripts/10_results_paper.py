@@ -235,13 +235,13 @@ Transition & Coupling & Enrichment & AUROC & Top-10 (\%) & Enrichment & AUROC & 
             n = int(nlat[nlat.uncapped == unc].n_later.iloc[0])
             rows.append(f"{nm if not unc else ''} & {pool} ({n:,}) & ${sci(o.m0)}$ & ${sci(o.m)}$ & "
                         f"{f(o.enrichment, 2)} & {f(o.auroc, 3)} & {pct(o.top1, 2)} & {pct(o.top10, 2)}" + r" \\")
-    write_table("tab_s4_cap", rf"""\begin{{table}}[!t]
+    write_table("tab_s4_cap", rf"""\begin{{table*}}[!t]
 \centering
 \caption{{Cap robustness (pre-specified): I$\to$II replicate~2 with the background cap
 (8{{,}}000 per stage) and without it. The uncapped OT solve used the block-wise solver of
 amendment A1, validated against POT before use. Later-cell pool size in parentheses.}}
 \label{{tab:s4}}
-\scriptsize
+\footnotesize
 \setlength{{\tabcolsep}}{{3pt}}
 \begin{{tabular}}{{llcccccc}}
 \toprule
@@ -250,7 +250,7 @@ Coupling & Pool & $m_0$ & $m$ & $m/m_0$ & AUROC & Top-1 (\%) & Top-10 (\%) \\
 {chr(10).join(rows).replace(",", "{,}").replace("{{,}}", "{,}")}
 \bottomrule
 \end{{tabular}}
-\end{{table}}
+\end{{table*}}
 """)
 
     # S5: per replicate, OT bal 0.05, forward and backward, primary
