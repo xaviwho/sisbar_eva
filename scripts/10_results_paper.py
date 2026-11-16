@@ -48,20 +48,40 @@ OT = "OT_bal_eps0.05"
 EPS = [0.005, 0.01, 0.05, 0.1]
 DELTA = 0.01  # equivalence margin, ANALYSIS_PLAN §2
 
-# Figure style (dataviz reference palette, light; validated: scripts/validate_palette.js)
-BLUE, ORANGE, AQUA, YELLOW = "#2a78d6", "#eb6834", "#1baf7a", "#eda100"
-INK, INK2, GRID, GREY = "#0b0b0b", "#52514e", "#e4e3df", "#8a8984"
+# Figure style: IEEE compsoc (sans captions) -> Arial; drawn at final print size so LaTeX
+# never rescales (text width 7.17 in, column 3.50 in). Okabe-Ito colours, checked for
+# colour-vision deficiency; every series also has its own marker. Fixed meaning across
+# figures: OT = blue, unbalanced OT = vermilion, kNN = green, independent/chance = grey,
+# true lineage = black.
+C_OT, C_UNB, C_KNN, C_IND, C_TRUE = "#0072B2", "#D55E00", "#009E73", "#7F7F7F", "#000000"
+C_ORANGE, C_PURPLE = "#E69F00", "#CC79A7"
+INK, INK2, BAND = "#000000", "#4D4D4D", "#EBEBEB"
 plt.rcParams.update({
-    "font.family": "serif", "font.serif": ["Times New Roman", "DejaVu Serif"],
-    "mathtext.fontset": "stix", "font.size": 7.5, "axes.titlesize": 8,
-    "axes.labelsize": 7.5, "xtick.labelsize": 7, "ytick.labelsize": 7, "legend.fontsize": 7,
-    "axes.edgecolor": INK2, "axes.labelcolor": INK, "xtick.color": INK2, "ytick.color": INK2,
-    "text.color": INK, "axes.linewidth": 0.6, "xtick.major.width": 0.6,
-    "ytick.major.width": 0.6, "axes.spines.top": False, "axes.spines.right": False,
-    "axes.grid": True, "grid.color": GRID, "grid.linewidth": 0.5, "axes.axisbelow": True,
-    "legend.frameon": False, "pdf.fonttype": 42, "savefig.bbox": "tight",
-    "savefig.pad_inches": 0.02})
-COL1, COL2 = 3.45, 7.0  # IEEE column / page widths (in)
+    "font.family": "sans-serif", "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans"],
+    "mathtext.fontset": "custom", "mathtext.rm": "Arial", "mathtext.it": "Arial:italic",
+    "mathtext.bf": "Arial:bold",
+    "font.size": 7, "axes.titlesize": 7.5, "axes.titleweight": "normal", "axes.labelsize": 7,
+    "xtick.labelsize": 6.5, "ytick.labelsize": 6.5, "legend.fontsize": 6.5,
+    "axes.edgecolor": INK, "axes.labelcolor": INK, "xtick.color": INK, "ytick.color": INK,
+    "text.color": INK, "axes.linewidth": 0.6, "lines.linewidth": 1.0,
+    "xtick.major.width": 0.6, "ytick.major.width": 0.6, "xtick.major.size": 2.5,
+    "ytick.major.size": 2.5, "xtick.direction": "out", "ytick.direction": "out",
+    "axes.spines.top": False, "axes.spines.right": False, "axes.grid": False,
+    "legend.frameon": False, "legend.handlelength": 1.6, "legend.columnspacing": 1.2,
+    "legend.handletextpad": 0.4, "errorbar.capsize": 1.5,
+    "pdf.fonttype": 42, "figure.dpi": 300})
+COL1, COL2 = 3.50, 7.17  # IEEE compsoc column / text width (in), measured from IEEEtran
+
+
+def panel(ax, letter, x=-0.16, y=1.02):
+    ax.text(x, y, letter, transform=ax.transAxes, fontsize=9, fontweight="bold",
+            va="bottom", ha="left")
+
+
+def save(fig, name):
+    fig.savefig(FIG / name)   # no bbox cropping: the PDF has exactly the figure size
+    plt.close(fig)
+
 
 M = {}  # macro name -> LaTeX text
 
@@ -294,45 +314,49 @@ Transition & Replicate & Clones & Enrichment & AUROC & Top-10 (\%) & Enrichment 
 
 def fig2(fw):
     p = fw[(fw.cellset == "primary") & ~fw.uncapped & (fw.rep == "pooled")]
-    fig, axes = plt.subplots(2, 3, figsize=(COL2, 3.4), sharex=True, sharey="row")
+    fig, axes = plt.subplots(2, 3, figsize=(COL2, 3.15), sharex=True, sharey="row",
+                             gridspec_kw=dict(hspace=0.22, wspace=0.12))
+    fig.subplots_adjust(left=0.075, right=0.995, top=0.86, bottom=0.11)
+    rows = (("auroc", "auroc_lo", "auroc_hi", "Clone-retrieval AUROC"),
+            ("enrichment", "enrichment_lo", "enrichment_hi", "Own-clone mass / chance"))
     for j, t in enumerate(TR):
         q = p[p.transition == t]
-        for i, (met, lo, hi, ylab) in enumerate((("auroc", "auroc_lo", "auroc_hi", "Clone-retrieval AUROC"),
-                                                 ("enrichment", "enrichment_lo", "enrichment_hi",
-                                                  "Own-clone mass / chance"))):
+        for i, (met, lo, hi, ylab) in enumerate(rows):
             ax = axes[i, j]
-            for kind, col, mk, nm, dx in (("bal", BLUE, "o", "OT, balanced", 0.94),
-                                          ("unb", ORANGE, "s", "OT, unbalanced", 1.06)):
+            ref = 1.0 if met == "enrichment" else 0.5
+            ax.axhline(ref, color=C_IND, lw=0.8, ls=(0, (1, 1.5)), zorder=1,
+                       label="Independent (= chance)")
+            ax.axhline(one(q, coupling="kNN")[met], color=C_KNN, lw=0.9, ls=(0, (4, 2)), zorder=1,
+                       label="kNN (k = 10)")
+            for kind, col, mk, mfc, nm, dx in (("bal", C_OT, "o", C_OT, "OT, balanced", 0.95),
+                                               ("unb", C_UNB, "s", "white", "OT, unbalanced (\u03c4 = 0.9)", 1.05)):
                 r = [one(q, coupling=f"OT_{kind}_eps{e}") for e in EPS]
-                x = np.array(EPS) * dx
                 y = np.array([v[met] for v in r])
                 err = np.array([[v[met] - v[lo] for v in r], [v[hi] - v[met] for v in r]])
-                ax.errorbar(x, y, yerr=err, color=col, marker=mk, ms=4, lw=1.4, elinewidth=0.8,
-                            capsize=0, label=nm, zorder=3)
-            knn = one(q, coupling="kNN")
-            ax.axhline(knn[met], color=AQUA, lw=1.2, ls="--", label="kNN ($k$=10)", zorder=2)
-            ax.axhline(1.0 if met == "enrichment" else 0.5, color=GREY, lw=1.0, ls=":",
-                       label="Independent (chance)", zorder=2)
+                ax.errorbar(np.array(EPS) * dx, y, yerr=err, color=col, marker=mk, ms=3.6, mfc=mfc,
+                            mec=col, mew=0.9, lw=1.0, elinewidth=0.7, zorder=3, label=nm)
             ax.set_xscale("log")
             ax.set_xticks(EPS)
-            ax.set_xticklabels([str(e) for e in EPS])
+            ax.set_xticklabels(["0.005", "0.01", "0.05", "0.1"])
             ax.minorticks_off()
+            ax.set_xlim(0.0036, 0.14)
             if met == "enrichment":
                 ax.set_yscale("log")
                 ax.set_yticks([0.1, 0.3, 1, 3, 10, 30])
                 ax.set_yticklabels(["0.1", "0.3", "1", "3", "10", "30"])
-                ax.set_xlabel(r"Entropy $\varepsilon$")
-            if i == 0:
-                ax.set_title(TPLOT[t])
+                ax.minorticks_off()
+                ax.set_xlabel("Entropy \u03b5")
+            else:
+                ax.set_ylim(0.44, 0.68)
+                ax.set_title(TPLOT[t], pad=3)
             if j == 0:
                 ax.set_ylabel(ylab)
+            panel(ax, "abcdef"[i * 3 + j], x=-0.2 if j == 0 else -0.08)
     h, l = axes[0, 0].get_legend_handles_labels()
-    order = [l.index(x) for x in ("OT, balanced", "OT, unbalanced", "kNN ($k$=10)", "Independent (chance)")]
-    fig.legend([h[i] for i in order], [l[i] for i in order], loc="upper center", ncol=4,
-               bbox_to_anchor=(0.5, 1.04))
-    fig.tight_layout(rect=(0, 0, 1, 0.97))
-    fig.savefig(FIG / "fig2_coupling_recovery.pdf")
-    plt.close(fig)
+    order = [2, 3, 1, 0]
+    fig.legend([h[k] for k in order], [l[k] for k in order], loc="upper center", ncol=4,
+               bbox_to_anchor=(0.53, 1.0))
+    save(fig, "fig2_coupling_recovery.pdf")
 
 
 def fate():
@@ -379,35 +403,44 @@ def fate():
     put("fateSensAgreeAll", sagree)
     put("fateSensNAll", sn)
 
-    # Fig 3
-    fig, axes = plt.subplots(1, 3, figsize=(COL2, 2.5), sharex=True)
-    for ax, t in zip(axes, TR):
+    fig3(p)
+
+
+def fig3(p):
+    fig, axes = plt.subplots(1, 3, figsize=(COL2, 2.15), sharex=True,
+                             gridspec_kw=dict(wspace=0.55))
+    fig.subplots_adjust(left=0.115, right=0.99, top=0.84, bottom=0.17)
+    for k, (ax, t) in enumerate(zip(axes, TR)):
         q = p[p.transition == t]
         cl = sorted(q.early_cluster.unique(), key=lambda c: -one(q, early_cluster=c, coupling=OT).n_clones)
-        y = np.arange(len(cl))[::-1]
-        for cp, col, mk, nm, dy in ((OT, BLUE, "o", r"OT, balanced, $\varepsilon$=0.05", 0.18),
-                                    ("kNN", AQUA, "^", "kNN ($k$=10)", 0.0),
-                                    ("independent", GREY, "s", "Independent", -0.18)):
-            r = [one(q, early_cluster=c, coupling=cp) for c in cl]
-            v = np.array([x.tvd for x in r])
-            err = np.array([[x.tvd - x.tvd_lo for x in r], [x.tvd_hi - x.tvd for x in r]])
-            ax.errorbar(v, y + dy, xerr=err, fmt=mk, color=col, ms=4, elinewidth=0.8, capsize=0,
-                        label=nm, zorder=3)
-        labs = [f"{c}  (n={int(one(q, early_cluster=c, coupling=OT).n_clones)})" for c in cl]
+        y = np.arange(len(cl))[::-1].astype(float)
+        o = [one(q, early_cluster=c, coupling=OT) for c in cl]
+        ind = [one(q, early_cluster=c, coupling="independent") for c in cl]
+        kn = [one(q, early_cluster=c, coupling="kNN") for c in cl]
+        for yy, a, b in zip(y, ind, o):   # dumbbell: independent -> OT
+            ax.plot([a.tvd, b.tvd], [yy, yy], color="#BDBDBD", lw=1.6, zorder=1, solid_capstyle="round")
+        ax.errorbar([x.tvd for x in o], y, xerr=[[x.tvd - x.tvd_lo for x in o], [x.tvd_hi - x.tvd for x in o]],
+                    fmt="o", ms=3.8, color=C_OT, elinewidth=0.7, zorder=4, label="OT, balanced, \u03b5 = 0.05")
+        ax.plot([x.tvd for x in ind], y, "s", ms=3.4, mfc="white", mec=C_IND, mew=0.9, zorder=3,
+                label="Independent")
+        ax.plot([x.tvd for x in kn], y, "^", ms=3.4, mfc="white", mec=C_KNN, mew=0.9, zorder=3,
+                label="kNN (k = 10)")
         ax.set_yticks(y)
-        ax.set_yticklabels(labs)
+        ax.set_yticklabels([f"{c.split('-', 1)[1]} ({int(x.n_clones)})" for c, x in zip(cl, o)])
         for tl, c in zip(ax.get_yticklabels(), cl):
             if c.endswith("NPvMB"):
                 tl.set_fontweight("bold")
-        ax.set_title(TPLOT[t])
-        ax.set_xlim(0, 1)
+        ax.tick_params(axis="y", length=0)
+        ax.spines["left"].set_visible(False)
+        ax.set_ylim(-0.6, len(cl) - 0.4)
+        ax.set_xlim(0, 0.85)
+        ax.set_xticks([0, 0.2, 0.4, 0.6, 0.8])
+        ax.set_title(f"{TPLOT[t]}  (early cluster, clones)", pad=3)
         ax.set_xlabel("TVD to clonal fate distribution")
-        ax.grid(axis="y", visible=False)
+        panel(ax, "abc"[k], x=-0.36)
     h, l = axes[0].get_legend_handles_labels()
-    fig.legend(h, l, loc="upper center", ncol=3, bbox_to_anchor=(0.5, 1.06))
-    fig.tight_layout(rect=(0, 0, 1, 0.95))
-    fig.savefig(FIG / "fig3_fate_agreement.pdf")
-    plt.close(fig)
+    fig.legend([h[2], h[1], h[0]], [l[2], l[1], l[0]], loc="upper center", ncol=3, bbox_to_anchor=(0.5, 1.0))
+    save(fig, "fig3_fate_agreement.pdf")
 
 
 # ============================================================ RQ2
@@ -589,34 +622,41 @@ Transition & Training pairs & Ridge & RF & Transf. & Transf.\,vs\,RF & Ridge & R
 
 
 def fig4(pc):
-    fig, axes = plt.subplots(1, 3, figsize=(COL2, 2.4), sharey=True)
-    ccol = {"true": BLUE, "OT": ORANGE, "independent": GREY}
+    fig, axes = plt.subplots(1, 3, figsize=(COL2, 2.0), sharey=True, sharex=True,
+                             gridspec_kw=dict(wspace=0.08))
+    fig.subplots_adjust(left=0.1, right=0.99, top=0.83, bottom=0.19)
+    ccol = {"true": C_TRUE, "OT": C_OT, "independent": C_IND}
     cmk = {"true": "o", "OT": "s", "independent": "D"}
-    for ax, t in zip(axes, TR):
+    cnm = {"true": "True lineage", "OT": "OT (\u03b5 = 0.05)", "independent": "Independent"}
+    for k, (ax, t) in enumerate(zip(axes, TR)):
         q = pc[(pc.transition == t) & (pc.reference == "ConstMedian")]
-        ax.axvspan(-DELTA * 1000, DELTA * 1000, color="#f0efec", zorder=0, lw=0)
-        ax.axvline(0, color=INK2, lw=0.6, zorder=1)
+        ax.axvspan(-DELTA * 1000, DELTA * 1000, color=BAND, zorder=0, lw=0)
+        ax.axvline(0, color=INK, lw=0.6, zorder=1)
         yt, yl = [], []
         for gi, m in enumerate(MODELS):
             for ci, cp in enumerate(CPL):
                 y = -(gi * 4 + ci)
                 r = one(q, model=m, coupling=cp)
                 ax.errorbar(1000 * r.delta, y, xerr=[[1000 * (r.delta - r.ci_lo)], [1000 * (r.ci_hi - r.delta)]],
-                            fmt=cmk[cp], color=ccol[cp], ms=4, elinewidth=0.9, capsize=0, zorder=3,
-                            label=CLAB[cp].replace(r"$\varepsilon{=}0.05$", "ε=0.05") if gi == 0 else None)
+                            fmt=cmk[cp], color=ccol[cp], ms=3.4, mfc=ccol[cp] if cp != "independent" else "white",
+                            mew=0.9, elinewidth=0.8, zorder=3, label=cnm[cp] if gi == 0 else None)
             yt.append(-(gi * 4 + 1))
             yl.append(MLAB[m].replace("\\ ", " "))
         ax.set_yticks(yt)
         ax.set_yticklabels(yl)
-        ax.set_title(TPLOT[t])
+        ax.tick_params(axis="y", length=0)
+        ax.set_ylim(-11, 1)
+        ax.set_xlim(-25, 10)
+        ax.set_xticks([-20, -10, 0, 10])
+        ax.set_title(TPLOT[t], pad=3)
         ax.set_xlabel(r"$\Delta$MAE vs. constant median ($\times10^{-3}$)")
-        ax.grid(axis="y", visible=False)
-        ax.set_xlim(-25, 12)
+        if k == 0:
+            ax.text(-9.4, -10.8, "\u00b1\u03b4", ha="left", va="bottom", fontsize=6.5, color=INK2)
+        panel(ax, "abc"[k], x=-0.27 if k == 0 else -0.05)
     h, l = axes[0].get_legend_handles_labels()
-    fig.legend(h, ["Training pairs:  " + l[0]] + l[1:], loc="upper center", ncol=3, bbox_to_anchor=(0.5, 1.07))
-    fig.tight_layout(rect=(0, 0, 1, 0.94))
-    fig.savefig(FIG / "fig4_forecasting.pdf")
-    plt.close(fig)
+    fig.legend(h, ["Training pairs: " + l[0]] + l[1:], loc="upper center", ncol=3,
+               bbox_to_anchor=(0.55, 1.0))
+    save(fig, "fig4_forecasting.pdf")
 
 
 # ============================================================ RQ3
@@ -719,26 +759,31 @@ Transition & {' & '.join(RLAB[r] for r in REPS)} & {' & '.join(RLAB[r] for r in 
 
 
 def fig5(p):
-    fig, ax = plt.subplots(figsize=(COL1, 2.3))
-    cols = {"P_tcbb_D": YELLOW, "Pg_D": ORANGE, "PC30": BLUE, "fate_axis": AQUA}
+    fig, ax = plt.subplots(figsize=(COL1, 2.05))
+    fig.subplots_adjust(left=0.15, right=0.99, top=0.84, bottom=0.12)
+    cols = {"P_tcbb_D": C_ORANGE, "Pg_D": C_UNB, "PC30": C_KNN, "fate_axis": C_PURPLE}
     mks = {"P_tcbb_D": "v", "Pg_D": "s", "PC30": "o", "fate_axis": "D"}
-    rng = np.random.default_rng(0)  # jitter only
+    rng = np.random.default_rng(0)  # horizontal jitter only
     for j, t in enumerate(TR):
         for k, r in enumerate(REPS):
             g = p[(p.transition == t) & (p.representation == r)].macro_auroc.to_numpy()
-            x = j + (k - 1.5) * 0.2
-            ax.scatter(x + rng.uniform(-0.05, 0.05, len(g)), g, s=5, color=cols[r], alpha=0.35, lw=0, zorder=2)
-            ax.errorbar(x, g.mean(), yerr=g.std(), fmt=mks[r], color=cols[r], ms=4.5, mec=INK, mew=0.4,
-                        elinewidth=0.9, capsize=0, zorder=3, label=RLAB[r] if j == 0 else None)
-    ax.axhline(0.5, color=GREY, ls=":", lw=1.0, label="Chance", zorder=1)
+            x = j + (k - 1.5) * 0.19
+            ax.scatter(x + rng.uniform(-0.045, 0.045, len(g)), g, s=3, color=cols[r], alpha=0.45,
+                       lw=0, zorder=2)
+            ax.errorbar(x, g.mean(), yerr=g.std(ddof=1), fmt=mks[r], color=cols[r], ms=3.8,
+                        mec=INK, mew=0.5, elinewidth=0.9, capsize=1.5, zorder=3,
+                        label=RLAB[r] if j == 0 else None)
+    ax.axhline(0.5, color=C_IND, ls=(0, (1, 1.5)), lw=0.8, zorder=1)
+    ax.text(2.48, 0.505, "chance", ha="right", va="bottom", fontsize=6, color=INK2)
     ax.set_xticks(range(3))
     ax.set_xticklabels([TPLOT[t] for t in TR])
+    ax.tick_params(axis="x", length=0)
+    ax.set_xlim(-0.5, 2.5)
     ax.set_ylabel("Fate macro-AUROC")
     ax.set_ylim(0.45, 0.92)
-    ax.grid(axis="x", visible=False)
-    ax.legend(loc="upper center", ncol=5, bbox_to_anchor=(0.5, 1.17), handletextpad=0.2, columnspacing=0.8)
-    fig.savefig(FIG / "fig5_state_adequacy.pdf")
-    plt.close(fig)
+    ax.legend(loc="upper center", ncol=4, bbox_to_anchor=(0.45, 1.2), handletextpad=0.2,
+              columnspacing=0.8)
+    save(fig, "fig5_state_adequacy.pdf")
 
 
 # ============================================================ RQ4
@@ -769,25 +814,29 @@ def rq4():
 
 
 def fig6(g, est):
-    fig, axes = plt.subplots(1, 2, figsize=(COL1, 1.75), sharex=True)
-    cols = {1: BLUE, 2: ORANGE, 3: AQUA}
+    fig, axes = plt.subplots(1, 2, figsize=(COL1, 1.75), sharex=True, gridspec_kw=dict(wspace=0.45))
+    fig.subplots_adjust(left=0.13, right=0.98, top=0.8, bottom=0.21)
+    cols = {1: C_OT, 2: C_UNB, 3: C_KNN}
     mks = {1: "o", 2: "s", 3: "^"}
-    for ax, (met, ylab) in zip(axes, (("rmse", "Per-cell effect RMSE"), ("r", "Pearson $r$ with true effect"))):
+    for k, (ax, (met, ylab)) in enumerate(zip(axes, (("rmse", "Per-cell effect RMSE"),
+                                                     ("r", "Pearson r with true effect")))):
         for rep in (1, 2, 3):
             q = g[g.rep == rep].sort_values("m")
             ax.fill_between(q.m, q[f"{met}_lo"], q[f"{met}_hi"], color=cols[rep], alpha=0.2, lw=0)
-            ax.plot(q.m, q[met], color=cols[rep], marker=mks[rep], ms=3, lw=1.2, label=f"Replicate {rep}")
+            ax.plot(q.m, q[met], color=cols[rep], marker=mks[rep], ms=2.6, mfc="white", mew=0.8,
+                    lw=0.9, label=f"Replicate {rep}")
             mm = est[(est.rep == rep) & (est.rate_kind == "1-own_clone_mass")]
-            ax.plot(mm.m, mm[met], ls="none", marker="*", ms=7, mfc="none", mec=INK, mew=0.6, zorder=4,
+            ax.plot(mm.m, mm[met], ls="none", marker="*", ms=6.5, color=INK, mew=0, zorder=5,
                     label="RQ1-measured OT rate" if rep == 1 else None)
-        ax.set_xlabel("Mismatch rate $m$")
+        ax.set_xlabel("Mismatch rate m")
         ax.set_ylabel(ylab)
         ax.set_xticks([0, 0.5, 1])
+        ax.set_xticklabels(["0", "0.5", "1"])
+        panel(ax, "ab"[k], x=-0.38)
     h, l = axes[0].get_legend_handles_labels()
-    fig.legend(h, l, loc="upper center", ncol=2, bbox_to_anchor=(0.5, 1.2))
-    fig.tight_layout(rect=(0, 0, 1, 0.93), w_pad=1.0)
-    fig.savefig(FIG / "fig6_perturbation.pdf")
-    plt.close(fig)
+    fig.legend([h[0], h[2], h[3], h[1]], [l[0], l[2], l[3], l[1]], loc="upper center", ncol=4, bbox_to_anchor=(0.53, 1.0), handlelength=1.2,
+               columnspacing=0.7)
+    save(fig, "fig6_perturbation.pdf")
 
 
 # ============================================================ output
