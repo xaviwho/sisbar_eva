@@ -172,6 +172,15 @@ from the viral barcode there.
 
 ## Paper outline (≈10–12 IEEE double-column pages, 6 figures, 3 tables)
 
+**Decided 2026-11-16 (author):**
+- Data & setup is part of Methods (§3.1); there is no separate Data section.
+- Page budget: 12 formatted pages including references and biographies (Computer
+  Society overlength policy for TCBB), so supplementary tables go to
+  `paper/supplement.tex`.
+- Figures are drawn at exact print width (7.17 in / 3.50 in) in Arial 6.5–8 pt, with
+  panel letters and Okabe–Ito colours; fixed colours: OT blue, unbalanced vermilion, kNN
+  green, independent grey, true lineage black.
+
 1. Introduction · 2. Related work · 3. Data & setup (Fig 1) · 4. Methods (Table 1)
 5. Results: coupling recovery (Fig 2), fate agreement (Fig 3), forecasting (Fig 4,
    Table 2), state adequacy + Jerber transfer (Fig 5), perturbation consequence (Fig 6)

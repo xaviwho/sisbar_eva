@@ -67,10 +67,42 @@
   table. → `f0a8a37` (generator), `d640917` (section, table, numbers, bib).
 - [x] 2026-11-11 — Author approved `ANALYSIS_PLAN.md` with Q5 items 1–9 merged. →
   `65cd70d` (pre-registration record).
+- [x] 2026-11-16 — Data and Setup merged into Methods; supplementary tables moved to
+  `paper/supplement.tex`; figures redesigned. → `416e055` (figure script) and the
+  commit after it.
 
 ---
 
 ## Log (newest first)
+
+### 2026-11-16 (later) — Claude (VS Code) — Structure, length, figures
+- **Author:** "data and setup should be part of the method … TCBB is constrained on page
+  length … not satisfied with the result figure quality."
+- **Page budget:** IEEE Computer Society overlength policy (MOPC) for TCBB regular papers:
+  12 formatted pages including references and author biographies; each extra page is
+  charged and 18 pages is the hard cap. Supplementary files have no limit. (Some older
+  listings say 14 pages; check the current author guidelines before submission.)
+- **Structure:**
+  - Data and Setup is now Methods §3.1, *Lineage data and ground truth*. It is shortened
+    and keeps every generated number and the data table.
+  - Tables S1–S5 moved to a separate `paper/supplement.tex` (3 pages); main.tex cites them
+    as "Table S1" etc.
+  - The RQ1 robustness paragraph is condensed.
+- **Length:** main.tex is now 7 pages. The Introduction, Related work, Discussion,
+  Conclusion, abstract and biographies remain, at about 3–3.5 pages, so the estimate is
+  ≈10.5 / 12.
+- **Figures (`scripts/10_results_paper.py`, committed `416e055` before regeneration):**
+  - Drawn at exact print size (text width 7.17 in and column 3.50 in, measured from
+    IEEEtran compsoc) and never rescaled. No bbox cropping, so the PDF size equals the
+    figure size.
+  - Arial 6.5–8 pt, matching compsoc's sans-serif captions; bold panel letters; no
+    gridlines; outward ticks.
+  - Okabe–Ito colour-blind-safe palette with a fixed meaning across figures (OT blue,
+    unbalanced vermilion, kNN green, independent grey, true lineage black), plus a distinct
+    marker per series.
+  - Fig 3 is now a dumbbell (independent → OT per cluster).
+  - Captions are updated to refer to the panel letters, and all fonts are embedded.
+- **Note:** the F: drive disconnected mid-session; no work was lost.
 
 ### 2026-11-16 — Claude (VS Code) — Methods written; amendment A2
 - **Author answers:**

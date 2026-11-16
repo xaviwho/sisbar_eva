@@ -58,86 +58,56 @@ forecasting, benchmarking, neural differentiation.
 \section{Related Work}\label{sec:related}
 
 % ---------------------------------------------------------------------------
-\section{Data and Setup}\label{sec:data}
-
-\subsection{Lineage-traced differentiation data}
-We use the single-cell split-barcoding (SISBAR) data of~\cite{You_2023}:
-H9 human embryonic stem cells differentiated towards ventral midbrain and hindbrain
-fates and profiled by droplet single-cell RNA sequencing at stages I, II, III and IV
-(days~\dayOne, \dayTwo, \dayThree{} and~\dayFour). Each of three experiments labels
-progenitors with a retroviral barcode library at one stage, lets them divide three to
-four times, and splits the culture so that one half is profiled at that stage and the
-other at the next. Experiments~1--3 thus link I$\to$II, II$\to$III and III$\to$IV. A
-barcode observed in both halves links \emph{sister} cells rather than one cell observed
-twice; this shared ancestry is our ground truth. Because each experiment is barcoded once
-and sampled at two consecutive stages, no clone spans three stages, and every analysis
-concerns a single transition $t\to t+1$.
-
-Each experiment has three biological replicates, deposited in GEO as GSE207921
-(replicate~1) and GSE221592 (replicates~2--3): \nLibraries{} 10x libraries with
-\nBarcodes{} cell barcodes and \nGenes{} genes. The authors' barcode-to-cell table lists
-\nCloneTableCells{} cells with their viral barcodes and cluster labels. Every cell in it
-was found in the 10x library predicted by its barcode suffix and replicate. Stage-IV
-barcodes lack the library suffix, so we take the replicate from the viral barcode, which
-also resolves \nStageIVCollisions{} stage-IV cell barcodes shared between libraries. In
-experiment~3 the GEO sample names swap replicates~2 and~3 relative to the viral barcodes,
-consistently in both stages (viral replicate~2: \swapRepTwoGSM; viral replicate~3:
-\swapRepThreeGSM). This leaves clone pairing unchanged; we use the viral-barcode replicate
-throughout.
-
-\subsection{Clone definition}
-Of the clone-table cells, \pctMultiBarcode\% carry more than one viral barcode
-(\pctMultiBarcodeMin--\pctMultiBarcodeMax\% across stage--experiment sheets). We define a
-clone as the exact set of viral barcodes on a cell, within one experiment and replicate,
-and call it cross-stage if it has cells at both stages of its transition. Treating each
-barcode as a clone, or merging barcodes that co-occur in a cell, does not reproduce the
-published counts; the barcode-set definition reproduces I$\to$II and II$\to$III exactly
-(Table~\ref{tab:data_counts}). For III$\to$IV we obtain \nExpThreeClones{} clones and
-\nExpThreeCells{} cells against \nExpThreePubClones{} and \nExpThreePubCells{} published
-(\pctExpThreeCloneGap\% and \pctExpThreeCellGap\% fewer). All \nStageIVCells{} stage-IV
-clone-table cells are present in their expression matrices, so the shortfall lies in the
-deposited table. We fixed the handling rule beforehand (one matching pass, then accept the
-deposited count) and did not adjust filters to recover the published value.
-
-\subsection{Cell filtering and doublets}
-The original study reports thresholds of at least \minGenes{} genes, at most \umiCap{}
-UMIs and at most \maxMt\% mitochondrial reads. These pass \nPaperQCPass{} barcodes but
-reject \nCloneTableFailPaperQC{} (\pctCloneTableFailPaperQC\%) of the authors' own
-clone-table cells, \nCloneTableOverUMICap{} of them on the UMI cap alone, including
-\pctStageIVOverUMICap\% of stage-IV clone-table cells; maturing neurons have larger
-transcriptomes. Under these thresholds III$\to$IV would retain \nExpThreeClonesPaperQC{}
-cross-stage clones (Table~\ref{tab:data_counts}), so the lineage table was evidently not
-filtered on UMIs. Because couplings are fitted on barcoded and unbarcoded cells together,
-one rule must cover both. Our primary rule keeps cells with at least \minGenes{} genes and
-at most \maxMt\% mitochondrial reads, with no UMI cap: \nPrimaryCells{} cells, including
-\nCloneTablePrimary{} of \nCloneTableCells{} clone-table cells (\pctCloneTableKept\%).
-Neither rule reproduces the published \nPublishedCells{} cells, which reflect further
-filtering in the original pipeline.
-
-Doublet detection with Scrublet~\cite{Wolock_2019} was pre-specified per library at an
-expected rate of \dblRatePct\% per \dblRatePer{} barcodes, but its automatic threshold was
-unstable: it flagged between none and \nScrubletAutoMax{} cells per library (none in
-\nLibsScrubletZero{} of \nLibraries{}; \nScrubletAutoTotal{} in total), its output
-depended on implementation settings, and observed scores overlapped simulated doublets, as
-expected when cells within a stage form a continuum. We therefore do not filter on it.
-Instead, each library's top expected-rate fraction by doublet score is flagged. Flagged
-cells have \umiRatioFlagMin--\umiRatioFlagMax{} times the median UMI count of other cells,
-yet the score correlates only weakly with UMI count (Spearman $\rho=\rhoDoubletUMI$).
-Every RQ1--RQ3 analysis is repeated without flagged cells (\nSensitivityCells{} cells;
-\nCloneTableSensitivity{} clone-table cells) as a pre-specified sensitivity analysis.
-
-All analyses use one-step pairs from the primary set (Table~\ref{tab:data_counts}).
-Dopaminergic neurons are rare among lineage-traced cells: only \nDACellsCrossStage{}
-stage-IV dopaminergic cells fall in cross-stage III$\to$IV clones. We therefore study
-dopaminergic fate as progenitor fate bias at stage~III rather than as a forecasting target.
-
-\input{tables/tab_data_counts}
-
-% ---------------------------------------------------------------------------
 \section{Methods}\label{sec:methods}
 All settings were fixed in a pre-registered analysis plan before any result was computed.
 The plan has two dated amendments: A1 changes the solver for one robustness job, and A2
-clarifies a tie-break. Table~\ref{tab:methods} summarises the settings.
+clarifies a tie-break. Table~\ref{tab:methods} lists the settings.
+
+\subsection{Lineage data and ground truth}\label{sec:data}
+We use the single-cell split-barcoding (SISBAR) data of~\cite{You_2023}. H9 human embryonic
+stem cells were differentiated towards ventral midbrain and hindbrain fates and profiled by
+droplet single-cell RNA sequencing at stages I--IV (days~\dayOne, \dayTwo, \dayThree{}
+and~\dayFour). In each of three experiments, progenitors are labelled with a retroviral
+barcode library and divide three to four times. The culture is then split: one half is
+profiled at that stage and the other at the next, so the experiments link I$\to$II,
+II$\to$III and III$\to$IV. A barcode seen in both halves links \emph{sister} cells, not one
+cell observed twice, and this shared ancestry is our ground truth. No clone spans three
+stages, so every analysis concerns a single transition.
+
+Each experiment has three replicates (GEO GSE207921 and GSE221592; \nLibraries{} libraries,
+\nBarcodes{} barcodes). Every cell in the authors' barcode-to-cell table
+(\nCloneTableCells{} cells) was found in the library predicted by its barcode suffix.
+Stage-IV barcodes lack this suffix, so we take the replicate from the viral barcode. This
+also resolves \nStageIVCollisions{} cell barcodes shared between stage-IV libraries. In
+experiment~3 the GEO sample names swap replicates~2 and~3 relative to the viral barcodes;
+we use the viral-barcode replicate throughout.
+
+A clone is the exact set of viral barcodes on a cell, within one experiment and replicate;
+\pctMultiBarcode\% of cells carry more than one barcode. This definition reproduces the
+published cross-stage counts for I$\to$II and II$\to$III exactly (Table~\ref{tab:data_counts}).
+For III$\to$IV it gives \nExpThreeClones{} clones and \nExpThreeCells{} cells, against
+\nExpThreePubClones{} and \nExpThreePubCells{} published (\pctExpThreeCloneGap\% and
+\pctExpThreeCellGap\% fewer). The shortfall lies in the deposited table, and we accepted it
+under a rule fixed beforehand rather than tuning filters to match.
+
+The published thresholds (at least \minGenes{} genes, at most \umiCap{} UMIs, at most
+\maxMt\% mitochondrial reads) would reject \pctCloneTableFailPaperQC\% of the authors' own
+clone-table cells. Most fail the UMI cap, which removes \pctStageIVOverUMICap\% of stage-IV
+clone-table cells (maturing neurons). Couplings use barcoded and unbarcoded cells together,
+so one filtering rule must cover both. Our primary set keeps cells with at least
+\minGenes{} genes and at most \maxMt\% mitochondrial reads: \nPrimaryCells{} cells,
+including \pctCloneTableKept\% of clone-table cells.
+
+Scrublet~\cite{Wolock_2019} was unstable on these data. Its automatic threshold flagged
+\nScrubletAutoTotal{} cells in total and none in \nLibsScrubletZero{} of \nLibraries{}
+libraries, so we do not filter on it. Instead, in each library we flag the top fraction of
+cells by doublet score, matching the expected doublet rate (\dblRatePct\% per \dblRatePer{}
+barcodes). As a pre-specified sensitivity analysis, RQ1--RQ3 are repeated without these
+cells (\nSensitivityCells{} cells). Only \nDACellsCrossStage{} stage-IV dopaminergic cells
+lie in cross-stage clones, so we study dopaminergic fate as stage-III progenitor bias rather
+than as a forecasting target.
+
+\input{tables/tab_data_counts}
 
 \subsection{Notation and expression space}\label{sec:notation}
 Fix a transition $t\to t{+}1$ and a replicate. Let $\mathcal{E}$ ($|\mathcal{E}|=n_0$)
@@ -395,7 +365,7 @@ Uncertainty (RQ1) & 1{,}000 bootstrap resamples of clones \\
 \section{Results}\label{sec:results}
 
 Primary-set results are reported below; the doublet-sensitivity set and the cap-robustness
-check are in the supplementary tables (Tables~\ref{tab:s1}--\ref{tab:s5}). Where a
+check are in the supplementary tables (Tables~S1--S5, supplementary material). Where a
 pre-specified expectation (stated in the analysis plan before any result) was not met, we
 say so.
 
@@ -434,32 +404,24 @@ the bulk of later cells, not better nearest matches. These results match the pre
 expectation: above chance, far from perfect, lowest at III$\to$IV, and OT not clearly
 better than kNN where it matters for pairing.
 
-The backward direction (later$\to$early) gave AUROC \rqOneBwdAUROCOne, \rqOneBwdAUROCTwo{}
-and \rqOneBwdAUROCThree. Per replicate, the fixed coupling's AUROC ranged from
-\rqOneRepAUROCMin{} to \rqOneRepAUROCMax{} and its enrichment from \rqOneRepEnrMin{} to
-\rqOneRepEnrMax{} (Table~\ref{tab:s5}). Excluding doublet-flagged cells gave enrichments
-of \rqOneSensEnrOne, \rqOneSensEnrTwo{} and \rqOneSensEnrThree{} and AUROCs of
-\rqOneSensAUROCOne, \rqOneSensAUROCTwo{} and \rqOneSensAUROCThree{} (Table~\ref{tab:s1}).
-
-The pre-specified cap check reran I$\to$II replicate~2 with all \capNLaterUncapped{} later
-cells instead of \capNLaterCapped{} (Table~\ref{tab:s4}). The uncapped solve did not fit
-in memory with POT, so it used a block-wise implementation of the same Sinkhorn iterations
-(plan amendment A1). Before use, this implementation was validated against POT on the
-capped job, with maximum relative plan difference $\valMaxRelPlanDiff$. The AUROC was
-unchanged (\capUncapAUROC{} uncapped vs.\ \capCapAUROC{} capped). Enrichment fell from
-\capCapEnr{} to \capUncapEnr{} and top-1 recall from \capCapTopOnePct\% to
-\capUncapTopOnePct\%, while chance fell from $\capCapChanceSci$ to $\capUncapChanceSci$.
-Absolute mass and top-$k$ recall scale with the size of the later pool and must be read
-against chance; the AUROC result is not an artefact of the cap. All \nOTSolves{} OT solves
-converged.
+\emph{Robustness.} All \nOTSolves{} OT solves converged. The backward direction gave AUROC
+\rqOneBwdAUROCOne, \rqOneBwdAUROCTwo{} and \rqOneBwdAUROCThree. Per replicate, AUROC
+ranged from \rqOneRepAUROCMin{} to \rqOneRepAUROCMax{} (Table~S5). Without doublet-flagged
+cells, AUROC was \rqOneSensAUROCOne, \rqOneSensAUROCTwo{} and \rqOneSensAUROCThree{}
+(Table~S1). The pre-specified cap check reran I$\to$II replicate~2 with all
+\capNLaterUncapped{} later cells instead of \capNLaterCapped{}, using the validated
+block-wise solver (amendment A1; maximum relative plan difference $\valMaxRelPlanDiff$ from
+POT). AUROC was unchanged (\capUncapAUROC{} vs.\ \capCapAUROC). Enrichment fell from
+\capCapEnr{} to \capUncapEnr{} as chance fell from $\capCapChanceSci$ to
+$\capUncapChanceSci$ (Table~S4). Absolute mass and top-$k$ recall scale with the size of
+the later pool, so they must be read against chance.
 
 \begin{figure*}[!t]
 \centering
 \includegraphics[width=\textwidth]{figures/fig2_coupling_recovery.pdf}
 \caption{Coupling recovery (RQ1, primary set, pooled over replicates, forward direction).
-Top: clone-retrieval AUROC, in which later cells are ranked by coupling weight and the early
-cell's own-clone sisters are the positives. Bottom: own-clone mass divided by its analytic
-chance (log scale). Points: OT over the entropy grid; bars: 95\% bootstrap CIs over clones.
+(a)--(c) Clone-retrieval AUROC: later cells ranked by coupling weight, with the early cell's
+sisters as positives. (d)--(f) Own-clone mass divided by its analytic chance (log scale). Points: OT over the entropy grid; bars: 95\% bootstrap CIs over clones.
 Dashed: kNN ($k=10$); dotted: independent coupling, equal to chance by construction.
 $\varepsilon=0.05$ (balanced) was fixed in advance for RQ2 and RQ4.}
 \label{fig:rq1}
@@ -498,8 +460,9 @@ sensitivity set the OT-vs.-independent ordering was the same for \fateSensAgreeA
 \includegraphics[width=\textwidth]{figures/fig3_fate_agreement.pdf}
 \caption{Fate-level agreement (RQ1). TVD between the later-cluster distribution predicted by
 each coupling and the measured distribution of the clones' sister cells, for early clusters
-with $\geq 20$ cross-stage clones ($n$ = clones). Lower is better; bars: 95\% bootstrap CIs
-over clones. Bold: ventral-midbrain progenitor (NPvMB) clusters, which at stage~III contain
+with $\geq 20$ cross-stage clones (number of clones in parentheses). Lower is better. Grey
+segments join the independent coupling to OT, so a leftward segment means OT recovers the
+clonal fates better. Bars: 95\% bootstrap CIs over clones for OT. Bold: ventral-midbrain progenitor (NPvMB) clusters, which at stage~III contain
 the dopaminergic progenitor.}
 \label{fig:fate}
 \end{figure*}
@@ -555,7 +518,7 @@ comparisons, the only other non-equivalent one is \rqTwoNEOtherDesc{}
 In the sensitivity set the true-lineage gains were
 \rqTwoSensTrueGainMinPct--\rqTwoSensTrueGainMaxPct\%, \rqTwoSensTrueNEquiv{} of
 \rqTwoTrueN{} were equivalent to the constant, and the non-equivalent comparisons were
-\rqTwoSensSameNonEquiv{} (Table~\ref{tab:s2}). The pre-stated expectations held: true and
+\rqTwoSensSameNonEquiv{} (Table~S2). The pre-stated expectations held: true and
 OT pairs beat the constant, independent pairs did not, and the Transformer showed no
 advantage. The qualification is that beating the constant here means a gain smaller than
 the margin we fixed in advance.
@@ -613,7 +576,7 @@ fate-bias axis, an LDA fitted on training clones, added only
 sensitivity set, (Pg, D) reached \rqThreeSensAUCPgDOne, \rqThreeSensAUCPgDTwo{} and
 \rqThreeSensAUCPgDThree{} and 30-PC reached \rqThreeSensAUCPCOne, \rqThreeSensAUCPCTwo{}
 and \rqThreeSensAUCPCThree; marker states were again lower in \rqThreeSensMarkerNSig{} of
-\rqThreeMarkerN{} comparisons (Table~\ref{tab:s3}).
+\rqThreeMarkerN{} comparisons (Table~S3).
 
 \emph{Dopaminergic lineage (descriptive).} Of \daNPvMBClones{} cross-stage clones whose
 stage-III cells are mostly III-NPvMB, only \daNmDA{} produced any stage-IV dopaminergic
@@ -669,8 +632,8 @@ end.
 \centering
 \includegraphics[width=\columnwidth]{figures/fig6_perturbation.pdf}
 \caption{Consequence of pair mismatch for a perturbation model (RQ4; II$\to$III later-stage
-cells, 100 simulation seeds per point, bands: 95\% intervals). Left: RMSE of the estimated
-per-cell effect. Right: its Pearson correlation with the true effect, which stays high by
+cells, 100 simulation seeds per point, bands: 95\% intervals). (a) RMSE of the estimated
+per-cell effect. (b) Its Pearson correlation with the true effect, which stays high by
 design because each treated cell carries its own effect. Stars: mismatch rates measured in
 RQ1 for the fixed OT coupling (1 $-$ own-clone mass), all within \rqFourMeasGap{} of $m=1$.}
 \label{fig:rq4}
@@ -684,19 +647,6 @@ RQ1 for the fixed OT coupling (1 $-$ own-clone mass), all within \rqFourMeasGap{
 \section{Limitations and Conclusion}\label{sec:conclusion}
 
 % ---------------------------------------------------------------------------
-\appendices
-\section{Supplementary Results}\label{app:supp}
-Pre-specified sensitivity analyses (doublet-flagged cells excluded), the cap-robustness check
-and per-replicate coupling recovery. All tables are generated from the saved result files.
-\renewcommand{\thetable}{S\arabic{table}}
-\renewcommand{\theHtable}{S\arabic{table}}
-\setcounter{table}{0}
-\input{tables/tab_s1_rq1_sensitivity}
-\input{tables/tab_s2_rq2_sensitivity}
-\input{tables/tab_s3_rq3_sensitivity}
-\input{tables/tab_s4_cap}
-\input{tables/tab_s5_rq1_replicates}
-
 % ---------------------------------------------------------------------------
 \ifCLASSOPTIONcompsoc
   \section*{Acknowledgments}
