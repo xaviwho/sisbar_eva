@@ -188,3 +188,17 @@ accuracy, how much error does mismatching add to the estimated response?
   (`scripts/06b_validate_blocked_solver.py`: mean |Δ own-clone mass| < 1e-5, mean
   |Δ AUROC| < 1e-3, max relative plan difference < 1e-2). If validation fails, the uncapped
   check is reported as not run. No primary result and no setting changes.
+- **A2 (2026-11-16) — clarification: tie-break for the RQ3 fate label.** §3 defines a
+  clone's fate as the majority cluster of its later sisters but does not say how ties are
+  broken. `scripts/08_rq3_fate.py` (committed before running, `6bde8cb`) breaks ties
+  alphabetically by cluster name. The class list in §3 was illustrative ("current counts")
+  and came from `05a_plan_checks`, which broke ties by order of occurrence instead. With
+  the ≥ 30-clone rule unchanged, the RQ3 classes are therefore:
+  - I→II: NPaHB, NPvMB, Motors, NPMHB, NPpHB, Gluts, GABAs + other;
+  - II→III: NPaHB, NPvMB, Motors, NPpHB, Gluts, GABAs + other;
+  - III→IV: as listed in §3.
+
+  GABAs reaches the threshold under the alphabetical rule (32 and 37 clones) but not under
+  the 05a rule (28 and 27). Verified: 103 / 113 / 52 clones have tied majorities, and the
+  two rules relabel 53 / 60 / 31 clones. Approved by the author on 2026-11-16. No setting,
+  script or result changes.

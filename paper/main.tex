@@ -135,11 +135,261 @@ dopaminergic fate as progenitor fate bias at stage~III rather than as a forecast
 
 % ---------------------------------------------------------------------------
 \section{Methods}\label{sec:methods}
-% Protocol (Table 1): clone-level splits, training-only normalisation, 20 seeds,
-% paired bootstrap CIs, Wilcoxon--Holm, Cohen's d_z, pre-fixed equivalence margin.
-% OT settings (UPDATES.md Q4). Models: Ridge, matched random forest, Transformer.
-% Controls: TCBB simulation (positive); independent pairing, within-stage
-% clone-label shuffle (negative).
+All settings were fixed in a pre-registered analysis plan before any result was computed.
+The plan has two dated amendments: A1 changes the solver for one robustness job, and A2
+clarifies a tie-break. Table~\ref{tab:methods} summarises the settings.
+
+\subsection{Notation and expression space}\label{sec:notation}
+Fix a transition $t\to t{+}1$ and a replicate. Let $\mathcal{E}$ ($|\mathcal{E}|=n_0$)
+and $\mathcal{L}$ ($|\mathcal{L}|=n_1$) be the early and later cells, and $c(\cdot)$ the
+clone of a barcoded cell. \emph{Foreground} cells belong to clones with cells at both stages.
+All other cells are \emph{background}: they enter the couplings but are never positives.
+Background cells are subsampled to at most 8{,}000 per stage; foreground cells are always
+kept. Clones are replicate-specific, so every coupling is computed within a replicate. The
+sisters of a foreground early cell $i$ are
+\begin{equation}
+\mathcal{S}_i=\{\,j\in\mathcal{L}: c(j)=c(i)\,\},\qquad s_i=|\mathcal{S}_i|.
+\end{equation}
+For UMI counts $u_{ig}$, expression is normalised to $10^4$ counts per cell and
+log-transformed:
+\begin{equation}
+x_{ig}=\log\bigl(1+10^{4}\,u_{ig}/\textstyle\sum_{g'}u_{ig'}\bigr).
+\label{eq:lognorm}
+\end{equation}
+Features are 2{,}000 highly variable genes, selected on raw counts with the Seurat~v3
+criterion and library as batch~\cite{Stuart_2019,Wolf_2018}. They are standardised,
+clipped at 10 and projected onto 30 principal components, $\mathbf{z}_i\in\mathbb{R}^{30}$.
+For couplings (RQ1, reused in RQ2 and RQ4), the projection is fitted without labels on both
+stages pooled. For RQ3 it is refitted on training cells only.
+
+\subsection{Couplings}\label{sec:couplings}
+The transport cost is the squared Euclidean distance in PC space, divided by its median so
+that $\varepsilon$ means the same in every job:
+\begin{equation}
+C_{ij}=\|\mathbf{z}_i-\mathbf{z}_j\|_2^2\,\big/\operatorname*{median}_{k\in\mathcal{E},\,l\in\mathcal{L}}\|\mathbf{z}_k-\mathbf{z}_l\|_2^2 .
+\end{equation}
+\emph{Balanced entropic OT}~\cite{Cuturi_2013,Schiebinger_2019} solves
+\begin{equation}
+\boldsymbol{\pi}^{\star}=\operatorname*{arg\,min}_{\boldsymbol{\pi}\in\Pi(\mathbf{a},\mathbf{b})}
+\langle\mathbf{C},\boldsymbol{\pi}\rangle-\varepsilon H(\boldsymbol{\pi}),
+\label{eq:ot}
+\end{equation}
+where $H(\boldsymbol{\pi})=-\sum_{ij}\pi_{ij}(\log\pi_{ij}-1)$ and $\Pi(\mathbf{a},\mathbf{b})$
+is the set of couplings with uniform marginals $\mathbf{a}=\mathbf{1}/n_0$ and
+$\mathbf{b}=\mathbf{1}/n_1$. The minimiser has the form
+$\pi_{ij}=\exp(f_i+g_j-C_{ij}/\varepsilon)$. The dual potentials are found by log-domain
+Sinkhorn iterations,
+\begin{align}
+g_j&\leftarrow\log b_j-\operatorname{LSE}_{i}\bigl(f_i-C_{ij}/\varepsilon\bigr),\label{eq:sk1}\\
+f_i&\leftarrow\log a_i-\operatorname{LSE}_{j}\bigl(g_j-C_{ij}/\varepsilon\bigr),\label{eq:sk2}
+\end{align}
+with $\operatorname{LSE}$ the log-sum-exp, until the column-marginal error
+$\|\boldsymbol{\pi}^{\top}\mathbf{1}-\mathbf{b}\|_2$ falls below $10^{-6}$
+(POT~\cite{Flamary_2021}). The grid $\varepsilon\in\{0.005,0.01,0.05,0.1\}$ is solved from
+large to small. Each solve is warm-started from the previous potentials scaled by
+$\varepsilon_{\mathrm{prev}}/\varepsilon$; this changes speed, not the solution.
+
+\emph{Unbalanced OT}~\cite{Chizat_2018} allows for proliferation and death between stages
+by replacing the marginal constraints with KL penalties:
+\begin{equation}
+\min_{\boldsymbol{\pi}\geq 0}\;\langle\mathbf{C},\boldsymbol{\pi}\rangle-\varepsilon H(\boldsymbol{\pi})
++\lambda\,\mathrm{KL}(\boldsymbol{\pi}\mathbf{1}\,\|\,\mathbf{a})
++\lambda\,\mathrm{KL}(\boldsymbol{\pi}^{\top}\mathbf{1}\,\|\,\mathbf{b}),
+\end{equation}
+with $\lambda=\varepsilon\tau/(1-\tau)$ and $\tau=0.9$. The updates are
+(\ref{eq:sk1})--(\ref{eq:sk2}) with the right-hand sides multiplied by
+$\lambda/(\lambda+\varepsilon)=\tau$. They are iterated until the largest relative change
+of any potential is below $10^{-6}$.
+
+Two reference couplings are used. The \emph{kNN coupling}
+$\pi_{ij}=k^{-1}\mathbb{1}[\,j\in\mathcal{N}_k(i)\,]$ spreads each early cell's mass over its
+$k=10$ nearest later cells. The \emph{independent coupling} $\pi_{ij}=1/(n_0n_1)$ is the
+chance reference. The coupling used in RQ2 and RQ4 was fixed in advance as balanced OT with
+$\varepsilon=0.05$; no setting was chosen by its recovery.
+
+For the uncapped robustness job, the dense $n_0\times n_1$ cost matrix alone needs
+1.1\,GB, and POT's working copies exceeded the 5.8\,GB memory limit (amendment~A1). That job
+instead evaluates (\ref{eq:sk1})--(\ref{eq:sk2}) over blocks of 1{,}024 rows with a
+streaming log-sum-exp. Apart from the cost matrix, this keeps memory at
+$O(1024\,n_1)$, with identical updates and stopping rule. It was validated against POT on
+the capped job before use.
+
+\subsection{Coupling-recovery metrics (RQ1)}\label{sec:metrics}
+Each foreground early cell's row is normalised, $w_{ij}=\pi_{ij}/\sum_{l}\pi_{il}$. With
+$n=n_1$, the own-clone mass, its chance level and the enrichment are
+\begin{equation}
+m_i=\sum_{j\in\mathcal{S}_i}w_{ij},\qquad m_i^{0}=s_i/n,\qquad \rho_i=m_i/m_i^{0}.
+\end{equation}
+Clone retrieval ranks the later cells by $w_{ij}$, with sisters as positives. Its AUROC is
+the Mann--Whitney statistic, with ties counted as one half:
+\begin{equation}
+A_i=\frac{1}{s_i(n-s_i)}\sum_{j\in\mathcal{S}_i}\sum_{l\notin\mathcal{S}_i}
+\Bigl(\mathbb{1}[w_{ij}>w_{il}]+\tfrac{1}{2}\mathbb{1}[w_{ij}=w_{il}]\Bigr).
+\end{equation}
+The independent coupling therefore scores exactly $0.5$. Top-$k$ recall $R_i^{(k)}$,
+$k\in\{1,5,10\}$, indicates whether a sister is among the $k$ heaviest later cells. Its
+chance level is $1-\binom{n-s_i}{k}/\binom{n}{k}$. For kNN, whose ten weights are tied,
+$R_i^{(k)}$ is the hypergeometric expectation within the neighbourhood, so no random
+tie-break is needed. Cell values are averaged within clone and then across clones.
+95\% intervals come from 1{,}000 bootstrap resamples of clones. A backward (later$\to$early)
+version applies the same metrics to column-normalised couplings.
+
+\emph{Fate agreement.} Each later cell carries a cluster label $\ell_j$: the authors' label
+for clone-table cells, otherwise a majority vote of the 15 nearest clone-table cells of the
+same stage and replicate. Using one-hot vectors $\mathbf{e}_\ell$, each early cell has a
+predicted and a clonal fate distribution:
+\begin{equation}
+\hat{\mathbf{p}}_i=\sum_{j\in\mathcal{L}}w_{ij}\,\mathbf{e}_{\ell_j},\qquad
+\mathbf{q}_i=\frac{1}{s_i}\sum_{j\in\mathcal{S}_i}\mathbf{e}_{\ell_j}.
+\end{equation}
+Restrict to early clusters with at least 20 cross-stage clones. For each, both vectors are
+averaged within clone and then across clones, giving $\bar{\mathbf{p}}$ and
+$\bar{\mathbf{q}}$, and compared by the total-variation distance
+$\mathrm{TVD}=\tfrac{1}{2}\|\bar{\mathbf{p}}-\bar{\mathbf{q}}\|_1$, with a clone bootstrap.
+
+\subsection{Forecasting on true lineage (RQ2)}\label{sec:m_rq2}
+A panel score is the mean of (\ref{eq:lognorm}) over the panel's genes,
+$\bar{x}_{\mathcal{G}}(i)=|\mathcal{G}|^{-1}\sum_{g\in\mathcal{G}}x_{ig}$. The state is
+$\mathbf{y}=(\mathrm{Pg},\mathrm{D})$. Pg uses the progenitor panel \{SOX2, NES, HES1, HES5,
+VIM\}, because pluripotency genes other than SOX2 are silent from day~13. D uses the TCBB
+panel \{TH, DDC, SLC6A3, DRD2, LMX1A, FOXA2\}; it is carried here by FOXA2, DDC and LMX1A,
+so we read it as a floor-plate/ventral-midbrain identity score. Each component is min--max
+scaled with bounds from training pairs only and clipped to $[0,1]$.
+
+For each seed, cross-stage clones are split 70/15/15 by clone, stratified by replicate. One
+early cell $i_c$ and one later sister $j_c$ are drawn per clone. The \emph{training} target
+of $i_c$ depends on the coupling:
+\begin{equation}
+j\sim\begin{cases}
+\delta_{j_c} & \text{true lineage},\\
+w_{i_c j}\,\mathbb{1}[j\in\mathcal{A}]\big/\sum_{l\in\mathcal{A}}w_{i_c l} & \text{OT},\\
+\mathrm{Unif}(\mathcal{A}) & \text{independent}.
+\end{cases}
+\end{equation}
+Here $\mathcal{A}$ is the set of later cells of training clones plus background cells, so a
+validation or test sister is never a training target. All models are tested on the same
+held-out \emph{true} pairs:
+\begin{equation}
+\mathrm{MAE}=\frac{1}{2N_{\mathrm{test}}}\sum_{c\in\mathrm{test}}\|\hat{\mathbf{y}}(i_c)-\mathbf{y}(j_c)\|_1 .
+\end{equation}
+The models are:
+\begin{itemize}
+\item the training median (the MAE-optimal constant);
+\item the training mean;
+\item ridge regression ($\alpha=1$);
+\item a random forest of 300 trees, with depth in $\{2,3,5,\infty\}$ and minimum leaf size
+in $\{1,5,10\}$ chosen by threefold cross-validation on MAE;
+\item the Transformer of~\cite{Kanu_TCBB}, with mean-squared-error loss and early stopping on
+validation clones.
+\end{itemize}
+The Transformer has 4 layers, width 128, 8 heads, feed-forward width 512, dropout 0.1, and
+is trained with Adam at learning rate $10^{-3}$. Its input is a single token. Attention over
+one token returns that token's value, $\mathrm{softmax}(\mathbf{q}\mathbf{k}^{\top}/\sqrt{d})
+\mathbf{v}=\mathbf{v}$, so here it acts as a deep feed-forward network. Under independent
+pairing the target is independent of the input, so the constant median is MAE-optimal
+(Proposition~1 of~\cite{Kanu_TCBB}). This makes independent pairing a negative control.
+
+\subsection{Fate prediction (RQ3)}\label{sec:m_rq3}
+The fate of clone $c$ is the most frequent cluster among its later sisters:
+\begin{equation}
+y_c=\operatorname*{arg\,max}_{k}\,\bigl|\{\,j: c(j)=c,\ \ell_j=k\,\}\bigr| .
+\end{equation}
+Ties are broken alphabetically (amendment~A2). Fates with fewer than 30 clones in a
+transition are pooled as ``other''. An early cell is represented in four ways:
+\begin{itemize}
+\item (P, D), with the TCBB pluripotency panel P = \{POU5F1, NANOG, SOX2, UTF1, TDGF1\};
+\item (Pg, D);
+\item 30-PC, with gene selection, scaling and PCA refitted on training cells;
+\item a lineage-derived fate-bias axis.
+\end{itemize}
+The fate-bias axis is the linear discriminant projection of the 30-PC representation onto
+$K{-}1$ dimensions, $\mathbf{h}_i=\mathbf{W}^{\top}\mathbf{z}_i$, fitted on training
+cells with their clones' fate labels:
+\begin{equation}
+\mathbf{W}=\operatorname*{arg\,max}_{\mathbf{W}}\operatorname{tr}\!\bigl[(\mathbf{W}^{\top}\mathbf{S}_w\mathbf{W})^{-1}\mathbf{W}^{\top}\mathbf{S}_b\mathbf{W}\bigr],
+\end{equation}
+with $\mathbf{S}_w$ and $\mathbf{S}_b$ the within- and between-class scatter matrices. Every
+representation is standardised and fed to the same multinomial logistic regression (L2,
+$C=1$):
+\begin{equation}
+P(y=k\mid\mathbf{h})=\frac{\exp(\boldsymbol{\beta}_k^{\top}\mathbf{h}+\beta_{k0})}{\sum_{k'}\exp(\boldsymbol{\beta}_{k'}^{\top}\mathbf{h}+\beta_{k'0})},
+\end{equation}
+so only the representation differs. A clone's prediction is the mean probability over its
+early cells. Clones are split 70/15/15, stratified by replicate, over 20 seeds; nothing is
+tuned, so the validation part is unused. The primary metric is macro one-vs-rest AUROC
+(chance 0.5); balanced accuracy is secondary (chance $1/K$). For the descriptive dopaminergic
+analysis, the discriminant axis is fitted on all III$\to$IV clones without a split.
+
+\subsection{Pair-mismatch simulation (RQ4)}\label{sec:m_rq4}
+Controls are real stage-III cells of experiment~2, analysed per replicate. Let $L_{ig}$ be
+(\ref{eq:lognorm}) on the 200 most highly variable genes $\mathcal{G}$. Each cell receives a
+heterogeneous effect that is linear in its standardised first principal component
+$\tilde{z}_i$:
+\begin{equation}
+e_i=0.5+0.25\,\tilde{z}_i,\qquad T_{ig}=L_{ig}+e_i\quad(g\in\mathcal{G}).
+\end{equation}
+A pairing $\sigma$ sets $\sigma(i)=i$ with probability $1-m$; otherwise $\sigma(i)$ is drawn
+uniformly from the other cells. The per-cell effect estimate decomposes as
+\begin{equation}
+\hat{e}_i=\frac{1}{|\mathcal{G}|}\sum_{g\in\mathcal{G}}\bigl(T_{ig}-L_{\sigma(i)g}\bigr)
+=e_i+\frac{1}{|\mathcal{G}|}\sum_{g\in\mathcal{G}}\bigl(L_{ig}-L_{\sigma(i)g}\bigr).
+\label{eq:rq4}
+\end{equation}
+The second term is the pairing error. It vanishes for correct pairs and has zero mean over
+random partners, so mismatch adds variance but no bias. We report three quantities:
+$\mathrm{RMSE}(\hat{\mathbf{e}},\mathbf{e})$, Pearson's $r(\hat{\mathbf{e}},\mathbf{e})$ and
+the bias $\overline{\hat{e}-e}$. Mismatch rates are $m\in\{0,0.1,\dots,1\}$ plus the rates
+measured in RQ1 for the fixed coupling. The primary measured rate is $1-\bar{m}$, the chance
+that a partner drawn from the OT row is not a sister. The secondary rate is $1-\bar{R}^{(1)}$.
+Each measured rate is also evaluated at its CI bounds. Every point uses 100 simulation seeds,
+with intervals from the 2.5th and 97.5th percentiles.
+
+\subsection{Statistical analysis}\label{sec:stats}
+Comparisons in RQ2 and RQ3 are paired over the $S=20$ splits, which every model and
+representation share. For a metric $M$ and methods $A$ and $B$, let
+$d_s=M_{A,s}-M_{B,s}$. We report
+\begin{equation}
+\bar{d}=\frac{1}{S}\sum_{s=1}^{S}d_s,\qquad d_z=\bar{d}\,/\operatorname{sd}(d),
+\end{equation}
+with a 95\% percentile bootstrap interval (10{,}000 resamples of seeds) and a two-sided
+Wilcoxon signed-rank test. $p$-values are Holm-corrected~\cite{Holm_1979} within families.
+In RQ2 a family is a cell set, transition and coupling; it covers every model against the
+constant median and against the random forest. In RQ3 a family is a cell set, transition and
+metric; it covers every representation against chance and every pair of representations.
+
+In RQ2 a difference counts as equivalent only if its whole interval lies in $(-\delta,\delta)$,
+with $\delta=0.01$ MAE fixed in advance as in~\cite{Kanu_TCBB}. An interval that merely
+contains zero is not equivalence. Each $\bar d$ is also reported as a percentage of the
+constant-median MAE. RQ1--RQ3 are repeated without doublet-flagged cells as a pre-specified
+sensitivity analysis. Each analysis script was committed before it ran, and every output
+records the git commit and the SHA-256 of its inputs. Every number in this paper is
+generated from those outputs.
+
+\begin{table}[!t]
+\centering
+\caption{Pre-specified analysis settings.}
+\label{tab:methods}
+\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{@{}p{0.27\columnwidth}p{0.66\columnwidth}@{}}
+\toprule
+Component & Setting \\
+\midrule
+Cell sets & Primary ($\geq$1{,}000 genes, $\leq$15\% mt); sensitivity: also without doublet-flagged cells \\
+Expression space & CP10k, $\log(1{+}x)$; 2{,}000 HVGs (Seurat v3, batch = library); scaled, clip 10; 30 PCs \\
+Pool & Per transition $\times$ replicate; background $\leq$8{,}000 per stage \\
+Couplings & Entropic OT, balanced and unbalanced ($\tau=0.9$), $\varepsilon\in\{0.005,0.01,0.05,0.1\}$; kNN ($k=10$); independent \\
+Fixed coupling & Balanced OT, $\varepsilon=0.05$ (RQ2, RQ4) \\
+RQ1 metrics & Own-clone mass / chance; AUROC (ties $=\frac12$); top-$k$, $k\in\{1,5,10\}$; fate TVD ($\geq$20 clones) \\
+RQ2 & State (Pg, D); split 70/15/15 by clone; one pair per clone; training pairs true / OT / independent; tested on true pairs \\
+RQ2 models & Const.\ median, const.\ mean, ridge ($\alpha=1$), random forest (CV), Transformer \\
+RQ3 & Fate = majority later cluster ($\geq$30 clones); (P, D), (Pg, D), 30-PC, LDA axis; multinomial LR ($C=1$) \\
+RQ4 & II$\to$III stage-III cells; 200 genes; $e_i=0.5+0.25\tilde{z}_i$; $m\in\{0,\dots,1\}$ + RQ1 rates; 100 seeds \\
+Statistics & 20 clone-level splits; paired bootstrap 95\% CI; Wilcoxon + Holm; $d_z$; $\delta=0.01$ MAE \\
+Uncertainty (RQ1) & 1{,}000 bootstrap resamples of clones \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 % ---------------------------------------------------------------------------
 \section{Results}\label{sec:results}
