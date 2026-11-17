@@ -75,6 +75,33 @@
 
 ## Log (newest first)
 
+### 2026-11-17 (evening) — Claude (VS Code) — Limitations and Conclusion written
+- **Author:** "write the limitations and conclusion section."
+- **Pulled `cae3f47`, `1186581`:** the author added co-author Willaims Paul Nwadiugwu and
+  IEEE grades, and moved the figure floats. Left as is. Points to check before submission
+  are listed under Q10.
+- **§6 Limitations (six numbered):**
+  1. Sisters, not descendants (the RQ4 rates are upper bounds; standard scRNA-seq cannot
+     observe the same cell twice).
+  2. One cell line, protocol and laboratory.
+  3. Incomplete lineage (background cells, the deposited-table gap, the pool-size
+     dependence of absolute metrics; AUROC is robust to the cap).
+  4. Fixed representations (one PCA space, one τ, no growth priors).
+  5. The two-score marker state (D is an identity score; DA analysis descriptive; Jerber
+     transfer pending).
+  6. A simulated perturbation.
+- **Conclusion:** one paragraph of findings, recommendations and next steps (lineage-
+  informed couplings, other systems, the pre-specified Jerber transfer).
+- Numbers are macros; the claims are softened to what the data show.
+- **Build:** clean, 10 pages. Remaining: abstract and author biographies (~0.5 page, so
+  ≈11 / 12).
+- **Q10 (new, non-blocking) — author block.**
+  - Is "Willaims" a typo for "Williams"?
+  - The new co-author has no affiliation in the footnote.
+  - IEEE/compsoc style puts membership grades as ", Member, IEEE" / ", Senior Member,
+    IEEE" after each name, not "(MIEEE)" / "(SMIEEE)". Peer-review submissions often omit
+    them.
+
 ### 2026-11-17 (later) — Claude (VS Code) — Related work checked; Introduction written
 - **Author:** "read the related works and the papers cited, if it is good, add the
   introduction and three to four contributions enumerated."
