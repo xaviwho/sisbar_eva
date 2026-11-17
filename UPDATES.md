@@ -75,6 +75,29 @@
 
 ## Log (newest first)
 
+### 2026-11-17 — Claude (VS Code) — Discussion written
+- **Author:** "let's have the discussion section done."
+- **Pulled `2e1ae54`:** the author removed "(RQ3)" from the Methods heading *Fate
+  prediction*. The other headings are left as they are.
+- **Discussion (§5 of `paper/main.tex`, about one page), in three parts:**
+  - (i) *Couplings recover populations, not cells*: above-chance sister mass and AUROC,
+    fate composition for 13/17 clusters, but at most 0.26% mass on sisters; kNN gets
+    similar mass; RQ4 shows the per-cell error equals random pairing.
+  - (ii) *Marker states are a bottleneck*: (Pg, D) is above chance but below 30-PC; the
+    panel choice matters little; the RQ2 gains under exact pairing lie inside δ, so the
+    limit is the state.
+  - (iii) *Evaluation practice*: the kNN AUROC artefact, chance depending on pool size,
+    and constants fitted to a coupling's own targets.
+- **Table 4 (checklist, nine rows):** each check is paired with its evidence in this
+  study, and each cites its figure or table.
+- **Numbers:** all come from macros. The generator gained cross-transition range macros
+  (script `5a4b09c` committed before the run). The claims "every transition" and "every
+  comparison" rest on existing `check_wording` asserts.
+- **New reference:** Weinreb et al. 2020 (Science; Crossref metadata), the clonal
+  haematopoiesis benchmark of state→fate.
+- **Build:** clean, 8 pages. Still to write: Introduction, Related work, Limitations and
+  Conclusion, abstract, biographies (≈2.5 pages, so about 10.5 / 12).
+
 ### 2026-11-16 (later) — Claude (VS Code) — Structure, length, figures
 - **Author:** "data and setup should be part of the method … TCBB is constrained on page
   length … not satisfied with the result figure quality."

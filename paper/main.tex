@@ -13,6 +13,7 @@
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{array}
 \usepackage{url}
 \usepackage[hidelinks]{hyperref}
 
@@ -641,7 +642,83 @@ RQ1 for the fixed OT coupling (1 $-$ own-clone mass), all within \rqFourMeasGap{
 
 % ---------------------------------------------------------------------------
 \section{Discussion}\label{sec:discussion}
-% Table 3 checklist.
+We used measured clonal lineage to test two assumptions behind models of differentiation:
+that inferred couplings link cells to their descendants, and that marker states capture
+fate. Both hold only in part, and in each case the part that holds is at the population
+level.
+
+\emph{Couplings recover populations, not cells.} Entropic OT placed
+\rqOneEnrMinT--\rqOneEnrMaxT{} times the chance mass on sister cells and ranked them above
+other later cells (AUROC \rqOneAUROCMinT--\rqOneAUROCMaxT). It was also closer to the clonal
+fate composition than the independent coupling for \fateNBetterAll{} of
+\fateNClustersAll{} early clusters. Yet at most \rqOneMassPctMaxT\% of an early cell's mass
+reached its sisters, and its heaviest partner was a sister for at most
+\rqOneTopOnePctMaxT\% of cells. These findings do not conflict. A population-level quantity
+averages over many cells whose individual partners are interchangeable within a state, so a
+coupling can be right in aggregate while almost every pair is wrong. The kNN coupling put a
+similar share of mass on sisters (\rqOneKnnEnrMinT--\rqOneKnnEnrMaxT{} times chance). This
+suggests that what OT recovers is largely transcriptional proximity, not lineage
+information added by the transport constraint. This agrees with clonal studies of haematopoiesis, in which
+much fate bias was not explained by transcriptional state and methods that infer dynamics
+from state alone predicted clonal fate only modestly~\cite{Weinreb_2020}.
+
+RQ4 shows what this means for perturbation models. At the measured mismatch rates
+(\rqFourMeasMin--\rqFourMeasMax), the per-cell effect error was
+\rqFourRatioMinPct--\rqFourRatioMaxPct\% of its value under random pairing, while the mean
+effect stayed unbiased (\ref{eq:rq4}). OT couplings are suited to population quantities,
+such as fate proportions and mean responses. They are not cell-to-cell correspondences, and
+heterogeneous responses read off OT-paired cells are, at this resolution, noise.
+
+\emph{Marker states are a bottleneck.} The two-score state carries fate information
+(macro-AUROC \rqThreeAUCPgDMinT--\rqThreeAUCPgDMaxT, above chance at every transition), but
+the transcriptome carries more (30-PC: \rqThreeAUCPCMinT--\rqThreeAUCPCMaxT). Replacing the
+pluripotency panel with a progenitor panel changed little, so the limit is the
+dimensionality of the summary, not the choice of genes. RQ2 shows the same limit from the
+other side. With the true sister as target, models beat the constant by only
+\rqTwoTrueGainMinPct--\rqTwoTrueGainMaxPct\% of its error, inside the margin fixed in
+advance. Because the pairing is exact there, the shortfall lies in the state: two marker
+scores cannot express most of what separates one clone's future from another's. This also
+explains why OT pairs forecast about as well as true pairs (Table~\ref{tab:rq2}) at I$\to$II and II$\to$III: when the
+state is coarse, a coupling that is right about populations is good enough. A larger model
+does not help either, since the Transformer was equivalent to the random forest in every
+comparison.
+
+\emph{Evaluation practice.} Three results concern how such evaluations should be run.
+\begin{itemize}
+\item AUROC and own-clone mass can disagree for sparse couplings. kNN's AUROC near 0.5
+(\rqOneKnnAUROCMinAll--\rqOneKnnAUROCMaxAll) reflects tied weights, not an absent signal.
+\item Absolute mass and top-$k$ recall depend on the size of the candidate pool (Table~S4),
+so they are uninterpretable without the matching chance level.
+\item A constant fitted to a coupling's own training targets can be a poor reference. At
+III$\to$IV, models trained on OT or independent pairs beat their own constant by
+\rqTwoThreeOIGainMinPct--\rqTwoThreeOIGainMaxPct\%, yet were worse than the true-lineage
+constant (Table~\ref{tab:rq2}).
+\end{itemize}
+Table~\ref{tab:checklist} turns these points, and the protocol rules that prevented leakage
+here, into a checklist for evaluating inferred couplings and marker states against lineage.
+
+\begin{table}[!t]
+\centering
+\caption{Checklist for evaluating couplings and marker states against lineage.}
+\label{tab:checklist}
+\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.45\columnwidth}>{\raggedright\arraybackslash}p{0.5\columnwidth}@{}}
+\toprule
+Check & Reason (this study) \\
+\midrule
+Split by clone, never by cell & Sisters share state; cell-level splits leak the target \\
+Report own-clone mass with its analytic chance & Mass scales with pool size (Table~S4) \\
+Report AUROC (ties $=\frac12$) with mass and top-$k$ & kNN: AUROC $\approx 0.5$ despite above-chance mass (Fig.~\ref{fig:rq1}) \\
+Include a kNN coupling & Similar sister mass to OT (Fig.~\ref{fig:rq1}) \\
+Separate population- from cell-level agreement & Fate composition recovered (Fig.~\ref{fig:fate}); cell pairs not (Fig.~\ref{fig:rq4}) \\
+Compare constants across couplings & III$\to$IV constants fitted to background targets (Table~\ref{tab:rq2}) \\
+Fix an equivalence margin in advance & Significant gains inside $\pm\delta$ (Fig.~\ref{fig:rq2}) \\
+Benchmark marker states against the transcriptome & (Pg, D) below 30-PC at every transition (Fig.~\ref{fig:rq3}) \\
+Pre-register settings; date every amendment & $\varepsilon$ fixed before results; amendments A1, A2 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 % ---------------------------------------------------------------------------
 \section{Limitations and Conclusion}\label{sec:conclusion}
