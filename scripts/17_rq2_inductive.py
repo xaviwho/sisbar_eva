@@ -29,6 +29,7 @@ from seed-0 runtimes only, before any result is summarised.
 Usage: python scripts/17_rq2_inductive.py run --transition T --seeds S... | summarise
 """
 import argparse
+import gc
 import importlib.util
 import subprocess
 import sys
@@ -125,10 +126,14 @@ def run(transition, seeds):
             dp = dp[~dp.clone.isin(excl)].reset_index(drop=True)
             va_r = va[va.rep == rep]
             Xp, Xva = embed_fit(dp, va_r.early_id.to_numpy())
+            gc.collect()        # memory only: release the AnnData objects before OT
             st = dp.stage.to_numpy()
             e_ids, l_ids = dp.cell_id.to_numpy()[st == s0], dp.cell_id.to_numpy()[st == s1]
             X0, X1 = Xp[st == s0], Xp[st == s1]
-            M = cdist(X0, X1, "sqeuclidean").astype(np.float32)
+            # chunked float32 (same values as cdist -> float32; as in 07), memory only
+            M = np.empty((len(X0), len(X1)), dtype=np.float32)
+            for k in range(0, len(X0), 1000):
+                M[k:k + 1000] = cdist(X0[k:k + 1000], X1, "sqeuclidean")
             med = np.float32(np.median(M))
             M /= med
             tag = f"{CELLSET}_{tt}_s{seed}_r{rep}"
@@ -145,7 +150,8 @@ def run(transition, seeds):
                 lw = lu[i] - M[i] / np.float32(0.05) + lv
                 w = np.exp(lw - lw.max()).astype(np.float64)
                 tgt_tr[(rep, c)] = l_ids[rng.choice(len(w), p=w / w.sum())]
-            del M
+            del M, sol
+            gc.collect()
             Cva = cdist(Xva, X1, "sqeuclidean").astype(np.float32) / med
             for k, c in enumerate(va_r.clone):
                 lw = lv - Cva[k] / np.float32(0.05)
