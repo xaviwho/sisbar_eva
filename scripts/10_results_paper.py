@@ -178,6 +178,17 @@ def rq1():
         os_ = one(fw, coupling=OT, transition=t, cellset="sensitivity", uncapped=False, rep="pooled")
         put(f"rqOneSensEnr{n}", f(os_.enrichment, 1))
         put(f"rqOneSensAUROC{n}", f(os_.auroc))
+    # cross-transition ranges for the fixed coupling (Discussion)
+    fx = fw[(fw.coupling == OT) & (fw.cellset == "primary") & ~fw.uncapped & (fw.rep == "pooled")]
+    kx = fw[(fw.coupling == "kNN") & (fw.cellset == "primary") & ~fw.uncapped & (fw.rep == "pooled")]
+    put("rqOneAUROCMinT", f(fx.auroc.min()))
+    put("rqOneAUROCMaxT", f(fx.auroc.max()))
+    put("rqOneEnrMinT", f(fx.enrichment.min(), 1))
+    put("rqOneEnrMaxT", f(fx.enrichment.max(), 1))
+    put("rqOneMassPctMaxT", pct(fx.m.max(), 2))
+    put("rqOneTopOnePctMaxT", pct(fx.top1.max(), 2))
+    put("rqOneKnnEnrMinT", f(kx.enrichment.min(), 1))
+    put("rqOneKnnEnrMaxT", f(kx.enrichment.max(), 1))
     put("rqOneBalAUROCMin", f(min(aur_bal)))
     put("rqOneBalAUROCMax", f(max(aur_bal)))
     unb3 = fw[(fw.transition == "III->IV") & fw.coupling.str.startswith("OT_unb") &
@@ -695,6 +706,11 @@ def rq3():
     pm = cm[(cm.cellset == "primary") & (cm.metric == "macro_auroc")]
     mk = pm[pm.b == "chance"]
     put("rqThreeAllAboveChance", "all" if (mk.ci_lo > 0).all() else "not all")
+    mean_auc = p.groupby(["transition", "representation"]).macro_auroc.mean()
+    for r in REPS:
+        v = mean_auc.xs(r, level="representation")
+        put(f"rqThreeAUC{RMAC[r]}MinT", f(v.min()))
+        put(f"rqThreeAUC{RMAC[r]}MaxT", f(v.max()))
     bt = pm[pm.a.isin(["P_tcbb_D", "Pg_D"]) & pm.b.isin(["PC30", "fate_axis"])]
     put("rqThreeMarkerGapMin", f(-bt.delta.max()))
     put("rqThreeMarkerGapMax", f(-bt.delta.min()))
