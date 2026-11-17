@@ -382,6 +382,17 @@ that a partner drawn from the OT row is not a sister. The secondary rate is $1-\
 Each measured rate is also evaluated at its CI bounds. Every point uses 100 simulation seeds,
 with intervals from the 2.5th and 97.5th percentiles.
 
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig2_coupling_recovery.pdf}
+\caption{Coupling recovery (RQ1, primary set, pooled over replicates, forward direction).
+(a)--(c) Clone-retrieval AUROC: later cells ranked by coupling weight, with the early cell's
+sisters as positives. (d)--(f) Own-clone mass divided by its analytic chance (log scale). Points: OT over the entropy grid; bars: 95\% bootstrap CIs over clones.
+Dashed: kNN ($k=10$); dotted: independent coupling, equal to chance by construction.
+$\varepsilon=0.05$ (balanced) was fixed in advance for RQ2 and RQ4.}
+\label{fig:rq1}
+\end{figure*}
+
 \subsection{Statistical analysis}\label{sec:stats}
 Comparisons in RQ2 and RQ3 are paired over the $S=20$ splits, which every model and
 representation share. For a metric $M$ and methods $A$ and $B$, let
@@ -483,17 +494,6 @@ POT). AUROC was unchanged (\capUncapAUROC{} vs.\ \capCapAUROC). Enrichment fell 
 \capCapEnr{} to \capUncapEnr{} as chance fell from $\capCapChanceSci$ to
 $\capUncapChanceSci$ (Table~S4). Absolute mass and top-$k$ recall scale with the size of
 the later pool, so they must be read against chance.
-
-\begin{figure*}[!t]
-\centering
-\includegraphics[width=\textwidth]{figures/fig2_coupling_recovery.pdf}
-\caption{Coupling recovery (RQ1, primary set, pooled over replicates, forward direction).
-(a)--(c) Clone-retrieval AUROC: later cells ranked by coupling weight, with the early cell's
-sisters as positives. (d)--(f) Own-clone mass divided by its analytic chance (log scale). Points: OT over the entropy grid; bars: 95\% bootstrap CIs over clones.
-Dashed: kNN ($k=10$); dotted: independent coupling, equal to chance by construction.
-$\varepsilon=0.05$ (balanced) was fixed in advance for RQ2 and RQ4.}
-\label{fig:rq1}
-\end{figure*}
 
 \subsection{Fate-level agreement}\label{sec:fate}
 For each early cluster with at least 20 cross-stage clones we compared two distributions
