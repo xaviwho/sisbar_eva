@@ -811,37 +811,36 @@ Pre-register settings; date every amendment & $\varepsilon$ fixed before results
 
 % ---------------------------------------------------------------------------
 \subsection{Limitations}\label{sec:limitations}
-Six limits bound these conclusions.
-\begin{enumerate}
-\item \emph{The ground truth is sisters, not descendants.} Sister cells share an ancestor
-three to four divisions back and then diverge, so recovering a sister is likely harder than
-recovering the cell's own future state. The mismatch rates in RQ4 are therefore upper bounds
-on the pairing error that matters for perturbation models. Standard single-cell sequencing
-cannot observe the same cell twice, however, and sisters are the closest reference that
-can be measured at this scale.
-\item \emph{One cell line, one protocol, one laboratory.} All data come from H9 cells
-differentiated towards ventral midbrain and hindbrain fates~\cite{You_2023}. The size of
-the gap between OT and lineage may differ in other systems, especially those with slower
-or less branched fate decisions.
-\item \emph{Incomplete lineage information.} Only barcoded clones with cells at both stages
-of a transition are positives; all other later cells are background. The deposited lineage
-table also has \pctExpThreeCloneGap\% fewer III$\to$IV clones than published. Absolute mass
-and top-$k$ recall depend on the size of the later-cell pool, so we report them against
-their chance levels. AUROC is less sensitive to pool size: it was unchanged in the
-pre-specified check without the background cap.
-\item \emph{Fixed representations.} Couplings were computed in one pre-registered space (30
-PCs of 2{,}000 HVGs), with one unbalanced relaxation and no prior growth rates. Other
-embeddings or growth-informed OT could recover more lineage. Our results apply to the
-standard configuration, not to every variant.
-\item \emph{A two-score marker state.} The (Pg, D) state was kept comparable to earlier
-work~\cite{Kanu_TCBB}, and in this system D is an identity score rather than a
-dopaminergic one. Only \nDACellsCrossStage{} stage-IV dopaminergic cells lie in
-cross-stage clones, so the dopaminergic analysis is descriptive, and transfer of the
-fate-bias axis to independent data~\cite{Jerber_2021} remains to be tested.
-\item \emph{A simulated perturbation.} RQ4 adds a synthetic effect that is linear in one
-principal component. Real perturbation responses are more complex, so RQ4 shows how
-pairing error propagates, not how large it is for a specific perturbation.
-\end{enumerate}
+The most basic limit is the ground truth itself. Sister cells share an ancestor three to
+four divisions back and then diverge, so recovering a sister is likely harder than
+recovering a cell's own future state. The mismatch rates used in RQ4 are therefore upper
+bounds on the pairing error that matters for perturbation models. Standard single-cell
+sequencing cannot observe the same cell twice, however, and sisters remain the closest
+reference that can be measured at this scale.
+
+The lineage information is also incomplete. Only barcoded clones with cells at both stages
+of a transition can serve as positives, and all other later cells are background. The
+deposited table holds \pctExpThreeCloneGap\% fewer III$\to$IV clones than published.
+Because absolute own-clone mass and top-$k$ recall grow or shrink with the size of the
+later-cell pool, we report them against their chance levels. AUROC is less sensitive to
+pool size and was unchanged in the pre-specified check without the background cap.
+
+All data come from a single cell line differentiated with a single protocol in one
+laboratory~\cite{You_2023}. The size of the gap between OT and lineage may therefore
+differ in other systems, especially those with slower or less branched fate decisions.
+Within these data, couplings were computed in one pre-registered space (30 PCs of 2{,}000
+HVGs), with one unbalanced relaxation and no prior growth rates. Other embeddings or
+growth-informed OT may recover more lineage, so our results describe the standard
+configuration, not every variant.
+
+The marker state was kept to two scores for comparability with earlier
+work~\cite{Kanu_TCBB}, and in this system D measures floor-plate and ventral-midbrain
+identity rather than dopaminergic maturity. With only \nDACellsCrossStage{} stage-IV
+dopaminergic cells in cross-stage clones, the dopaminergic analysis is descriptive. Whether
+the fate-bias axis transfers to independent data~\cite{Jerber_2021} remains to be tested.
+Finally, RQ4 adds a synthetic effect that is linear in one principal component. Real
+perturbation responses are more complex, so RQ4 shows how pairing error propagates, not how
+large it is for any particular treatment.
 
 % ---------------------------------------------------------------------------
 \section{Conclusion}\label{sec:conclusion}

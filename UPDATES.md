@@ -75,6 +75,14 @@
 
 ## Log (newest first)
 
+### 2026-11-17 (late) — Claude (VS Code) — Limitations as prose
+- **Author:** "write the limitations as a flowing statement instead of listing them."
+- §5.4 is now four paragraphs of prose with the same six points and macros: the
+  ground truth (sisters) → incomplete lineage information → generality (one line, protocol,
+  laboratory; fixed OT configuration) → the marker state, the DA analysis and the simulated
+  perturbation.
+- Also pulled the author's acknowledgments (`e71379d`). Build clean, 10 pages.
+
 ### 2026-11-17 (night) — Claude (VS Code) — Abstract, index terms, author block, restructure
 - **Author:**
   - correct the Williams name and add his affiliation;
