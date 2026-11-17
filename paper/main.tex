@@ -557,6 +557,18 @@ progenitors but not reliably at the latest transition, again as expected. In the
 sensitivity set the OT-vs.-independent ordering was the same for \fateSensAgreeAll{} of
 \fateSensNAll{} clusters.
 
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig4_forecasting.pdf}
+\caption{Forecasting on true lineage (RQ2, primary set). Paired difference in MAE between
+each model and the constant median trained on the same pairs (negative = model better),
+tested on held-out true sister pairs; mean over \rqTwoSeeds{} clone-level splits with
+percentile bootstrap 95\% CIs. Shaded: equivalence margin $\pm\delta$. At III$\to$IV the OT
+and independent constants are fitted to mostly background targets, so the reference itself
+is poor (Table~\ref{tab:rq2}).}
+\label{fig:rq2}
+\end{figure*}
+
 \subsection{Forecasting on true lineage}\label{sec:rq2}
 Models mapped an early cell's two-dimensional state (Pg, D) to its sister's later state. The
 same models were trained on one of three kinds of pairs: true clonal pairs, pairs drawn from
@@ -578,17 +590,6 @@ criterion the models are practically equivalent to the constant. This holds even
 (Cohen's $d_z$ \rqTwoTrueDzMin--\rqTwoTrueDzMax). Measured lineage gives the marker-state
 forecast a real but small signal.
 
-\begin{figure*}[!t]
-\centering
-\includegraphics[width=\textwidth]{figures/fig4_forecasting.pdf}
-\caption{Forecasting on true lineage (RQ2, primary set). Paired difference in MAE between
-each model and the constant median trained on the same pairs (negative = model better),
-tested on held-out true sister pairs; mean over \rqTwoSeeds{} clone-level splits with
-percentile bootstrap 95\% CIs. Shaded: equivalence margin $\pm\delta$. At III$\to$IV the OT
-and independent constants are fitted to mostly background targets, so the reference itself
-is poor (Table~\ref{tab:rq2}).}
-\label{fig:rq2}
-\end{figure*}
 
 No model beat the random forest under true lineage (\rqTwoTrueBeatRFN{} of \rqTwoTrueVsRFN{} intervals
 below zero). The Transformer was equivalent to the random forest in all \rqTwoTrfRFN{}
