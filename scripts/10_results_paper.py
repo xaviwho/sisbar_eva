@@ -79,7 +79,9 @@ def panel(ax, letter, x=-0.16, y=1.02):
 
 
 def save(fig, name):
-    fig.savefig(FIG / name)   # no bbox cropping: the PDF has exactly the figure size
+    # no bbox cropping: the PDF has exactly the figure size; no timestamp, so reruns on
+    # unchanged results give byte-identical files
+    fig.savefig(FIG / name, metadata={"CreationDate": None})
     plt.close(fig)
 
 
