@@ -15,10 +15,56 @@
 
 ## Open instructions (author → Claude)
 
+- [ ] 2026-11-17 — **(Cloud) Post-review analyses: ANALYSIS_PLAN amendment A3, items
+  A3.1–A3.6.** Approved by the author ("yes go ahead").
+  - **The rule:** every setting is fixed in A3. Follow it exactly; any deviation becomes a
+    new dated amendment. Commit each script before running it; each writes
+    `results/NN_*/provenance.txt`. Primary cell set only. Run one OT job at a time (5.8 GB
+    limit).
+  - **Order (cheapest first):**
+    - A3.1 RQ2 with 30-PC input → `scripts/12_rq2_pc_input.py`, `results/12_rq2_pc/`. Reuse
+      the 07_rq2 splits, sampled cells and targets per seed; save per-seed MAE for both
+      inputs.
+    - A3.4 repeated target draws → `scripts/13_rq2_draws.py`, `results/13_rq2_draws/`.
+    - A3.3 leave-one-replicate-out (RQ2 and RQ3) → `scripts/14_loro.py`, `results/14_loro/`.
+    - A3.5 fate agreement on measured labels and label-transfer k → `scripts/15_fate_labels.py`,
+      `results/15_fate_labels/`. Reuse the saved RQ1 couplings and potentials.
+    - A3.6 RQ4 effect-model sensitivity → `scripts/16_rq4_sensitivity.py`,
+      `results/16_rq4_sens/`.
+    - A3.2 inductive RQ2 (OT arm) → `scripts/17_rq2_inductive.py`, `results/17_rq2_inductive/`.
+      Most expensive. Apply the seed 0–9 fallback only on seed-0 runtime, and log the
+      decision before reading any result.
+  - **Outputs:** per-seed or per-fold CSVs plus a summary CSV per item. Do not write paper
+    text; VS Code writes the paper from these outputs.
+- [ ] 2026-11-17 — **(Cloud) Public code release.** The repo `github.com/xaviwho/sisbar_eva`
+  is public (author). Push everything needed to reproduce the paper:
+  - **Scripts:** every script used in the cloud workspace, including helpers. Make sure no
+    script exists only in the workspace.
+  - **Environment:** `environment/requirements-cloud.txt` (`pip freeze` of the cloud
+    environment, plus the Python version) next to the existing local `requirements.txt`.
+  - **Data download:** `scripts/00_download_geo.py` fetches GSE207921/GSE221592 and the
+    clone table and checks the SHA-256 values recorded in the `provenance.txt` files.
+  - **README:** a reproduction guide covering data download, script order (01 → 17), which
+    steps run where (local vs Linux), what each `results/NN_*` contains, and the analysis
+    plan with its dated changes. State that the plan was committed at `65cd70d`, before any
+    result.
+  - **Never commit** `data/`, `.h5ad` or other large intermediates. Never commit
+    FOUNDIN-PD/PPMI material.
+  - **After the A3 results land:** tag `v1.0-submission`.
+- [ ] 2026-11-17 — **(VS Code) A3.7 single-barcode sensitivity** (local, from saved per-cell
+  metrics) and, once the cloud A3 results land, the paper text for A3.1–A3.7 (supplement
+  first; main-text paragraphs where they change a claim). If A3.1 shows that 30-PC input
+  does not beat (Pg, D) by more than δ, revise the "marker state limits forecasting" claim.
 - [ ] Later — Jerber D30 transfer of the RQ3 fate-bias axis (needs Jerber data; separate
   plan amendment).
 
 ## Open questions (Claude → author)
+
+- **Q11 (2026-11-17) — licence and archive for the public release.**
+  - (a) Licence: MIT is recommended for code. Results and paper files could be CC BY 4.0.
+  - (b) Zenodo DOI: enable the GitHub–Zenodo integration on your account
+    (zenodo.org → GitHub → switch on `sisbar_eva`). The `v1.0-submission` tag then gets a
+    citable, archived DOI. Only you can do this step.
 
 - **Q6 (2026-11-14, non-blocking) — reference for the TCBB benchmark paper.** Results cite
   Proposition 1 as `\cite{Kanu_TCBB}`; the bib entry is a placeholder (`@misc`, title and
@@ -74,6 +120,43 @@
 ---
 
 ## Log (newest first)
+
+### 2026-11-17 (night) — Claude (VS Code) — Peer review triage; amendment A3; wording fixes
+- **Author shared an AI peer review** (3/5, major revision) and approved the plan: wording
+  fixes now, cloud runs A3.1–A3.6, and a public code release. The repo is public.
+- **Checked before acting:**
+  - Multi-barcode clones are 2.7 / 6.5 / 12.8% of early cells in cross-stage clones.
+    Restricting to single-barcode clones leaves OT AUROC at 0.609 / 0.643 / 0.601 (vs
+    0.607 / 0.644 / 0.593). Now formal as A3.7 (`f09a46b`, `results/11_single_barcode/`).
+    Its "all clones" rows reproduce the RQ1 summary exactly.
+  - The review's "inconsistent ranges" point is a misreading: true lineage is 0.9–3.1%
+    throughout, and 0.9–4.2% is the OT range.
+- **Amendment A3** written in ANALYSIS_PLAN before any run (A3.1 30-PC RQ2 input; A3.2
+  inductive OT arm; A3.3 leave-one-replicate-out; A3.4 repeated target draws; A3.5 fate
+  agreement on measured labels; A3.6 RQ4 effect-model sensitivity; A3.7 single-barcode).
+  The preliminary A3.7 check is disclosed there.
+- **Author asked why "amendment A1/A2" appeared in the paper.** They are internal labels
+  from ANALYSIS_PLAN.md and meaningless to readers.
+  - Removed everywhere: main text, Table S4 caption, supplement. Each is replaced by a
+    plain description.
+  - "Pre-registered" became "pre-specified" / "time-stamped": the plan was never filed
+    with a registry, it was committed to the repo at `65cd70d` before any result.
+  - Methods now states the repository URL and that commit.
+- **Wording fixes from the review:**
+  - The abstract, Discussion and Conclusion narrow the population-level claim to this
+    system and to cluster-by-cluster checking.
+  - RQ4 is framed as a conditional synthetic propagation analysis, with bias intervals
+    reported.
+  - The 20-split intervals are called "split-stability intervals".
+  - The replicate structure is stated (one experiment and three biological replicates per
+    transition).
+  - The rationale for δ is given (1% of the scaled range).
+  - The LDA axis is called "supervised".
+  - Matched split, cells and sisters across pairing constructions are stated.
+- **Not yet changed:** the claim "marker state, not coupling, limits forecasting" stays as
+  is until A3.1 lands.
+- **Build:** both PDFs clean, main 10 pages; no internal labels in the PDF text.
+- **New:** Q11 (licence; Zenodo integration).
 
 ### 2026-11-17 (late) — Claude (VS Code) — Cited the ICUFN 2026 paper
 - **Author:** asked whether https://ieeexplore.ieee.org/document/11628674 can be cited and

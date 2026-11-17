@@ -1,0 +1,4 @@
+git_commit f09a46b45e69e1439213bd0904fe11298e5840ac
+plan: ANALYSIS_PLAN.md amendment A3.7 (post-review; preliminary check disclosed there)
+python 3.11.9 pandas 2.3.3 numpy 2.4.6
+input results/06_rq1/cells_forward.csv.gz sha256 515fae7b16998b2cd8a57207026f6ff7c0f4948c72cda8919782b9ca112a9492

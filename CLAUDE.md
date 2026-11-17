@@ -197,6 +197,10 @@ from the viral barcode there.
 
 Decided 2026-11-11 by approving `ANALYSIS_PLAN.md` (pre-registration commit `65cd70d`):
 - Pre-registration: yes — the approved plan; changes only as dated amendments.
+  In the PAPER call it a pre-specified plan time-stamped in the public repo (commit
+  `65cd70d`), never "pre-registered" (not filed with a registry), and never cite
+  amendment labels (A1, A2, …) — describe the change instead. Repo is PUBLIC:
+  github.com/xaviwho/sisbar_eva (2026-11-17).
 - Panels: D unchanged (TH, DDC, SLC6A3, DRD2, LMX1A, FOXA2; here a floor-plate/vMB identity
   score); P replaced by Pg = SOX2, NES, HES1, HES5, VIM; TCBB P kept only as RQ3 baseline
   (reduces to SOX2 here).
