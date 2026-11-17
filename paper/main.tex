@@ -310,8 +310,8 @@ $\mathrm{TVD}=\tfrac{1}{2}\|\bar{\mathbf{p}}-\bar{\mathbf{q}}\|_1$, with a clone
 A panel score is the mean of (\ref{eq:lognorm}) over the panel's genes,
 $\bar{x}_{\mathcal{G}}(i)=|\mathcal{G}|^{-1}\sum_{g\in\mathcal{G}}x_{ig}$. The state is
 $\mathbf{y}=(\mathrm{Pg},\mathrm{D})$. Pg uses the progenitor panel \{SOX2, NES, HES1, HES5,
-VIM\}, because pluripotency genes other than SOX2 are silent from day~13. D uses the TCBB
-panel \{TH, DDC, SLC6A3, DRD2, LMX1A, FOXA2\}; it is carried here by FOXA2, DDC and LMX1A,
+VIM\}, because pluripotency genes other than SOX2 are silent from day~13. D uses the
+dopaminergic panel of~\cite{Kanu_TCBB}, \{TH, DDC, SLC6A3, DRD2, LMX1A, FOXA2\}; it is carried here by FOXA2, DDC and LMX1A,
 so we read it as a floor-plate/ventral-midbrain identity score. Each component is min--max
 scaled with bounds from training pairs only and clipped to $[0,1]$.
 
@@ -356,7 +356,8 @@ y_c=\operatorname*{arg\,max}_{k}\,\bigl|\{\,j: c(j)=c,\ \ell_j=k\,\}\bigr| .
 Ties are broken alphabetically (amendment~A2). Fates with fewer than 30 clones in a
 transition are pooled as ``other''. An early cell is represented in four ways:
 \begin{itemize}
-\item (P, D), with the TCBB pluripotency panel P = \{POU5F1, NANOG, SOX2, UTF1, TDGF1\};
+\item (P, D), the original state of~\cite{Kanu_TCBB}, with pluripotency panel
+P = \{POU5F1, NANOG, SOX2, UTF1, TDGF1\};
 \item (Pg, D);
 \item 30-PC, with gene selection, scaling and PCA refitted on training cells;
 \item a lineage-derived fate-bias axis.
@@ -635,7 +636,7 @@ The same multinomial logistic regression predicted fate from four representation
 early sister cell (Fig.~\ref{fig:rq3}). Macro-AUROC for I$\to$II, II$\to$III and
 III$\to$IV was:
 \begin{itemize}
-\item TCBB (P, D): \rqThreeAUCPDOne, \rqThreeAUCPDTwo{} and \rqThreeAUCPDThree;
+\item original (P, D): \rqThreeAUCPDOne, \rqThreeAUCPDTwo{} and \rqThreeAUCPDThree;
 \item (Pg, D): \rqThreeAUCPgDOne, \rqThreeAUCPgDTwo{} and \rqThreeAUCPgDThree;
 \item 30-PC: \rqThreeAUCPCOne, \rqThreeAUCPCTwo{} and \rqThreeAUCPCThree;
 \item lineage-derived fate-bias axis: \rqThreeAUCFateOne, \rqThreeAUCFateTwo{} and
@@ -683,8 +684,8 @@ data~\cite{Jerber_2021} is left to a later amendment.
 \includegraphics[width=\columnwidth]{figures/fig5_state_adequacy.pdf}
 \caption{State adequacy (RQ3, primary set). Macro-AUROC for predicting a clone's later fate
 from its early sister cell, with an identical classifier for each representation. Small
-points: \rqThreeSeeds{} clone-level splits; large markers: mean $\pm$ SD. (P, D): TCBB
-panels; (Pg, D): progenitor score replacing pluripotency; fate-bias axis: LDA on 30 PCs
+points: \rqThreeSeeds{} clone-level splits; large markers: mean $\pm$ SD. (P, D): original
+panels~\cite{Kanu_TCBB}; (Pg, D): progenitor score replacing pluripotency; fate-bias axis: LDA on 30 PCs
 fitted on training clones.}
 \label{fig:rq3}
 \end{figure}

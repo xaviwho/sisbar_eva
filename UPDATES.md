@@ -75,6 +75,14 @@
 
 ## Log (newest first)
 
+### 2026-11-17 (late) — Claude (VS Code) — Removed "TCBB" labels from the manuscript
+- **Author:** "we can't call it that … shouldn't have such puerile things."
+- The 4 visible uses were "TCBB panel" (Methods ×2), "TCBB (P, D)" (RQ3 list) and the Fig.
+  caption. They now read "the original (P, D) state of [4]", "the dopaminergic panel of
+  [4]" and "original panels [4]". The compiled PDF contains no "TCBB"; the cite key is
+  invisible to readers.
+- New rule in CLAUDE.md (Style): no internal shorthand in the manuscript.
+
 ### 2026-11-17 (late) — Claude (VS Code) — Limitations as prose
 - **Author:** "write the limitations as a flowing statement instead of listing them."
 - §5.4 is now four paragraphs of prose with the same six points and macros: the

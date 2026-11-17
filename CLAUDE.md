@@ -213,3 +213,7 @@ individual-level data in this repository.
 
 - Writing: IEEE style, plain and specific, effect sizes with intervals before p-values.
 - Report null results as fully as positive ones.
+- **No internal shorthand in the manuscript** (author, 2026-11-17). Names like "TCBB
+  (P, D)", "TCBB panel", DT1/DT2, Q-numbers, file or script names are for our notes only.
+  In the paper, describe the thing and cite it: "the original (P, D) state
+  of~\cite{Kanu_TCBB}". The cite key itself is invisible to readers and can stay.
