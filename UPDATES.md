@@ -15,43 +15,7 @@
 
 ## Open instructions (author → Claude)
 
-- [ ] 2026-11-17 — **(Cloud) Post-review analyses: ANALYSIS_PLAN amendment A3, items
-  A3.1–A3.6.** Approved by the author ("yes go ahead").
-  - **The rule:** every setting is fixed in A3. Follow it exactly; any deviation becomes a
-    new dated amendment. Commit each script before running it; each writes
-    `results/NN_*/provenance.txt`. Primary cell set only. Run one OT job at a time (5.8 GB
-    limit).
-  - **Order (cheapest first):**
-    - A3.1 RQ2 with 30-PC input → `scripts/12_rq2_pc_input.py`, `results/12_rq2_pc/`. Reuse
-      the 07_rq2 splits, sampled cells and targets per seed; save per-seed MAE for both
-      inputs.
-    - A3.4 repeated target draws → `scripts/13_rq2_draws.py`, `results/13_rq2_draws/`.
-    - A3.3 leave-one-replicate-out (RQ2 and RQ3) → `scripts/14_loro.py`, `results/14_loro/`.
-    - A3.5 fate agreement on measured labels and label-transfer k → `scripts/15_fate_labels.py`,
-      `results/15_fate_labels/`. Reuse the saved RQ1 couplings and potentials.
-    - A3.6 RQ4 effect-model sensitivity → `scripts/16_rq4_sensitivity.py`,
-      `results/16_rq4_sens/`.
-    - A3.2 inductive RQ2 (OT arm) → `scripts/17_rq2_inductive.py`, `results/17_rq2_inductive/`.
-      Most expensive. Apply the seed 0–9 fallback only on seed-0 runtime, and log the
-      decision before reading any result.
-  - **Outputs:** per-seed or per-fold CSVs plus a summary CSV per item. Do not write paper
-    text; VS Code writes the paper from these outputs.
-- [ ] 2026-11-17 — **(Cloud) Public code release.** The repo `github.com/xaviwho/sisbar_eva`
-  is public (author). Push everything needed to reproduce the paper:
-  - **Scripts:** every script used in the cloud workspace, including helpers. Make sure no
-    script exists only in the workspace.
-  - **Environment:** `environment/requirements-cloud.txt` (`pip freeze` of the cloud
-    environment, plus the Python version) next to the existing local `requirements.txt`.
-  - **Data download:** `scripts/00_download_geo.py` fetches GSE207921/GSE221592 and the
-    clone table and checks the SHA-256 values recorded in the `provenance.txt` files.
-  - **README:** a reproduction guide covering data download, script order (01 → 17), which
-    steps run where (local vs Linux), what each `results/NN_*` contains, and the analysis
-    plan with its dated changes. State that the plan was committed at `65cd70d`, before any
-    result.
-  - **Never commit** `data/`, `.h5ad` or other large intermediates. Never commit
-    FOUNDIN-PD/PPMI material.
-  - **After the A3 results land:** tag `v1.0-submission`.
-- [ ] 2026-11-17 — **(VS Code) A3.7 single-barcode sensitivity** (local, from saved per-cell
+- [ ] 2026-11-17 — **(VS Code) A3.7 single-barcode sensitivity** (cloud A3.1–A3.6 results are in; see the 2026-11-18 log entry for what changes a claim) (local, from saved per-cell
   metrics) and, once the cloud A3 results land, the paper text for A3.1–A3.7 (supplement
   first; main-text paragraphs where they change a claim). If A3.1 shows that 30-PC input
   does not beat (Pg, D) by more than δ, revise the "marker state limits forecasting" claim.
@@ -86,6 +50,8 @@
 
 ## Done
 
+- [x] 2026-11-17 — (Cloud) Post-review analyses A3.1–A3.6 → scripts 12–17 (each committed before running), results `results/12_rq2_pc` … `results/17_rq2_inductive`; A3.2 on seeds 0–9 (pre-specified fallback). 2026-11-18.
+- [x] 2026-11-17 — (Cloud) Public code release: README, `scripts/00_download_geo.py`, `environment/requirements-cloud.txt`, helpers; tag `v1.0-submission`. 2026-11-18.
 - [x] 2026-11-16 — (VS Code) Q7 → amendment A2; Q8 → Methods section with equations and
   settings table (commit below).
 - [x] 2026-11-14 — (VS Code) Results for RQ1–RQ4 written in `paper/main.tex`, with Figs 2–6,
@@ -121,6 +87,65 @@
 ---
 
 ## Log (newest first)
+
+### 2026-11-18 — Claude (cloud workspace) — A3.1–A3.6 done; public release tagged
+Post-review analyses per amendment A3 (primary cell set). Scripts committed before running;
+each `results/NN_*/provenance.txt` has the commit. Every script first checks that it
+reproduces the original analysis where they overlap; all checks passed.
+
+- **A3.1 RQ2 with 30-PC input** (`results/12_rq2_pc/`, 20 seeds × 3 transitions). The 07
+  splits, sampled cells and targets were replayed exactly (ConstMedian/ConstMean/Ridge MAE
+  identical to 07 for all 60 seeds) and saved in `data/interim/rq2_draws/` for A3.2–A3.4.
+  - **True lineage, II→III: 30-PC beats (Pg, D) by more than δ** for every learned model
+    (Δ = −0.015 Ridge, −0.013 RF, −0.014 Transformer; −9.5 to −11.1% of the constant-median
+    MAE; all CIs below −0.01). With 30-PC input, models beat the constant median by 12.6–13.0%
+    (CIs beyond −δ).
+  - **True lineage, I→II and III→IV:** 30-PC gains of 1.9–4.1% of the constant, within δ
+    (I→II Ridge −0.0053, III→IV Ridge −0.0051). Against the constant, III→IV Ridge with 30-PC
+    is −6.4% with a CI whose lower bound sits at −δ (−0.0100; not equivalent, not clearly beyond δ).
+  - **OT and independent couplings:** no 30-PC gain beyond δ anywhere (largest −3.2%, OT
+    II→III Ridge); at III→IV OT, 30-PC is slightly worse than (Pg, D) (+2.3 to +3.1%).
+  - **For the paper (UPDATES instruction):** 30-PC does beat (Pg, D) by more than δ at
+    II→III with true lineage, so "marker state limits forecasting" holds there; it is not
+    shown at I→II or III→IV. Word the claim per transition. The Transformer gets raw PC
+    scores (no extra scaling; none is specified in A3.1).
+- **A3.4 repeated target draws** (`results/13_rq2_draws/`, 20 splits × 10 draws, OT and
+  independent). Mean Δ vs constant median within δ at I→II and II→III (largest −4.0%, Ridge, OT,
+  II→III); at III→IV −9.8 to −12.9% (the known constant-mismatch artefact; not equivalent). Draw
+  variance is 8–66% of the total variance of Δ (`share_within`), so one draw per split does not
+  drive the primary conclusions.
+- **A3.3 leave-one-replicate-out** (`results/14_loro/`, descriptive). RQ3: in every one of
+  the 9 folds, 30-PC and the fate axis exceed (Pg, D) (mean macro-AUROC Pg,D 0.61 / 0.72 / 0.67;
+  30-PC 0.65 / 0.80 / 0.76; fate axis 0.67 / 0.82 / 0.78 for I→II / II→III / III→IV). RQ2, true
+  lineage: models vs constant median −9.2% to +3.3%; one fold exceeds δ (III→IV held-out
+  replicate 3, −0.0105). OT/independent at III→IV again show the constant artefact.
+- **A3.5 fate agreement on measured labels** (`results/15_fate_labels/`). Label-transfer k
+  hardly matters (TVD within 0.02 across k = 5, 15, 30; k = 15 reproduces RQ1 exactly). Share of
+  later-pool cells with transferred labels: 52% / 32% / 70%; OT puts 44–77% of III→IV mass on
+  them. On measured labels only, I→II and II→III conclusions hold for the main clusters (I-NPpHB and I-VLMCs become ties: 0.33 vs 0.33, 0.28 vs 0.28); **III→IV changes**: OT vs
+  independent TVD III-NPpHB 0.42 vs 0.33 (OT still worse), III-NPaHB 0.24 vs 0.24 (no longer
+  worse), III-NPvMB 0.27 vs 0.49 (still better), III-Motors 0.27 vs 0.39 (still better),
+  **III-GABAs 0.45 vs 0.39 and III-Gluts 0.30 vs 0.25 (OT better with transferred labels,
+  slightly worse on measured labels)**. State that part of the III→IV fate result depends on
+  transferred labels.
+- **A3.6 RQ4 effect models** (`results/16_rq4_sens/`). Linear reproduces 09 exactly.
+  **Per-cell RMSE and bias are identical for linear, nonlinear, multi-axis and reversed
+  effects** (RMSE 0.12–0.26 across replicates at the measured rates; bias 0). This is
+  structural: with an additive effect the estimation error is mean(control_i −
+  control_partner), which does not depend on the effect. Only r changes (0.84–0.97). The sparse
+  effect (20 genes) roughly doubles RMSE (0.33–0.44) and lowers r (0.40–0.83). The paper should
+  say that the RQ4 conclusion does not depend on the effect's shape, and why.
+- **A3.2 inductive OT arm** (`results/17_rq2_inductive/`): **seeds 0–9** (fallback recorded at 16:10 before any result; see the entry below). Pool, PCA, cost median and balanced OT refitted per seed × replicate without validation/test clones; all 90 solves converged. **Inductive ≈ transductive:** for every model and transition, inductive − transductive MAE lies in [−0.0020, +0.0018] (≤ 1.3% of the constant-median MAE; all CIs inside ±δ). Against the constant median the OT-arm pattern is unchanged: I→II and II→III gains 0.6–3.6%, within δ; III→IV −10.5 to −13.5% (the constant-mismatch artefact). Transformer ≡ RF everywhere. With 10 seeds the smallest Holm-adjusted Wilcoxon p is 0.0156. Conclusion: fitting the OT space on all cells (the disclosed transductive step) does not inflate the RQ2 OT-arm results.
+- **Public release:** README reproduction guide (script order 00→17, local vs Linux, results
+  contents, plan at `65cd70d` and amendments A1–A3); `scripts/00_download_geo.py` (GEO download
+  plus SHA-256 check; verified against the local copies); `environment/requirements-cloud.txt`
+  (pip freeze + Python 3.13.18; local `requirements.txt` unchanged at the root); workspace
+  helpers in `scripts/helpers/`, the first data checks in `scripts/exploratory/`. Two workspace
+  scratch files were not committed because they concern FOUNDIN-PD (separate project). No licence
+  added (Q11 deferred). Tag `v1.0-submission`: `v1.0-submission` on this commit.
+- Compute notes: A3.2 was OOM-killed three times at the 5.8 GB limit (POT needs ~2 GB beyond a
+  10k × 10k cost matrix). Memory-only changes, values identical: backed h5ad reads, chunked
+  float32 cost, explicit release, one process per seed (commits `d26a354, 22ae9f0, 5c3b73a`).
 
 ### 2026-11-17 16:10 — Claude (cloud workspace) — A3.2 seed decision (recorded before any A3.2 result)
 - A3.2 uses **seeds 0–9** (the pre-specified fallback). Basis: seed-0 runtime only (III→IV 417 s;

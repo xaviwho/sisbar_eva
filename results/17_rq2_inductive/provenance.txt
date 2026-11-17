@@ -1,0 +1,12 @@
+git_commit 5c3b73aa9bef7880ff81d051d57a101e078b3b49
+plan: ANALYSIS_PLAN.md amendment A3.2 (2026-11-17, post-review, exploratory)
+python 3.13.18 scanpy 1.12.5 POT 0.9.7.post1 numpy 2.5.3 pandas 3.0.5
+input results/03_objects/cell_obs.csv.gz sha256 c4a43ad240fb68c4ebaec31080e4e4e85eb50c9ea1c68e037baac999cac34ae4
+input results/04_qc/cell_qc.csv.gz sha256 7f821c13c3df65c7a0d388da8b20b6fbc3a9fed79bfeb9213bfdfb26584de0b2
+input data/interim/cell_scores.csv.gz sha256 a80e4c6c2f0de2d90552f629deb1aa53962082ce6356a052ca1aff09f75ceeae
+input splits/sampled cells: data/interim/rq2_draws/primary_*_s*.csv (07_rq2 replay)
+seed decision: 2026-11-17 16:10 KST — A3.2 seed fallback applied: seeds 0-9 (not 0-19).
+Basis (runtime only; no A3.2 result had been read): seed 0 took 417 s for III->IV (3 OT refits,
+pools 3.7k-8.7k cells per stage) and about 25 min for II->III (pools up to ~9k x 9k), on a
+2-CPU, 5.8 GB workspace shared with A3.1/A3.4. Projected for 20 seeds x 3 transitions: well over
+12 h of wall time, beyond what the workspace session can keep running; seeds 0-9 halve it.

@@ -146,6 +146,21 @@ from the viral barcode there.
    above chance (AUROC ≈ 0.59–0.64, 3–4× chance mass) but not cell-level lineage (mismatch
    ≥ 0.996); RQ2 gains under true lineage are within δ; marker states predict fate above
    chance but far below 30-PC.
+8. ~~Post-review analyses A3.1–A3.6 (cloud).~~ Done 2026-11-18 (`results/12_rq2_pc` …
+   `results/17_rq2_inductive`; details in UPDATES.md log 2026-11-18). Claims affected:
+   - A3.1: with true lineage, a 30-PC input beats (Pg, D) by more than δ at II→III only
+     (≈10% of constant MAE); within δ at I→II and III→IV → state the marker-limit claim per
+     transition.
+   - A3.5: part of the III→IV fate-agreement result depends on transferred labels (70% of the
+     III→IV later pool); label-transfer k does not matter.
+   - A3.6: RQ4 per-cell error does not depend on the effect's shape (structural); only a
+     sparse effect changes it.
+   - A3.2 (seeds 0–9, pre-specified fallback): inductive OT arm ≈ transductive (|Δ| ≤ 0.002).
+   - A3.3, A3.4: consistent with the primary results.
+   Release: README, `scripts/00_download_geo.py`, `environment/requirements-cloud.txt`; tag
+   `v1.0-submission`. Licence/Zenodo (Q11) deferred by the author.
+   Cloud lesson: POT needs ~2 GB beyond a 10k × 10k cost matrix; one OT process at a time and
+   one process per seed keep it under the 5.8 GB limit.
 
 ## Research questions
 
