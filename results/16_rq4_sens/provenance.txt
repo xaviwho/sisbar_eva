@@ -1,4 +1,4 @@
-git_commit 8b2135762e5c7f7abc854db51758f453a47a1151 (DIRTY scripts/)
+git_commit 03f507fc2dcbae90aa2690bb12715282cd95c5f9
 plan: ANALYSIS_PLAN.md amendment A3.6 (2026-11-17, post-review, exploratory)
 python 3.13.18 numpy 2.5.3 pandas 3.0.5
 input results/03_objects/cell_obs.csv.gz sha256 c4a43ad240fb68c4ebaec31080e4e4e85eb50c9ea1c68e037baac999cac34ae4
