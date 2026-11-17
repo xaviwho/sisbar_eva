@@ -1,0 +1,7 @@
+git_commit 8b2135762e5c7f7abc854db51758f453a47a1151 (DIRTY scripts/)
+plan: ANALYSIS_PLAN.md amendment A3.6 (2026-11-17, post-review, exploratory)
+python 3.13.18 numpy 2.5.3 pandas 3.0.5
+input results/03_objects/cell_obs.csv.gz sha256 c4a43ad240fb68c4ebaec31080e4e4e85eb50c9ea1c68e037baac999cac34ae4
+input results/04_qc/cell_qc.csv.gz sha256 7f821c13c3df65c7a0d388da8b20b6fbc3a9fed79bfeb9213bfdfb26584de0b2
+input results/06_rq1/summary.csv sha256 8dc7cc799dda4adb55f676e30014b90ee7ce4676e4440b272c4bae8856aa77d6
+check: 'linear' effect reproduces results/09_rq4 per-seed values exactly
