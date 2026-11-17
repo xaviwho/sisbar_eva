@@ -577,6 +577,18 @@ criterion the models are practically equivalent to the constant. This holds even
 (Cohen's $d_z$ \rqTwoTrueDzMin--\rqTwoTrueDzMax). Measured lineage gives the marker-state
 forecast a real but small signal.
 
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig4_forecasting.pdf}
+\caption{Forecasting on true lineage (RQ2, primary set). Paired difference in MAE between
+each model and the constant median trained on the same pairs (negative = model better),
+tested on held-out true sister pairs; mean over \rqTwoSeeds{} clone-level splits with
+percentile bootstrap 95\% CIs. Shaded: equivalence margin $\pm\delta$. At III$\to$IV the OT
+and independent constants are fitted to mostly background targets, so the reference itself
+is poor (Table~\ref{tab:rq2}).}
+\label{fig:rq2}
+\end{figure*}
+
 No model beat the random forest under true lineage (\rqTwoTrueBeatRFN{} of \rqTwoTrueVsRFN{} intervals
 below zero). The Transformer was equivalent to the random forest in all \rqTwoTrfRFN{}
 transition $\times$ coupling cells; with a single input token it reduces to a feed-forward
@@ -689,18 +701,6 @@ The per-cell effect RMSE rose steadily with $m$: at $m=0.1$ it was \rqFourRMSETe
 \rqFourRMSEHalfA, \rqFourRMSEHalfB{} and \rqFourRMSEHalfC, and at $m=1$ it was
 \rqFourRMSEOneA, \rqFourRMSEOneB{} and \rqFourRMSEOneC. The population mean effect stayed
 unbiased (largest $|$bias$|$ $\rqFourMaxAbsBias$).
-
-\begin{figure*}[!t]
-\centering
-\includegraphics[width=\textwidth]{figures/fig4_forecasting.pdf}
-\caption{Forecasting on true lineage (RQ2, primary set). Paired difference in MAE between
-each model and the constant median trained on the same pairs (negative = model better),
-tested on held-out true sister pairs; mean over \rqTwoSeeds{} clone-level splits with
-percentile bootstrap 95\% CIs. Shaded: equivalence margin $\pm\delta$. At III$\to$IV the OT
-and independent constants are fitted to mostly background targets, so the reference itself
-is poor (Table~\ref{tab:rq2}).}
-\label{fig:rq2}
-\end{figure*}
 
 The mismatch rates measured in RQ1 for the fixed OT coupling were
 \rqFourMeasMin--\rqFourMeasMax. These are the primary rate, 1 $-$ own-clone mass
