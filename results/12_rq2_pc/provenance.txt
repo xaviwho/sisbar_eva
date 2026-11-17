@@ -1,0 +1,8 @@
+git_commit d26a3546aafb3ef97942b80362f80d1f56ca1281
+plan: ANALYSIS_PLAN.md amendment A3.1 (2026-11-17, post-review, exploratory)
+python 3.13.18 torch 2.15.0+cpu sklearn 1.9.1 numpy 2.5.3 pandas 3.0.5
+environment: Claude cloud workspace (Linux, 2 CPU, 5.8 GB)
+input data/interim/cell_scores.csv.gz sha256 a80e4c6c2f0de2d90552f629deb1aa53962082ce6356a052ca1aff09f75ceeae
+input (Pg, D) per-seed MAE: data/interim/rq2/primary_*_s*.csv (07_rq2), reproduced per seed
+input early counts: data/interim/rq3/primary_*_early_counts.npz (08_rq3)
+input OT potentials: data/interim/rq1/primary_*_bal_0.05.npz and *_emb.npz (RQ1)
