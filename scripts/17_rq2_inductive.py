@@ -143,7 +143,7 @@ def run(transition, seeds):
                     warm = (sol["log_u"] * np.float32(0.1 / eps), sol["log_v"] * np.float32(0.1 / eps))
                 sol = rq1.solve_balanced(M, eps, warm, tag, float("inf"))
             assert bool(sol["converged"]), tag
-            lu, lv = sol["log_u"], sol["log_v"]
+            lu, lv, niter = sol["log_u"], sol["log_v"], int(sol["niter"])
             epos = pd.Index(e_ids)
             for c, eid in zip(tr[tr.rep == rep].clone, tr[tr.rep == rep].early_id):
                 i = epos.get_loc(eid)
@@ -158,7 +158,7 @@ def run(transition, seeds):
                 w = np.exp(lw - lw.max()).astype(np.float64)
                 tgt_va[(rep, c)] = l_ids[rng.choice(len(w), p=w / w.sum())]
             timing.append(dict(rep=rep, n_early=len(e_ids), n_later=len(l_ids),
-                               niter=int(sol["niter"]), seconds=time.time() - t1))
+                               niter=niter, seconds=time.time() - t1))
         Btr = np.vstack([state(tr.early_id), state(tr.target_true)])
         lo, hi = Btr.min(0), Btr.max(0)
         scl = lambda A: np.clip((A - lo) / np.where(hi > lo, hi - lo, 1), 0, 1)
