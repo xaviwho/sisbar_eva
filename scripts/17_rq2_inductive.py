@@ -68,8 +68,10 @@ def embed_fit(d_pool, extra_ids):
     libs = obs.loc[allc, "library"]
     parts = []
     for lib, ids in libs.groupby(libs):
-        a = ad.read_h5ad(rq1.LIBS / f"{lib}.h5ad")
-        parts.append(a[ids.index.to_numpy()].copy())
+        # backed read: only the needed rows are loaded (memory only; same values)
+        a = ad.read_h5ad(rq1.LIBS / f"{lib}.h5ad", backed="r")
+        parts.append(a[ids.index.to_numpy()].to_memory())
+        a.file.close()
     a_all = ad.concat(parts)[allc.to_numpy()].copy()
     a_all.obs["library"] = libs.to_numpy()
     a = a_all[d_pool.cell_id.to_numpy()].copy()
