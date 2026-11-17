@@ -85,10 +85,13 @@ and a dopaminergic score, and treat that low-dimensional state as what determine
 Two assumptions are thus built into this workflow. First, that an inferred coupling links a
 cell to its true descendants. Second, that a marker state captures the information that
 decides a cell's fate. Neither is usually tested, because snapshot data contain no ground
-truth for either. In earlier work we showed that, under independent pairing, the constant
-predictor is optimal, and we used OT couplings as positive controls in a leakage-safe
-forecasting benchmark~\cite{Kanu_TCBB}. Whether OT pairs are correct, however, could not be
-checked there.
+truth for either. In earlier work we defined a two-score marker state for dopaminergic
+differentiation and forecast it across stages from population-level pseudo-trajectories,
+in which cells are sampled independently at each stage~\cite{Kanu_ICUFN2026}. We then
+showed that, under such independent pairing, the constant predictor is optimal, and we used
+OT couplings as positive controls in a leakage-safe forecasting
+benchmark~\cite{Kanu_TCBB}. Whether OT pairs are correct, however, could not be checked
+there.
 
 Lineage tracing supplies the missing ground truth. In single-cell split barcoding
 (SISBAR)~\cite{You_2023}, human embryonic stem cells differentiating towards ventral
@@ -310,7 +313,7 @@ A panel score is the mean of (\ref{eq:lognorm}) over the panel's genes,
 $\bar{x}_{\mathcal{G}}(i)=|\mathcal{G}|^{-1}\sum_{g\in\mathcal{G}}x_{ig}$. The state is
 $\mathbf{y}=(\mathrm{Pg},\mathrm{D})$. Pg uses the progenitor panel \{SOX2, NES, HES1, HES5,
 VIM\}, because pluripotency genes other than SOX2 are silent from day~13. D uses the
-dopaminergic panel of~\cite{Kanu_TCBB}, \{TH, DDC, SLC6A3, DRD2, LMX1A, FOXA2\}; it is carried here by FOXA2, DDC and LMX1A,
+dopaminergic panel of~\cite{Kanu_ICUFN2026,Kanu_TCBB}, \{TH, DDC, SLC6A3, DRD2, LMX1A, FOXA2\}; it is carried here by FOXA2, DDC and LMX1A,
 so we read it as a floor-plate/ventral-midbrain identity score. Each component is min--max
 scaled with bounds from training pairs only and clipped to $[0,1]$.
 
@@ -355,7 +358,7 @@ y_c=\operatorname*{arg\,max}_{k}\,\bigl|\{\,j: c(j)=c,\ \ell_j=k\,\}\bigr| .
 Ties are broken alphabetically (amendment~A2). Fates with fewer than 30 clones in a
 transition are pooled as ``other''. An early cell is represented in four ways:
 \begin{itemize}
-\item (P, D), the original state of~\cite{Kanu_TCBB}, with pluripotency panel
+\item (P, D), the original state of~\cite{Kanu_ICUFN2026,Kanu_TCBB}, with pluripotency panel
 P = \{POU5F1, NANOG, SOX2, UTF1, TDGF1\};
 \item (Pg, D);
 \item 30-PC, with gene selection, scaling and PCA refitted on training cells;

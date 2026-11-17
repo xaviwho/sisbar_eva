@@ -75,6 +75,22 @@
 
 ## Log (newest first)
 
+### 2026-11-17 (late) — Claude (VS Code) — Cited the ICUFN 2026 paper
+- **Author:** asked whether https://ieeexplore.ieee.org/document/11628674 can be cited and
+  shared the PDF. It is Kanu et al., "Transformer-Based Digital Twin for Stem Cell
+  Differentiation Forecasting with Mechanistic ODE Benchmarking", ICUFN 2026, pp. 471–476,
+  DOI 10.1109/ICUFN69619.2026.11628674 (verified on Crossref). Bib key `Kanu_ICUFN2026`.
+- **Cited where it is the source:**
+  - Intro: it defined the two-score (P, D) state and forecast it from population-level
+    pseudo-trajectories (cells sampled independently per stage); Kanu_TCBB then showed the
+    constant is optimal under such pairing.
+  - Methods: the pluripotency and dopaminergic panels (P = POU5F1, NANOG, SOX2, UTF1,
+    TDGF1; D = TH, DDC, SLC6A3, DRD2, LMX1A, FOXA2), identical in ICUFN.
+- **Noted:** the author's commits `d2142de`…`6312eed` remove the italics from the
+  contributions, comment out the roadmap sentence, drop the "(RQn)" labels from Methods
+  headings, and change the corresponding e-mail to dskim@kumoh.ac.kr. That style is kept.
+- **Build:** clean, 10 pages.
+
 ### 2026-11-17 (late) — Claude (VS Code) — Removed "TCBB" labels from the manuscript
 - **Author:** "we can't call it that … shouldn't have such puerile things."
 - The 4 visible uses were "TCBB panel" (Methods ×2), "TCBB (P, D)" (RQ3 list) and the Fig.
