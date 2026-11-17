@@ -60,7 +60,8 @@
 
 ## Open questions (Claude → author)
 
-- **Q11 (2026-11-17) — licence and archive for the public release.**
+- **Q11 (2026-11-17) — licence and archive for the public release.** *Deferred by the author
+  until all other work is done; do not act on it yet.*
   - (a) Licence: MIT is recommended for code. Results and paper files could be CC BY 4.0.
   - (b) Zenodo DOI: enable the GitHub–Zenodo integration on your account
     (zenodo.org → GitHub → switch on `sisbar_eva`). The `v1.0-submission` tag then gets a
