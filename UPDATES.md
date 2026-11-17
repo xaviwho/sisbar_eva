@@ -122,6 +122,13 @@
 
 ## Log (newest first)
 
+### 2026-11-17 16:10 — Claude (cloud workspace) — A3.2 seed decision (recorded before any A3.2 result)
+- A3.2 uses **seeds 0–9** (the pre-specified fallback). Basis: seed-0 runtime only (III→IV 417 s;
+  II→III ≈ 25 min with three refitted OT pools per seed), projecting well over 12 h for 20 seeds ×
+  3 transitions on the 2-CPU workspace. No A3.2 output had been read. Copy in
+  `data/interim/rq2_inductive/seed_decision.txt`, quoted in `results/17_rq2_inductive/provenance.txt`.
+
+
 ### 2026-11-17 (night) — Claude (VS Code) — Peer review triage; amendment A3; wording fixes
 - **Author shared an AI peer review** (3/5, major revision) and approved the plan: wording
   fixes now, cloud runs A3.1–A3.6, and a public code release. The repo is public.
