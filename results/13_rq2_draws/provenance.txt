@@ -1,0 +1,6 @@
+git_commit 4a327bef5d933124c8ac2ae599c2f4e5a8674571
+plan: ANALYSIS_PLAN.md amendment A3.4 (2026-11-17, post-review, exploratory)
+python 3.13.18 sklearn 1.9.1 numpy 2.5.3 pandas 3.0.5
+input data/interim/cell_scores.csv.gz sha256 a80e4c6c2f0de2d90552f629deb1aa53962082ce6356a052ca1aff09f75ceeae
+input splits/sampled cells: data/interim/rq2_draws/primary_*_s*.csv (07_rq2 replay, 12_rq2_pc_input)
+input OT potentials: data/interim/rq1/primary_*_bal_0.05.npz and *_emb.npz (RQ1)
