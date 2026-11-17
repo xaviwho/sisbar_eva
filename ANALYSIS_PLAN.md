@@ -202,3 +202,68 @@ accuracy, how much error does mismatching add to the estimated response?
   the 05a rule (28 and 27). Verified: 103 / 113 / 52 clones have tied majorities, and the
   two rules relabel 53 / 60 / 31 clones. Approved by the author on 2026-11-16. No setting,
   script or result changes.
+- **A3 (2026-11-17) — post-review additions (exploratory; not pre-registered).** Added in
+  response to peer review. Every setting below is fixed in this entry before any of these
+  analyses is run. The primary analyses, settings and results above are unchanged. In the
+  paper these results are labelled as post-review additions and reported mainly in the
+  supplement. The primary cell set is used unless stated.
+  - **A3.1 RQ2 with a 30-PC input.**
+    - *What changes:* the input is the early cell's 30-PC representation, refitted per
+      split on the training early cells with the RQ3 pipeline (`pca_train_apply`: HVGs
+      seurat_v3 on raw counts, batch = library with the RQ3 fallback; CP10k, log1p; scale
+      with training mean/SD, clip 10; PCA, 30 components). It is then applied to all early
+      cells.
+    - *What stays the same:* the target (the later sister's (Pg, D), training-only
+      min–max) and, per seed, the split, the sampled early and later cells, and the target
+      drawn for each coupling. These are reused, not redrawn.
+    - *Models:* the same, with Transformer input size 30.
+    - *Comparison:* 30-PC vs (Pg, D) input for each model × coupling: paired Δ, bootstrap
+      CI, Wilcoxon with Holm correction within (transition, coupling), d_z, δ = 0.01.
+    - *Scope:* 20 seeds, all three transitions.
+  - **A3.2 Inductive RQ2 (OT arm).**
+    - *Pool:* for each seed and replicate, gene selection, PCA, cost median and balanced OT
+      (ε = 0.05) are refitted using only cells of training clones plus background cells
+      (background cap and seed as in §0). Validation and test clone cells of both stages
+      are excluded.
+    - *Rows:* OT rows for training early cells come from the fitted plan. Validation early
+      cells are projected into the fitted PCA, and their rows use the fitted later-cell
+      potential: w_j ∝ exp(g_j − C_ij/ε).
+    - *Draws:* restricted to later cells of training clones plus background, as in §2.
+      Testing is on held-out true pairs as before.
+    - *Scope:* models, seeds and comparisons as in §2, primary set only. If seed 0 shows
+      that 20 seeds cannot finish within compute limits, seeds 0–9 are used. That decision
+      is based on runtime only and is recorded before any result is read.
+  - **A3.3 Leave-one-replicate-out (RQ2 with (Pg, D) input; RQ3).**
+    - *Folds:* for each transition there are three folds. Each trains on all cross-stage
+      clones of two replicates (15% of these held out for validation, seed 0) and tests on
+      all cross-stage clones of the third.
+    - *RQ2:* true, OT (the transductive §2 coupling) and independent training pairs; same
+      models; MAE and Δ vs constant median per held-out replicate.
+    - *RQ3:* macro-AUROC and balanced accuracy per representation per held-out replicate.
+    - *Reporting:* descriptive, with no p-values (n = 3 folds).
+  - **A3.4 Repeated target draws (RQ2, OT and independent arms).**
+    - *Draws:* 10 target draws per split (draw seed d = 0–9 nested within split seed s). The
+      constants, Ridge and random forest are refitted for each draw. The Transformer is
+      omitted, because it was equivalent to the random forest in every primary comparison.
+    - *Reported:* the mean over draws of Δ vs constant median, and a variance decomposition
+      of Δ into between-split and within-split (draw) components.
+  - **A3.5 Fate agreement on measured labels.** This uses the saved couplings (OT balanced
+    ε = 0.05, kNN, independent).
+    - (i) The share of later-pool cells, and of each early cluster's transported mass,
+      that falls on transferred rather than measured labels.
+    - (ii) TVD with the predicted distribution renormalised over later cells carrying the
+      authors' labels only.
+    - (iii) TVD with label-transfer k ∈ {5, 15, 30}.
+    - Clusters, bootstrap and the ≥ 20-clone rule are as in §1.
+  - **A3.6 RQ4 effect-model sensitivity.** As §4, except for the effect:
+    - (a) sparse: the effect is added to the top 20 of the 200 genes;
+    - (b) nonlinear: e_i = 0.5 + 0.25·(z̃_i² − 1)/√2;
+    - (c) multi-axis: e_i = 0.5 + 0.25·(z̃₁ + z̃₂ + z̃₃)/√3, with z̃_k the standardised PC k;
+    - (d) reversed direction: e_i = −0.5 + 0.25·z̃_i.
+
+    The same m grid and RQ1-measured rates are used, with 100 seeds, reporting RMSE, r and
+    bias with 2.5/97.5% intervals.
+  - **A3.7 Single-barcode clones (RQ1).** The RQ1 summary is recomputed from the saved
+    per-cell metrics for clones whose viral-barcode set is a single barcode. *Disclosure:* a
+    preliminary version of this check was computed during review triage on 2026-11-17,
+    before this entry was written (OT AUROC unchanged to ±0.01).
