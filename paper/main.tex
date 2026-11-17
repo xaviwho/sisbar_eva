@@ -52,8 +52,67 @@ forecasting, benchmarking, neural differentiation.
 
 % ---------------------------------------------------------------------------
 \IEEEraisesectionheading{\section{Introduction}\label{sec:intro}}
-% Two assumptions under test: (1) inferred couplings link cells to their true
-% descendants; (2) marker states such as (P, D) capture fate. RQ1--RQ4.
+\IEEEPARstart{S}{ingle-cell} RNA sequencing destroys the cells it measures. A
+differentiation time course therefore yields unpaired snapshots, and any model that predicts
+how a cell will change must first decide which later cells an earlier cell becomes.
+Entropic optimal transport (OT) has become a standard way to make that decision. It couples
+cells at consecutive time points by transcriptional similarity under mass
+constraints~\cite{Cuturi_2013,Schiebinger_2019,Chizat_2018}, and the resulting pairs are
+then used to fit trajectory, forecasting and perturbation-response models. Many such
+models also compress a cell into a few marker-based scores, for example a progenitor score
+and a dopaminergic score, and treat that low-dimensional state as what determines fate.
+
+Two assumptions are thus built into this workflow. First, that an inferred coupling links a
+cell to its true descendants. Second, that a marker state captures the information that
+decides a cell's fate. Neither is usually tested, because snapshot data contain no ground
+truth for either. In earlier work we showed that, under independent pairing, the constant
+predictor is optimal, and we used OT couplings as positive controls in a leakage-safe
+forecasting benchmark~\cite{Kanu_TCBB}. Whether OT pairs are correct, however, could not be
+checked there.
+
+Lineage tracing supplies the missing ground truth. In single-cell split barcoding
+(SISBAR)~\cite{You_2023}, human embryonic stem cells differentiating towards ventral
+midbrain and hindbrain fates are barcoded and allowed to divide. The culture is then split
+and profiled at two consecutive stages, so each barcode links sister cells across a stage
+transition. Three such experiments cover four stages, from day~\dayOne{} to
+day~\dayFour{}, with three replicates each. This lets us measure, not assume, how well
+couplings and marker states reflect lineage. We ask four questions:
+\begin{itemize}
+\item RQ1: how much of a cell's OT mass reaches its own clone;
+\item RQ2: whether state forecasts improve when trained on true rather than inferred pairs;
+\item RQ3: whether a cell's marker state predicts its clone's later fate;
+\item RQ4: what the measured pairing error costs a perturbation model.
+\end{itemize}
+
+Our contributions are as follows.
+\begin{enumerate}
+\item \emph{A lineage-grounded test of OT couplings across three transitions of human neural
+differentiation.} Balanced and unbalanced entropic OT over an entropy grid are compared
+with kNN and independent couplings against measured sister links. Chance levels are
+analytic and all settings were pre-registered. OT recovers shared ancestry above chance
+(AUROC \rqOneAUROCMinT--\rqOneAUROCMaxT; \rqOneEnrMinT--\rqOneEnrMaxT{} times chance mass)
+and the clonal fate composition of most early clusters. Yet at most \rqOneMassPctMaxT\% of
+a cell's mass reaches its sisters, and a nearest-neighbour coupling places about as much
+mass on them.
+\item \emph{Evidence that the marker state, not the coupling, limits forecasting.} With exact
+sister pairs, models beat the constant baseline by only
+\rqTwoTrueGainMinPct--\rqTwoTrueGainMaxPct\% of its error, inside an equivalence margin
+fixed in advance, and no model beat the random forest. Marker states predict fate above
+chance (macro-AUROC \rqThreeAUCPgDMinT--\rqThreeAUCPgDMaxT) but well below a 30-component
+transcriptomic representation (\rqThreeAUCPCMinT--\rqThreeAUCPCMaxT).
+\item \emph{A quantification of what pairing error costs a perturbation model.} At the
+mismatch rates measured for OT (\rqFourMeasMin--\rqFourMeasMax), per-cell effect estimates
+are as poor as under random pairing, while population mean effects remain unbiased.
+\item \emph{A reproducible, leakage-controlled protocol and checklist.} The protocol uses
+clone-level splits, training-only representation fitting and a pre-registered analysis plan
+with dated amendments, and generates every reported number from saved outputs. Its lessons
+are condensed into a checklist for evaluating couplings and marker states against lineage
+(Table~\ref{tab:checklist}).
+\end{enumerate}
+
+Section~\ref{sec:related} reviews related work, Section~\ref{sec:methods} describes the data
+and methods, Section~\ref{sec:results} reports the results, and
+Sections~\ref{sec:discussion} and~\ref{sec:conclusion} discuss them and their limits.
 
 % ---------------------------------------------------------------------------
 \section{Related Work}\label{sec:related}
@@ -62,9 +121,9 @@ Single-cell lineage tracing provides a direct way to connect transcriptional sta
 
 Optimal transport has become a useful framework for relating single-cell populations observed at different developmental stages. Entropic regularization enables computationally tractable couplings~\cite{Cuturi_2013}, and optimal-transport analyses have been used to infer developmental trajectories from single-cell expression data~\cite{Schiebinger_2019}. Unbalanced formulations further allow mass to be created or removed, which is relevant when cell populations proliferate, die, or are incompletely observed~\cite{Chizat_2018}. These methods, however, define biologically plausible transport plans from expression geometry; they do not by themselves establish that the transported mass corresponds to experimentally linked descendants. The present study consequently separates transport construction from validation: balanced and unbalanced couplings are compared with k-nearest-neighbour and independent references against barcode-defined sister pairs.
 
-A related literature focuses on predicting cellular responses or future states from single-cell representations. Latent-space arithmetic has been proposed for transferring perturbation responses across cell types, studies, and species~\cite{lotfollahi2018generative}, while more recent work has explored disentangled representations for counterfactual single-cell perturbation prediction~\cite{mejjad2026scdisentangle}. Benchmarking studies have also stressed the importance of comparing complex predictors with simple baselines and of evaluating generalisation beyond the conditions represented during training~\cite{li2026systematic,Kanu_TCBB}. These concerns are particularly important when the target pairs are inferred rather than observed: a model may appear predictive because the coupling preserves broad cell-state similarity, even when it does not recover lineage. We therefore train and evaluate state predictors on different pairing constructions but test every model on the same held-out barcode-defined pairs.
+A related literature focuses on predicting cellular responses or future states from single-cell representations. Latent-space arithmetic has been proposed for transferring perturbation responses across cell types, studies, and species~\cite{lotfollahi2018generative}, while more recent work has explored disentangled representations for counterfactual single-cell perturbation prediction and noted that existing methods often fail to beat simple baselines~\cite{mejjad2026scdisentangle}. Benchmarking studies have likewise stressed comparison with constant and simple baselines~\cite{Kanu_TCBB} and evaluation of generalisation beyond the conditions represented during training, where no method consistently transferred across cell types~\cite{li2026systematic}. These concerns are particularly important when the target pairs are inferred rather than observed: a model may appear predictive because the coupling preserves broad cell-state similarity, even when it does not recover lineage. We therefore train and evaluate state predictors on different pairing constructions but test every model on the same held-out barcode-defined pairs.
 
-Finally, leakage-aware evaluation is essential for claims about generalisation in biological machine learning. Empirical work has shown that feature selection, covariate correction, and non-independent subjects can inflate predictive performance when information crosses the train--test boundary~\cite{rosenblatt2023effects}, and that harmonisation can similarly exploit target information under site-specific class imbalance~\cite{nieto2026impact}. Our clone-level splits, training-only representation fitting, and independent negative-control pairing address the analogous risk in lineage-grounded forecasting. The gap left by these studies is a direct, multi-stage comparison of optimal-transport couplings against experimentally measured lineage links, together with an evaluation of whether marker-state representations retain predictive information about true descendants and fates under leakage-controlled testing.
+Finally, leakage-aware evaluation is essential for claims about generalisation in biological machine learning. Empirical work has shown that leakage through feature selection and through repeated subjects drastically inflates predictive performance when information crosses the train--test boundary~\cite{rosenblatt2023effects}, and that harmonisation can similarly exploit target information under site-specific class imbalance~\cite{nieto2026impact}. Our clone-level splits, training-only representation fitting, and independent negative-control pairing address the analogous risk in lineage-grounded forecasting. The gap left by these studies is a direct, multi-stage comparison of optimal-transport couplings against experimentally measured lineage links, together with an evaluation of whether marker-state representations retain predictive information about true descendants and fates under leakage-controlled testing.
 
 % ---------------------------------------------------------------------------
 \section{Methods}\label{sec:methods}

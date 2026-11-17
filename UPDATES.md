@@ -75,6 +75,38 @@
 
 ## Log (newest first)
 
+### 2026-11-17 (later) — Claude (VS Code) — Related work checked; Introduction written
+- **Author:** "read the related works and the papers cited, if it is good, add the
+  introduction and three to four contributions enumerated."
+- **Related work (author, `dfe8ba6`):** checked every cited reference on Crossref/OpenAlex
+  and read the abstracts. It is good overall, with three fixes made:
+  - **Rosenblatt et al.:** the leakage that "drastically inflates" performance is feature
+    selection and repeated subjects; covariate correction had minor effects, so the sentence
+    was narrowed.
+  - **"Compare with simple baselines":** Li et al. 2026 supports the generalisation point
+    (no method transferred across cell types) but not this one. It is now attributed to
+    scDisentangle (whose abstract says so) and to Kanu_TCBB.
+  - **Bibliography:** scGen and Rosenblatt now point to their published versions (Nature
+    Methods 2019; Nature Communications 2024), with keys unchanged. Volume and article
+    numbers were added for Li (Sci. Adv. 12(37)) and Nieto (Neurocomputing 680).
+  - 12 of the 21 new bib entries are not cited (harmless; bibtex skips them). Some of them
+    have weak metadata (TrajectoryNet listed with journal "PubMed"); fix before citing.
+- **Introduction (§1):**
+  - the snapshot problem, OT, and marker states;
+  - the two assumptions, and why they go untested;
+  - SISBAR as ground truth;
+  - RQ1–RQ4;
+  - four enumerated contributions: OT tested against lineage; the marker state, not the
+    coupling, limits forecasting; the cost of pairing error; the protocol and checklist;
+  - a roadmap sentence.
+
+  All numbers are generated macros. "No model beat the RF" refers to true-lineage pairs and
+  is guarded by an assert.
+- **Figures:** PDFs are now written without a timestamp, so reruns are byte-identical
+  (script `cc95506`, committed before the run).
+- **Build:** clean, 9 pages. Still to write: Limitations and Conclusion, abstract,
+  biographies (≈1 page, so about 10 / 12).
+
 ### 2026-11-17 — Claude (VS Code) — Discussion written
 - **Author:** "let's have the discussion section done."
 - **Pulled `2e1ae54`:** the author removed "(RQ3)" from the Methods heading *Fate
