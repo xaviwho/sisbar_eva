@@ -1,7 +1,7 @@
 """Results numbers, figures and tables for paper/main.tex (RQ1-RQ4).
 
 Reads only committed result files in results/06_rq1 ... results/09_rq4 (final at
-35d89c2) and writes:
+35d89c2) and the post-review results 11-17 (amendment A3), and writes:
   paper/generated/results_numbers.tex   LaTeX macros used in the Results text
   paper/tables/tab_rq2_mae.tex          Table 2 (RQ2 MAE, all couplings and models)
   paper/tables/tab_s*.tex               supplementary tables (sensitivity, cap, replicates)
@@ -857,10 +857,392 @@ def fig6(g, est):
     save(fig, "fig6_perturbation.pdf")
 
 
+# ============================================================ post-review (amendment A3)
+# Exploratory additions made after peer review; settings fixed in ANALYSIS_PLAN.md A3
+# (2026-11-17) before any was run. Main text cites them as post-review additions; full
+# results go to supplementary Tables S6-S13.
+LEARNED = ["Ridge", "RandomForest", "Transformer"]
+MLAB = {"ConstMedian": "Const.\\ median", "ConstMean": "Const.\\ mean", "Ridge": "Ridge",
+        "RandomForest": "Random forest", "Transformer": "Transformer"}
+CLAB = {"true": "True", "OT": "OT", "independent": "Indep."}
+REPLAB = {"P_tcbb_D": "(P, D)", "Pg_D": "(Pg, D)", "PC30": "30-PC", "fate_axis": "Fate-bias axis"}
+EFFLAB = {"linear": "Linear (primary)", "nonlinear": "Nonlinear", "multi_axis": "Multi-axis",
+          "reversed": "Reversed", "sparse": "Sparse (20 genes)"}
+INPUTS += [R / p for p in (
+    "11_single_barcode/summary.csv", "12_rq2_pc/summary.csv", "12_rq2_pc/per_seed.csv",
+    "13_rq2_draws/summary.csv", "14_loro/rq2_per_fold.csv", "14_loro/rq3_per_fold.csv",
+    "14_loro/rq3_summary.csv", "15_fate_labels/summary.csv",
+    "15_fate_labels/pool_label_shares.csv", "16_rq4_sens/summary.csv",
+    "17_rq2_inductive/comparisons.csv")]
+
+
+def ci(x, lo, hi, d=4):
+    return f"{f(x, d)} [{f(lo, d)}, {f(hi, d)}]"
+
+
+def post_review():
+    # ---- A3.1 RQ2 with 30-PC input
+    s = pd.read_csv(R / "12_rq2_pc/summary.csv")
+    pc = s[(s.comparison == "PC30 - Pg_D") & s.model.isin(LEARNED)]
+    tt = pc[(pc.coupling == "true") & (pc.transition == "II->III")]
+    assert (tt.ci_hi < -DELTA).all()  # beyond the margin for every learned model
+    put("pcTrueTwoGainMinPct", f(-tt.delta_pct_of_const.max(), 1))
+    put("pcTrueTwoGainMaxPct", f(-tt.delta_pct_of_const.min(), 1))
+    put("pcTrueTwoDeltaMin", f(-tt.delta.max(), 3))
+    put("pcTrueTwoDeltaMax", f(-tt.delta.min(), 3))
+    to = pc[(pc.coupling == "true") & (pc.transition != "II->III")]
+    assert to.equivalent.all()
+    put("pcTrueOtherMaxPct", f(-to.delta_pct_of_const.min(), 1))
+    oi = pc[pc.coupling != "true"]
+    assert oi.equivalent.all()
+    put("pcOIMaxGainPct", f(-oi.delta_pct_of_const.min(), 1))
+    put("pcOTThreeWorseMinPct", f(pc[(pc.coupling == "OT") & (pc.transition == "III->IV")].delta_pct_of_const.min(), 1))
+    put("pcOTThreeWorseMaxPct", f(pc[(pc.coupling == "OT") & (pc.transition == "III->IV")].delta_pct_of_const.max(), 1))
+    vc = s[(s.comparison == "PC30: model - ConstMedian") & s.model.isin(LEARNED)
+           & (s.coupling == "true") & (s.transition == "II->III")]
+    put("pcTrueTwoVsConstMinPct", f(-vc.delta_pct_of_const.max(), 1))
+    put("pcTrueTwoVsConstMaxPct", f(-vc.delta_pct_of_const.min(), 1))
+    # descriptive (not a pre-specified contrast): true minus OT training pairs, same input
+    ps = pd.read_csv(R / "12_rq2_pc/per_seed.csv")
+    w = ps[ps.model.isin(LEARNED)].pivot_table(index=["transition", "input", "model", "seed"],
+                                               columns="coupling", values="mae").reset_index()
+    w["d"] = w["true"] - w["OT"]
+    md = w.groupby(["transition", "input", "model"]).d.mean()
+    put("pcTrueMinusOTTwoMin", f(-md.loc[("II->III", "PC30")].max(), 3))
+    put("pcTrueMinusOTTwoMax", f(-md.loc[("II->III", "PC30")].min(), 3))
+    put("pgTrueMinusOTTwoMaxAbs", f(md.loc[("II->III", "Pg_D")].abs().max(), 3))
+    rows = []
+    for t in TR:
+        for c in ["true", "OT", "independent"]:
+            for i, m in enumerate(LEARNED):
+                r = one(pc, transition=t, coupling=c, model=m)
+                v = one(s, transition=t, coupling=c, model=m, comparison="PC30: model - ConstMedian")
+                rows.append(f"{TLAB[t] if (c == 'true' and i == 0) else ''} & {CLAB[c] if i == 0 else ''} & "
+                            f"{MLAB[m]} & {f(r.mae_Pg_D, 4)} & {f(r.mae_PC30, 4)} & "
+                            f"{ci(r.delta, r.ci_lo, r.ci_hi)} & {f(r.delta_pct_of_const, 1)} & "
+                            f"{f(v.delta_pct_of_const, 1)}" + r" \\")
+        rows.append(r"\addlinespace")
+    write_table("tab_s6_rq2_pc", rf"""\begin{{table*}}[!t]
+\centering
+\caption{{Post-review addition: RQ2 with a 30-PC input (primary set, 20 splits). Splits,
+sampled cells and training targets are those of the main analysis; only the input changes.
+$\Delta$ = MAE(30-PC) $-$ MAE((Pg, D)), mean over splits with 95\% split-stability interval;
+\%: as a percentage of the constant-median MAE. Last column: 30-PC model minus constant
+median, \% of the constant-median MAE. Equivalence margin $\delta=0.01$.}}
+\label{{tab:s6}}
+\footnotesize
+\begin{{tabular}}{{lllccccc}}
+\toprule
+Transition & Pairs & Model & MAE (Pg, D) & MAE 30-PC & $\Delta$ [95\% interval] & $\Delta$ (\%) & vs.\ const.\ (\%) \\
+\midrule
+{chr(10).join(rows[:-1])}
+\bottomrule
+\end{{tabular}}
+\end{{table*}}
+""")
+
+    # ---- A3.2 inductive OT arm
+    c = pd.read_csv(R / "17_rq2_inductive/comparisons.csv")
+    tr = c[c.reference == "transductive_OT_same_model"]
+    assert ((tr.ci_lo > -DELTA) & (tr.ci_hi < DELTA)).all()
+    put("indMaxAbsDelta", f(tr.delta.abs().max(), 4))
+    put("indMaxAbsPct", f(tr.delta_pct_of_const.abs().max(), 1))
+    put("indSeeds", int(tr.n_seeds.max()))
+    rows = []
+    for t in TR:
+        for i, m in enumerate(MLAB):
+            r = one(tr, transition=t, model=m)
+            vc_ = c[(c.transition == t) & (c.model == m) & (c.reference == "ConstMedian")]
+            vtxt = f(vc_.iloc[0].delta_pct_of_const, 1) if len(vc_) else "--"
+            rows.append(f"{TLAB[t] if i == 0 else ''} & {MLAB[m]} & {f(r.mae_model, 4)} & "
+                        f"{f(r.mae_reference, 4)} & {ci(r.delta, r.ci_lo, r.ci_hi)} & "
+                        f"{f(r.delta_pct_of_const, 1)} & {vtxt}" + r" \\")
+        rows.append(r"\addlinespace")
+    write_table("tab_s7_rq2_inductive", rf"""\begin{{table*}}[!t]
+\centering
+\caption{{Post-review addition: inductive OT training pairs (primary set, splits 0--{int(tr.n_seeds.max()) - 1}).
+Gene selection, PCA, cost scale and OT plan are refitted per split without validation and
+test clones; validation cells are projected and their rows use the fitted later-cell
+potential. $\Delta$ = inductive $-$ transductive MAE for the same model and splits, with 95\%
+split-stability interval; \%: of the constant-median MAE. Last column: inductive model minus
+inductive constant median (\%).}}
+\label{{tab:s7}}
+\footnotesize
+\begin{{tabular}}{{llccccc}}
+\toprule
+Transition & Model & MAE inductive & MAE transductive & $\Delta$ [95\% interval] & $\Delta$ (\%) & vs.\ const.\ (\%) \\
+\midrule
+{chr(10).join(rows[:-1])}
+\bottomrule
+\end{{tabular}}
+\end{{table*}}
+""")
+
+    # ---- A3.3 leave-one-replicate-out
+    q = pd.read_csv(R / "14_loro/rq3_per_fold.csv")
+    qw = q.pivot_table(index=["transition", "heldout_rep"], columns="representation", values="macro_auroc")
+    put("loroNFolds", len(qw))
+    put("loroNPCAbove", int((qw.PC30 > qw.Pg_D).sum()))
+    put("loroNFateAbove", int((qw.fate_axis > qw.Pg_D).sum()))
+    qs = pd.read_csv(R / "14_loro/rq3_summary.csv")
+    for t in TR:
+        for rep, nm in (("Pg_D", "PgD"), ("PC30", "PC"), ("fate_axis", "Fate")):
+            put(f"loro{nm}{TN[t]}", f(one(qs, transition=t, representation=rep).auroc_mean))
+    l2 = pd.read_csv(R / "14_loro/rq2_per_fold.csv")
+    lt = l2[(l2.coupling == "true") & l2.model.isin(LEARNED)]
+    put("loroTrueMinPct", f(lt.delta_pct_of_const.min(), 1))
+    put("loroTrueMaxPct", f(lt.delta_pct_of_const.max(), 1))
+    put("loroTrueNBeyond", int((lt.delta_vs_const_median < -DELTA).sum()))
+    put("loroTrueN", len(lt))
+    rows = []
+    for t in TR:
+        for i, rep in enumerate(REPLAB):
+            r = one(qs, transition=t, representation=rep)
+            rows.append(f"{TLAB[t] if i == 0 else ''} & {REPLAB[rep]} & {f(r.auroc_mean)} "
+                        f"[{f(r.auroc_min)}, {f(r.auroc_max)}] & {f(r.bacc_mean)} "
+                        f"[{f(r.bacc_min)}, {f(r.bacc_max)}]" + r" \\")
+        rows.append(r"\addlinespace")
+    rows2 = []
+    for t in TR:
+        for cpl in ["true", "OT", "independent"]:
+            for i, m in enumerate(LEARNED):
+                g = l2[(l2.transition == t) & (l2.coupling == cpl) & (l2.model == m)].sort_values("heldout_rep")
+                rows2.append(f"{TLAB[t] if (cpl == 'true' and i == 0) else ''} & {CLAB[cpl] if i == 0 else ''} & {MLAB[m]} & "
+                             + " & ".join(f(x, 1) for x in g.delta_pct_of_const) + r" \\")
+        rows2.append(r"\addlinespace")
+    write_table("tab_s8_loro", rf"""\begin{{table}}[!t]
+\centering
+\caption{{Post-review addition: leave-one-replicate-out RQ3 (primary set; descriptive).
+Train on two replicates, test on the third; mean [min, max] over the three held-out
+replicates.}}
+\label{{tab:s8}}
+\footnotesize
+\setlength{{\tabcolsep}}{{3pt}}
+\begin{{tabular}}{{llcc}}
+\toprule
+Transition & Representation & Macro-AUROC & Balanced accuracy \\
+\midrule
+{chr(10).join(rows[:-1])}
+\bottomrule
+\end{{tabular}}
+\end{{table}}
+
+\begin{{table}}[!t]
+\centering
+\caption{{Post-review addition: leave-one-replicate-out RQ2 (primary set, (Pg, D) input;
+descriptive). Model minus constant median trained on the same pairs, as \% of the
+constant-median MAE, for held-out replicates 1, 2 and 3.}}
+\label{{tab:s9}}
+\footnotesize
+\setlength{{\tabcolsep}}{{4pt}}
+\begin{{tabular}}{{lllccc}}
+\toprule
+Transition & Pairs & Model & Rep.~1 & Rep.~2 & Rep.~3 \\
+\midrule
+{chr(10).join(rows2[:-1])}
+\bottomrule
+\end{{tabular}}
+\end{{table}}
+""")
+
+    # ---- A3.4 repeated target draws
+    d = pd.read_csv(R / "13_rq2_draws/summary.csv")
+    dl = d[d.model.isin(LEARNED)]
+    put("drawShareMinPct", f(100 * dl.share_within.min(), 0))
+    put("drawShareMaxPct", f(100 * dl.share_within.max(), 0))
+    put("drawNDraws", int(d.n_draws.max()))
+    e12 = dl[dl.transition != "III->IV"]
+    assert e12.equivalent.all()
+    put("drawEarlyMaxPct", f(e12.mean_delta_pct_of_const.abs().max(), 1))
+    rows = []
+    for t in TR:
+        for cpl in ["OT", "independent"]:
+            for i, m in enumerate(["ConstMean"] + LEARNED[:2]):
+                r = one(d, transition=t, coupling=cpl, model=m)
+                rows.append(f"{TLAB[t] if (cpl == 'OT' and i == 0) else ''} & {CLAB[cpl] if i == 0 else ''} & {MLAB[m]} & "
+                            f"{ci(r.mean_delta, r.ci_lo, r.ci_hi)} & {f(r.mean_delta_pct_of_const, 1)} & "
+                            f"{pct(r.share_within, 0)} & {pct(r.frac_draws_model_better, 0)}" + r" \\")
+        rows.append(r"\addlinespace")
+    write_table("tab_s10_rq2_draws", rf"""\begin{{table*}}[!t]
+\centering
+\caption{{Post-review addition: repeated training-target draws (primary set; 20 splits
+$\times$ {int(d.n_draws.max())} draws; (Pg, D) input). $\Delta$ = model minus constant median,
+mean over splits and draws, with 95\% interval; \%: of the constant-median MAE. Within-split
+share: fraction of the variance of $\Delta$ due to the target draw. Last column: share of
+draws in which the model beat the constant.}}
+\label{{tab:s10}}
+\footnotesize
+\begin{{tabular}}{{lllcccc}}
+\toprule
+Transition & Pairs & Model & $\Delta$ [95\% interval] & $\Delta$ (\%) & Within-split share (\%) & Model better (\%) \\
+\midrule
+{chr(10).join(rows[:-1])}
+\bottomrule
+\end{{tabular}}
+\end{{table*}}
+""")
+
+    # ---- A3.5 fate agreement on measured labels
+    fl = pd.read_csv(R / "15_fate_labels/summary.csv")
+    sh = pd.read_csv(R / "15_fate_labels/pool_label_shares.csv")
+    for t in TR:
+        put(f"fateTransferredPct{TN[t]}", pct(one(sh, transition=t, rep="pooled").share_later_transferred, 0))
+    otk = fl[(fl.coupling == OT) & (fl.labels == "k15")]
+    o3 = otk[otk.transition == "III->IV"].mass_on_transferred
+    put("fateOTMassTransThreeMinPct", pct(o3.min(), 0))
+    put("fateOTMassTransThreeMaxPct", pct(o3.max(), 0))
+    kk = fl[(fl.coupling == OT) & fl.labels.isin(["k5", "k15", "k30"])]
+    put("fateKRangeMaxOT", f(kk.groupby(["transition", "early_cluster"]).tvd.agg(lambda x: x.max() - x.min()).max()))
+    pw = fl.pivot_table(index=["transition", "early_cluster", "labels"], columns="coupling", values="tvd").reset_index()
+    pw["better"] = pw[OT] < pw["independent"]
+    for t in TR:
+        mm = pw[(pw.transition == t) & (pw.labels == "measured")]
+        kq = pw[(pw.transition == t) & (pw.labels == "k15")]
+        put(f"fateMeasNBetter{TN[t]}", int(mm.better.sum()))
+        put(f"fateMeasNClusters{TN[t]}", len(mm))
+        assert int(kq.better.sum()) == int(M[f"fateNBetter{TN[t]}"])  # k15 reproduces RQ1
+    # I->II clusters that switch from OT-better (all labels) to OT-worse (measured labels)
+    k1 = pw[(pw.transition == "I->II") & (pw.labels == "k15")].set_index("early_cluster")
+    m1 = pw[(pw.transition == "I->II") & (pw.labels == "measured")].set_index("early_cluster")
+    sw = [cl for cl in k1.index if k1.better[cl] and not m1.better[cl]]
+    assert sw == ["I-NPpHB", "I-VLMCs"], sw
+    put("fateMeasSwitchMaxDiffOne", f(max(m1[OT][cl] - m1["independent"][cl] for cl in sw), 3))
+    for cl in ["III-GABAs", "III-Gluts", "III-NPvMB", "III-NPaHB", "III-NPpHB", "III-Motors"]:
+        nm = cl.split("-")[1]
+        for lab, tag in (("measured", "Meas"), ("k15", "Trans")):
+            r = pw[(pw.early_cluster == cl) & (pw.labels == lab)].iloc[0]
+            put(f"tvd{tag}OT{nm}", f(r[OT]))
+            put(f"tvd{tag}Ind{nm}", f(r["independent"]))
+    rows = []
+    for t in TR:
+        cls = sorted(pw[pw.transition == t].early_cluster.unique())
+        for i, cl in enumerate(cls):
+            a = pw[(pw.early_cluster == cl) & (pw.labels == "k15")].iloc[0]
+            b = pw[(pw.early_cluster == cl) & (pw.labels == "measured")].iloc[0]
+            o = one(fl, early_cluster=cl, coupling=OT, labels="k15")
+            kr = kk[kk.early_cluster == cl].tvd
+            rows.append(f"{TLAB[t] if i == 0 else ''} & {cl} ({int(o.n_clones)}) & {f(a[OT])} & {f(a['independent'])} & "
+                        f"{f(b[OT])} & {f(b['independent'])} & {pct(o.mass_on_transferred, 0)} & {f(kr.max() - kr.min())}" + r" \\")
+        rows.append(r"\addlinespace")
+    write_table("tab_s11_fate_labels", rf"""\begin{{table*}}[!t]
+\centering
+\caption{{Post-review addition: fate agreement (TVD, lower is better) with all later cells
+(authors' labels plus $k=15$ transferred labels; as in the main text) and with the authors'
+measured labels only (predicted distribution renormalised over measured cells). OT: balanced,
+$\varepsilon=0.05$. Transferred mass: share of the cluster's OT mass on cells with transferred
+labels. $k$ range: largest minus smallest OT TVD over $k\in\{{5,15,30\}}$. Clones in
+parentheses. Later-pool share with transferred labels: {M['fateTransferredPctOne']}\%,
+{M['fateTransferredPctTwo']}\% and {M['fateTransferredPctThree']}\% for the three transitions.}}
+\label{{tab:s11}}
+\footnotesize
+\begin{{tabular}}{{llcccccc}}
+\toprule
+ & & \multicolumn{{2}}{{c}}{{All labels}} & \multicolumn{{2}}{{c}}{{Measured labels}} & & \\
+\cmidrule(lr){{3-4}}\cmidrule(lr){{5-6}}
+Transition & Early cluster & OT & Indep. & OT & Indep. & Transferred mass (\%) & $k$ range \\
+\midrule
+{chr(10).join(rows[:-1])}
+\bottomrule
+\end{{tabular}}
+\end{{table*}}
+""")
+
+    # ---- A3.6 RQ4 effect models
+    e = pd.read_csv(R / "16_rq4_sens/summary.csv")
+    em = e[(e.point == "rq1_measured") & (e.bound == "estimate") & (e.rate_kind == "1-own_clone_mass")]
+    dense = em[em.effect_model != "sparse"]
+    spread = dense.groupby(["transition", "rep"]).rmse.agg(lambda x: x.max() - x.min()).max()
+    assert spread < 1e-9, spread  # identical RMSE for every dense effect shape
+    put("effRMSEMin", f(dense.rmse.min()))
+    put("effRMSEMax", f(dense.rmse.max()))
+    put("effRMin", f(dense.r.min()))
+    put("effRMax", f(dense.r.max()))
+    sp = em[em.effect_model == "sparse"]
+    put("effSparseRMSEMin", f(sp.rmse.min()))
+    put("effSparseRMSEMax", f(sp.rmse.max()))
+    put("effSparseRMin", f(sp.r.min()))
+    put("effSparseRMax", f(sp.r.max()))
+    put("effMaxAbsBiasCI", f(e[["bias_lo", "bias_hi"]].abs().max().max(), 3))
+    g = e[e.point == "grid"]
+    rows = []
+    for k, lab in EFFLAB.items():
+        cells = [lab]
+        for rep in (1, 2, 3):
+            r5 = one(g, effect_model=k, m=0.5, rep=rep)
+            r1 = one(g, effect_model=k, m=1.0, rep=rep)
+            cells.append(f"{f(r5.rmse)} / {f(r1.rmse)}")
+        x = em[em.effect_model == k]
+        cells += [f"{f(x.rmse.min())}--{f(x.rmse.max())}", f"{f(x.r.min())}--{f(x.r.max())}"]
+        rows.append(" & ".join(cells) + r" \\")
+    write_table("tab_s12_rq4_effects", rf"""\begin{{table*}}[!t]
+\centering
+\caption{{Post-review addition: RQ4 with other effect shapes (II$\to$III stage-III cells, 100
+seeds). Nonlinear: $e_i=0.5+0.25(\tilde z_i^2-1)/\sqrt2$; multi-axis: mean of the first three
+standardised PCs, scaled by $1/\sqrt3$; reversed: $e_i=-0.5+0.25\tilde z_i$; sparse: linear
+effect on 20 of the 200 genes, estimated over those 20. Per-cell RMSE at $m=0.5$ / $m=1$ by
+replicate, and RMSE and Pearson $r$ at the mismatch rates measured in RQ1 (1 $-$ own-clone
+mass; all transitions and replicates). Bias: every 95\% interval within $\pm${M['effMaxAbsBiasCI']}.}}
+\label{{tab:s12}}
+\footnotesize
+\begin{{tabular}}{{lccccc}}
+\toprule
+ & \multicolumn{{3}}{{c}}{{RMSE, $m=0.5$ / $m=1$}} & \multicolumn{{2}}{{c}}{{At measured rates}} \\
+\cmidrule(lr){{2-4}}\cmidrule(lr){{5-6}}
+Effect & Rep.~1 & Rep.~2 & Rep.~3 & RMSE & $r$ \\
+\midrule
+{chr(10).join(rows)}
+\bottomrule
+\end{{tabular}}
+\end{{table*}}
+""")
+
+    # ---- A3.7 single-barcode clones
+    b = pd.read_csv(R / "11_single_barcode/summary.csv")
+    bo = b[b.coupling == OT]
+    for t in TR:
+        a = one(bo, transition=t, subset="all")
+        assert abs(a.auroc - float(M[f"rqOneAUROC{TN[t]}"].replace(r"\ensuremath{-}", "-"))) < 0.006
+        sb = one(bo, transition=t, subset="single_barcode")
+        put(f"sbAUROC{TN[t]}", f(sb.auroc))
+        put(f"sbNClones{TN[t]}", int(sb.n_clones))
+        put(f"sbPctMulti{TN[t]}", f(a.pct_cells_multi, 1))
+    put("sbMaxAbsAUROCDiff", f(max(abs(one(bo, transition=t, subset="single_barcode").auroc
+                                      - one(bo, transition=t, subset="all").auroc) for t in TR), 3))
+    rows = []
+    for t in TR:
+        for i, cpl in enumerate([OT, "kNN", "independent"]):
+            for j, sub in enumerate(["all", "single_barcode"]):
+                r = one(b, transition=t, coupling=cpl, subset=sub)
+                rows.append(f"{TLAB[t] if (i == 0 and j == 0) else ''} & "
+                            f"{({OT: 'OT', 'kNN': 'kNN', 'independent': 'Indep.'})[cpl] if j == 0 else ''} & "
+                            f"{'All' if sub == 'all' else 'Single'} & {int(r.n_clones)} & "
+                            f"{f(r.auroc)} [{f(r.auroc_lo)}, {f(r.auroc_hi)}] & "
+                            f"{f(r.enrichment, 1)} [{f(r.enrichment_lo, 1)}, {f(r.enrichment_hi, 1)}] & "
+                            f"{pct(r.top10, 1)}" + r" \\")
+        rows.append(r"\addlinespace")
+    write_table("tab_s13_single_barcode", rf"""\begin{{table*}}[!t]
+\centering
+\caption{{Post-review addition: RQ1 restricted to clones marked by a single viral barcode
+(primary set, forward, pooled over replicates; clone-weighted means with 95\% clone-bootstrap
+CIs). Cells of cross-stage clones carrying more than one barcode: {M['sbPctMultiOne']}\%,
+{M['sbPctMultiTwo']}\% and {M['sbPctMultiThree']}\% for the three transitions.}}
+\label{{tab:s13}}
+\footnotesize
+\begin{{tabular}}{{lllcccc}}
+\toprule
+Transition & Coupling & Clones & $n$ & AUROC & Enrichment & Top-10 (\%) \\
+\midrule
+{chr(10).join(rows[:-1])}
+\bottomrule
+\end{{tabular}}
+\end{{table*}}
+""")
+
+
 # ============================================================ output
 def write_table(name, text):
     (TAB / f"{name}.tex").write_text(
-        f"% Generated by scripts/10_results_paper.py from results/06-09. Do not edit.\n{text}",
+        f"% Generated by scripts/10_results_paper.py from results/06-17. Do not edit.\n{text}",
         encoding="utf-8")
 
 
@@ -873,6 +1255,7 @@ def check_wording():
         assert M[a] == M[b], (a, M[a], b, M[b])
     assert M["rqTwoTrueBeatRFN"] == "0"
     assert M["rqThreeAllAboveChance"] == "all"
+    assert M["loroNPCAbove"] == M["loroNFateAbove"] == M["loroNFolds"]  # "each ... in all"
 
 
 def main():
@@ -880,8 +1263,9 @@ def main():
     rq2()
     rq3()
     rq4()
+    post_review()
     check_wording()
-    lines = ["% Generated by scripts/10_results_paper.py from results/06_rq1 ... 09_rq4.",
+    lines = ["% Generated by scripts/10_results_paper.py from results/06_rq1 ... 17_rq2_inductive.",
              "% Do not edit by hand."]
     lines += [rf"\newcommand{{\{k}}}{{{v}}}" for k, v in M.items()]
     (GEN / "results_numbers.tex").write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -891,7 +1275,7 @@ def main():
     dirty = subprocess.run(["git", "status", "--porcelain", "scripts"], cwd=ROOT,
                            capture_output=True, text=True).stdout.strip()
     prov = [f"git_commit {commit}{' (DIRTY scripts/)' if dirty else ''}",
-            "plan: ANALYSIS_PLAN.md approved at 65cd70d (amendment A1)",
+            "plan: ANALYSIS_PLAN.md approved at 65cd70d (amendments A1-A3; A3 = post-review additions)",
             f"python {sys.version.split()[0]} pandas {pd.__version__} numpy {np.__version__} "
             f"matplotlib {matplotlib.__version__}",
             "environment: Windows (VS Code session)"]
