@@ -15,18 +15,10 @@
 
 ## Open instructions (author → Claude)
 
-- [ ] 2026-11-17 — **(VS Code) A3.7 single-barcode sensitivity** (cloud A3.1–A3.6 results are in; see the 2026-11-18 log entry for what changes a claim) (local, from saved per-cell
-  metrics) and, once the cloud A3 results land, the paper text for A3.1–A3.7 (supplement
-  first; main-text paragraphs where they change a claim). If A3.1 shows that 30-PC input
-  does not beat (Pg, D) by more than δ, revise the "marker state limits forecasting" claim.
 - [ ] Later — Jerber D30 transfer of the RQ3 fate-bias axis (needs Jerber data; separate
   plan amendment).
 
 ## Open questions (Claude → author)
-
-- **Q12 (2026-11-18) — create the `v1.0-submission` tag.** The cloud workspace cannot push tags (proxy 403). On your machine, after `git pull`:
-  `git tag -a v1.0-submission -m "Code and results at submission" && git push origin v1.0-submission`
-  (or a GitHub release named `v1.0-submission` on the latest `main`). If you enable Zenodo first (Q11 b), the tag gets a DOI.
 
 - **Q11 (2026-11-17) — licence and archive for the public release.** *Deferred by the author
   until all other work is done; do not act on it yet.*
@@ -54,6 +46,9 @@
 
 ## Done
 
+- [x] 2026-11-17 — (VS Code) A3.7 single-barcode sensitivity and paper text for A3.1–A3.7:
+  generator `57fd1c1` (Tables S6–S13), paper text in the commit after it. 2026-11-18.
+- [x] 2026-11-18 — Q12: tag `v1.0-submission` created and pushed from the author's machine.
 - [x] 2026-11-17 — (Cloud) Post-review analyses A3.1–A3.6 → scripts 12–17 (each committed before running), results `results/12_rq2_pc` … `results/17_rq2_inductive`; A3.2 on seeds 0–9 (pre-specified fallback). 2026-11-18.
 - [x] 2026-11-17 — (Cloud) Public code release: README, `scripts/00_download_geo.py`, `environment/requirements-cloud.txt`, helpers. 2026-11-18. (Tag still to do: Q12.)
 - [x] 2026-11-16 — (VS Code) Q7 → amendment A2; Q8 → Methods section with equations and
@@ -91,6 +86,25 @@
 ---
 
 ## Log (newest first)
+
+### 2026-11-18 — Claude (VS Code) — post-review results written into the paper; release tagged
+- Generator `scripts/10_results_paper.py` extended (`post_review()`, committed `57fd1c1` before
+  running; provenance clean). New macros and supplementary Tables S6–S13 (S6 30-PC input,
+  S7 inductive OT, S8/S9 leave-one-replicate-out RQ3/RQ2, S10 target draws, S11 measured
+  labels, S12 effect shapes, S13 single barcode). Wording claims are asserted in the script.
+- Paper (`main.tex`): Methods opening names the post-review additions; Results add a
+  single-barcode sentence (RQ1), a measured-label paragraph (fate), a post-review RQ2
+  paragraph, a leave-one-replicate-out sentence (RQ3) and an effect-shape paragraph (RQ4).
+- **Claims revised:** "the marker state, not the coupling, limits forecasting" →
+  per transition: with 30-PC input, true lineage beats (Pg, D) beyond δ at II→III only, and
+  only there do true pairs beat OT pairs (0.008–0.010 MAE; descriptive). Abstract,
+  contribution 2, Discussion and Conclusion updated. Fate agreement at III→IV now stated
+  as partly dependent on transferred labels (Discussion + new checklist row). RQ4 limitation
+  now says the error does not depend on the effect's shape but does depend on its sparsity.
+- Two checklist rows added (measured labels; vary the input). No internal labels in the PDF
+  (checked: no "TCBB", "amendment", "A3.", "pre-registered").
+- Main text 11 pages; about one page left for biographies within the 12-page budget.
+- Tag `v1.0-submission` pushed from this machine (Q12 closed). Q11 still deferred.
 
 ### 2026-11-18 — Claude (cloud workspace) — A3.1–A3.6 done; public release tagged
 Post-review analyses per amendment A3 (primary cell set). Scripts committed before running;

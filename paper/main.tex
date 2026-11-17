@@ -51,7 +51,8 @@ fate composition of most early progenitor clusters. Yet at most \rqOneMassPctMax
 cell's transported mass reached its sisters, and a nearest-neighbour coupling placed
 similar mass on them. With exact sister pairs, forecasts of a two-score marker state beat
 a constant baseline by only \rqTwoTrueGainMinPct--\rqTwoTrueGainMaxPct\% of its error,
-inside an equivalence margin fixed in advance. Marker states predicted clonal fate above
+inside an equivalence margin fixed in advance; a transcriptomic input exceeded that margin
+at one of three transitions, and only there did sister pairs outperform OT pairs. Marker states predicted clonal fate above
 chance (macro-AUROC \rqThreeAUCPgDMinT--\rqThreeAUCPgDMaxT) but below a transcriptomic
 representation (\rqThreeAUCPCMinT--\rqThreeAUCPCMaxT). At the measured OT mismatch rates,
 simulated per-cell perturbation effects were estimated no better than with random pairing,
@@ -117,11 +118,13 @@ analytic and all settings were fixed before any result was computed. OT recovers
 and the clonal fate composition of most early clusters. Yet at most \rqOneMassPctMaxT\% of
 a cell's mass reaches its sisters, and a nearest-neighbour coupling places about as much
 mass on them.
-\item Evidence that the marker state, not the coupling, limits forecasting. With exact
-sister pairs, models beat the constant baseline by only
+\item Evidence that a two-score marker state limits what lineage can add to forecasting.
+With exact sister pairs, models beat the constant baseline by only
 \rqTwoTrueGainMinPct--\rqTwoTrueGainMaxPct\% of its error, inside an equivalence margin
-fixed in advance, and no model beat the random forest. Marker states predict fate above
-chance (macro-AUROC \rqThreeAUCPgDMinT--\rqThreeAUCPgDMaxT) but well below a 30-component
+fixed in advance, and no model beat the random forest. A 30-component transcriptomic input
+exceeded the margin at II$\to$III, and only there did sister pairs forecast better than OT
+pairs. Marker states predict fate above
+chance (macro-AUROC \rqThreeAUCPgDMinT--\rqThreeAUCPgDMaxT) but well below the
 transcriptomic representation (\rqThreeAUCPCMinT--\rqThreeAUCPCMaxT).
 \item A quantification of what pairing error costs a perturbation model. At the
 mismatch rates measured for OT (\rqFourMeasMin--\rqFourMeasMax), per-cell effect estimates
@@ -153,8 +156,10 @@ Finally, leakage-aware evaluation is essential for claims about generalisation i
 All settings were fixed in a written analysis plan, committed to the public code
 repository before any result was computed (Section~\ref{sec:stats}). Two later changes,
 both made before the analyses they affect, are recorded there with dates: a memory-efficient
-solver for one robustness job, and the tie-break rule for fate labels. Table~\ref{tab:methods}
-lists the settings.
+solver for one robustness job, and the tie-break rule for fate labels. After peer review we
+added seven exploratory analyses, whose settings were fixed in a further dated entry before
+any of them was run; they are labelled as post-review additions and reported in
+Tables~S6--S13. Table~\ref{tab:methods} lists the settings.
 
 \subsection{Lineage data and ground truth}\label{sec:data}
 We use the single-cell split-barcoding (SISBAR) data of~\cite{You_2023}. H9 human embryonic
@@ -479,7 +484,8 @@ Uncertainty (RQ1) & 1{,}000 bootstrap resamples of clones \\
 \section{Results}\label{sec:results}
 
 Primary-set results are reported below; the doublet-sensitivity set and the cap-robustness
-check are in the supplementary tables (Tables~S1--S5, supplementary material). Where a
+check are in the supplementary tables (Tables~S1--S5), and the post-review additions in
+Tables~S6--S13 (supplementary material). Where a
 pre-specified expectation (stated in the analysis plan before any result) was not met, we
 say so.
 
@@ -540,7 +546,10 @@ block-wise solver (Section~\ref{sec:couplings}; maximum relative plan difference
 POT). AUROC was unchanged (\capUncapAUROC{} vs.\ \capCapAUROC). Enrichment fell from
 \capCapEnr{} to \capUncapEnr{} as chance fell from $\capCapChanceSci$ to
 $\capUncapChanceSci$ (Table~S4). Absolute mass and top-$k$ recall scale with the size of
-the later pool, so they must be read against chance.
+the later pool, so they must be read against chance. In a post-review check restricted to
+clones marked by a single viral barcode, OT AUROC was \sbAUROCOne, \sbAUROCTwo{} and
+\sbAUROCThree{} (largest change \sbMaxAbsAUROCDiff; Table~S13), so clones defined by
+barcode combinations do not drive the result.
 
 \subsection{Fate-level agreement}\label{sec:fate}
 For each early cluster with at least 20 cross-stage clones we compared two distributions
@@ -569,6 +578,21 @@ independent for the two largest III$\to$IV hindbrain progenitor clusters: III-NP
 progenitors but not reliably at the latest transition, again as expected. In the
 sensitivity set the OT-vs.-independent ordering was the same for \fateSensAgreeAll{} of
 \fateSensNAll{} clusters.
+
+Transferred labels cover \fateTransferredPctOne\%, \fateTransferredPctTwo\% and
+\fateTransferredPctThree\% of the later pools, and at III$\to$IV OT placed
+\fateOTMassTransThreeMinPct--\fateOTMassTransThreeMaxPct\% of each cluster's mass on them.
+The choice of $k$ changed OT's TVD by at most \fateKRangeMaxOT. In a post-review analysis
+restricted to the authors' measured labels (Table~S11), OT was closer than independent for
+\fateMeasNBetterOne{} of \fateMeasNClustersOne{}, \fateMeasNBetterTwo{} of
+\fateMeasNClustersTwo{} and \fateMeasNBetterThree{} of \fateMeasNClustersThree{} clusters.
+The two clusters that changed at I$\to$II, I-NPpHB and I-VLMCs, came within
+\fateMeasSwitchMaxDiffOne{} of the independent coupling. At III$\to$IV,
+III-NPvMB (\tvdMeasOTNPvMB{} vs.\ \tvdMeasIndNPvMB) and III-Motors (\tvdMeasOTMotors{} vs.\
+\tvdMeasIndMotors) kept their gains, but III-GABAs (\tvdMeasOTGABAs{} vs.\
+\tvdMeasIndGABAs) and III-Gluts (\tvdMeasOTGluts{} vs.\ \tvdMeasIndGluts) reversed, while
+III-NPaHB, worse with all labels, drew level (\tvdMeasOTNPaHB{} vs.\ \tvdMeasIndNPaHB). Part of
+the III$\to$IV fate result therefore rests on transferred labels.
 
 \begin{figure*}[!t]
 \centering
@@ -639,6 +663,26 @@ OT pairs beat the constant, independent pairs did not, and the Transformer showe
 advantage. The qualification is that beating the constant here means a gain smaller than
 the margin we fixed in advance.
 
+\emph{Post-review additions.} To separate the state from the coupling, we reran RQ2 with the
+early cell's 30-PC representation as input, refitted per split on training cells, keeping
+the splits, cells and training targets (Table~S6). With true lineage at II$\to$III, every
+learned model improved beyond the margin, by \pcTrueTwoDeltaMin--\pcTrueTwoDeltaMax{} MAE
+(\pcTrueTwoGainMinPct--\pcTrueTwoGainMaxPct\% of the constant), and then beat the constant
+by \pcTrueTwoVsConstMinPct--\pcTrueTwoVsConstMaxPct\%. At I$\to$II and III$\to$IV the
+30-PC gain stayed inside the margin (at most \pcTrueOtherMaxPct\%), as it did for OT and
+independent pairs everywhere (at most \pcOIMaxGainPct\%). With 30-PC input, models trained
+on true pairs at II$\to$III had \pcTrueMinusOTTwoMin--\pcTrueMinusOTTwoMax{} lower MAE than
+the same models trained on OT pairs (descriptive), whereas with (Pg, D) input the two
+differed by at most \pgTrueMinusOTTwoMaxAbs. The richer input thus exposes a cost of the
+coupling that the two-score state hides. Three further checks left the RQ2 conclusions
+unchanged. Refitting the OT space without validation and test cells (\indSeeds{} splits)
+changed MAE by at most \indMaxAbsDelta{} (\indMaxAbsPct\% of the constant; Table~S7). Across
+leave-one-replicate-out folds, true-lineage models differed from the constant by
+\loroTrueMinPct{} to $+$\loroTrueMaxPct\%, with \loroTrueNBeyond{} of \loroTrueN{} beyond
+the margin (Table~S9). Over \drawNDraws{} training-target draws per split, the target draw
+accounted for \drawShareMinPct--\drawShareMaxPct\% of the variance of $\Delta$, and the
+I$\to$II and II$\to$III results stayed within the margin (Table~S10).
+
 \input{tables/tab_rq2_mae}
 
 
@@ -681,7 +725,11 @@ fate-bias axis, an LDA fitted on training clones, added only
 sensitivity set, (Pg, D) reached \rqThreeSensAUCPgDOne, \rqThreeSensAUCPgDTwo{} and
 \rqThreeSensAUCPgDThree{} and 30-PC reached \rqThreeSensAUCPCOne, \rqThreeSensAUCPCTwo{}
 and \rqThreeSensAUCPCThree; marker states were again lower in \rqThreeSensMarkerNSig{} of
-\rqThreeMarkerN{} comparisons (Table~S3).
+\rqThreeMarkerN{} comparisons (Table~S3). In a post-review leave-one-replicate-out analysis
+(Table~S8), 30-PC and the fate-bias axis each exceeded (Pg, D) in all \loroNFolds{}
+held-out replicates (mean macro-AUROC for (Pg, D)
+\loroPgDOne, \loroPgDTwo{} and \loroPgDThree; for 30-PC \loroPCOne, \loroPCTwo{} and
+\loroPCThree), so the ordering holds for an unseen differentiation.
 
 \emph{Dopaminergic lineage (descriptive).} Of \daNPvMBClones{} cross-stage clones whose
 stage-III cells are mostly III-NPvMB, only \daNmDA{} produced any stage-IV dopaminergic
@@ -734,6 +782,14 @@ therefore not evidence that pairing works. As expected, the mean effect was robu
 mismatch, the per-cell effect degraded steadily, and the measured rate sits at the degraded
 end.
 
+In post-review runs with nonlinear, multi-axis and reversed effects (Table~S12), the
+per-cell RMSE at the measured rates was identical to the linear case
+(\effRMSEMin--\effRMSEMax), and only the correlation changed (\effRMin--\effRMax). This
+follows from (\ref{eq:rq4}): for an additive effect, the error term involves control cells
+only, so its size does not depend on the effect's shape. A sparse effect estimated over 20
+genes raised the RMSE to \effSparseRMSEMin--\effSparseRMSEMax, because fewer genes average
+out less pairing noise. The bias stayed within $\pm$\effMaxAbsBiasCI{} throughout.
+
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\columnwidth]{figures/fig6_perturbation.pdf}
@@ -758,7 +814,9 @@ other later cells (AUROC \rqOneAUROCMinT--\rqOneAUROCMaxT). It was also closer t
 fate composition than the independent coupling for \fateNBetterAll{} of
 \fateNClustersAll{} early clusters. Yet at most \rqOneMassPctMaxT\% of an early cell's mass
 reached its sisters, and its heaviest partner was a sister for at most
-\rqOneTopOnePctMaxT\% of cells. These findings do not conflict. A population-level quantity
+\rqOneTopOnePctMaxT\% of cells. On measured labels alone the fate gains held for the
+ventral-midbrain and most hindbrain progenitors but not for two III$\to$IV clusters, so the
+latest transition's fate agreement depends partly on label transfer. These findings do not conflict. A population-level quantity
 averages over many cells whose individual partners are interchangeable within a state, so a
 coupling can be right in aggregate while almost every pair is wrong. The kNN coupling put a
 similar share of mass on sisters (\rqOneKnnEnrMinT--\rqOneKnnEnrMaxT{} times chance). This
@@ -771,7 +829,8 @@ RQ4 is a conditional, synthetic propagation analysis, not a validation of any pe
 model. Under its effect model, at the measured mismatch rates
 (\rqFourMeasMin--\rqFourMeasMax), the per-cell effect error was
 \rqFourRatioMinPct--\rqFourRatioMaxPct\% of its value under random pairing. The mean effect
-stayed unbiased, as (\ref{eq:rq4}) predicts for this construction. In this system and
+stayed unbiased, as (\ref{eq:rq4}) predicts for this construction, and the per-cell error
+did not depend on the shape of an additive effect. In this system and
 configuration, OT couplings therefore agreed with lineage on population quantities for most
 early progenitors, with the exceptions in Fig.~\ref{fig:fate}. They did not provide
 cell-to-cell correspondence, so heterogeneous responses read off OT-paired cells would here
@@ -784,12 +843,15 @@ pluripotency panel with a progenitor panel changed little, so the limit is the
 dimensionality of the summary, not the choice of genes. RQ2 shows the same limit from the
 other side. With the true sister as target, models beat the constant by only
 \rqTwoTrueGainMinPct--\rqTwoTrueGainMaxPct\% of its error, inside the margin fixed in
-advance. Because the pairing is exact there, the shortfall lies in the state: two marker
-scores cannot express most of what separates one clone's future from another's. This also
-explains why OT pairs forecast about as well as true pairs (Table~\ref{tab:rq2}) at I$\to$II and II$\to$III: when the
-state is coarse, a coupling that is right about populations is good enough. A larger model
-does not help either, since the Transformer was equivalent to the random forest in every
-comparison.
+advance. Because the pairing is exact there, much of the shortfall lies in the input: when
+the same models read 30 PCs instead, the gain exceeded the margin at II$\to$III, though not
+at I$\to$II or III$\to$IV, where little of the sister's later state appears predictable from
+the early cell by either input. The same contrast explains why OT pairs forecast about as
+well as true pairs with (Pg, D) (Table~\ref{tab:rq2}): when the state is coarse, a coupling
+that is right about populations is good enough. With the richer input at II$\to$III, true
+pairs pulled ahead of OT pairs, so the coupling's cell-level error starts to matter once
+the state can use cell-level information. A larger model does not help, since the
+Transformer was equivalent to the random forest in every comparison.
 
 \emph{Evaluation practice.} Three results concern how such evaluations should be run.
 \begin{itemize}
@@ -820,6 +882,8 @@ Report own-clone mass with its analytic chance & Mass scales with pool size (Tab
 Report AUROC (ties $=\frac12$) with mass and top-$k$ & kNN: AUROC $\approx 0.5$ despite above-chance mass (Fig.~\ref{fig:rq1}) \\
 Include a kNN coupling & Similar sister mass to OT (Fig.~\ref{fig:rq1}) \\
 Separate population- from cell-level agreement & Fate composition recovered (Fig.~\ref{fig:fate}); cell pairs not (Fig.~\ref{fig:rq4}) \\
+Score fate agreement on measured labels & Two III$\to$IV gains reverse without transferred labels (Table~S11) \\
+Vary the input, not only the pairs & True pairs beat OT only with a 30-PC input (Table~S6) \\
 Compare constants across couplings & III$\to$IV constants fitted to background targets (Table~\ref{tab:rq2}) \\
 Fix an equivalence margin in advance & Significant gains inside $\pm\delta$ (Fig.~\ref{fig:rq2}) \\
 Benchmark marker states against the transcriptome & (Pg, D) below 30-PC at every transition (Fig.~\ref{fig:rq3}) \\
@@ -857,9 +921,11 @@ work~\cite{Kanu_TCBB}, and in this system D measures floor-plate and ventral-mid
 identity rather than dopaminergic maturity. With only \nDACellsCrossStage{} stage-IV
 dopaminergic cells in cross-stage clones, the dopaminergic analysis is descriptive. Whether
 the fate-bias axis transfers to independent data~\cite{Jerber_2021} remains to be tested.
-Finally, RQ4 adds a synthetic effect that is linear in one principal component. Real
-perturbation responses are more complex, so RQ4 shows how pairing error propagates, not how
-large it is for any particular treatment.
+Finally, RQ4 adds a synthetic, additive effect. Its per-cell error did not depend on the
+effect's shape, but it did depend on how many genes carry the effect, and real responses
+need not be additive. RQ4 therefore shows how pairing error propagates, not how large it is
+for any particular treatment. The analyses added after review were exploratory; their
+settings were fixed before they were run, but they were not part of the original plan.
 
 % ---------------------------------------------------------------------------
 \section{Conclusion}\label{sec:conclusion}
@@ -867,7 +933,8 @@ Measured lineage shows that entropic OT couplings in human neural differentiatio
 shared ancestry above chance and recover population-level fate composition at early
 transitions. They do not, however, link individual cells to their sisters. Two-score marker
 states carry some fate information, but much less than the transcriptome. Even with exact
-sister pairs they support forecasts that are practically equivalent to a constant. In
+sister pairs they support forecasts that are practically equivalent to a constant, and only
+a richer input revealed an advantage of true over OT pairs. In
 settings like this one, OT couplings should therefore be used for population quantities,
 checked cluster by cluster, and not as cell-level correspondences. Low-dimensional marker states should be benchmarked against richer
 representations before being used to describe fate, and claims about either should be
