@@ -24,6 +24,10 @@
 
 ## Open questions (Claude → author)
 
+- **Q12 (2026-11-18) — create the `v1.0-submission` tag.** The cloud workspace cannot push tags (proxy 403). On your machine, after `git pull`:
+  `git tag -a v1.0-submission -m "Code and results at submission" && git push origin v1.0-submission`
+  (or a GitHub release named `v1.0-submission` on the latest `main`). If you enable Zenodo first (Q11 b), the tag gets a DOI.
+
 - **Q11 (2026-11-17) — licence and archive for the public release.** *Deferred by the author
   until all other work is done; do not act on it yet.*
   - (a) Licence: MIT is recommended for code. Results and paper files could be CC BY 4.0.
@@ -51,7 +55,7 @@
 ## Done
 
 - [x] 2026-11-17 — (Cloud) Post-review analyses A3.1–A3.6 → scripts 12–17 (each committed before running), results `results/12_rq2_pc` … `results/17_rq2_inductive`; A3.2 on seeds 0–9 (pre-specified fallback). 2026-11-18.
-- [x] 2026-11-17 — (Cloud) Public code release: README, `scripts/00_download_geo.py`, `environment/requirements-cloud.txt`, helpers; tag `v1.0-submission`. 2026-11-18.
+- [x] 2026-11-17 — (Cloud) Public code release: README, `scripts/00_download_geo.py`, `environment/requirements-cloud.txt`, helpers. 2026-11-18. (Tag still to do: Q12.)
 - [x] 2026-11-16 — (VS Code) Q7 → amendment A2; Q8 → Methods section with equations and
   settings table (commit below).
 - [x] 2026-11-14 — (VS Code) Results for RQ1–RQ4 written in `paper/main.tex`, with Figs 2–6,
@@ -142,7 +146,7 @@ reproduces the original analysis where they overlap; all checks passed.
   (pip freeze + Python 3.13.18; local `requirements.txt` unchanged at the root); workspace
   helpers in `scripts/helpers/`, the first data checks in `scripts/exploratory/`. Two workspace
   scratch files were not committed because they concern FOUNDIN-PD (separate project). No licence
-  added (Q11 deferred). Tag `v1.0-submission`: `v1.0-submission` on this commit.
+  added (Q11 deferred). Tag `v1.0-submission`: **not created** — the workspace's git proxy refused the tag push (HTTP 403, policy denial; branch pushes work). Author to create it (Open questions Q12).
 - Compute notes: A3.2 was OOM-killed three times at the 5.8 GB limit (POT needs ~2 GB beyond a
   10k × 10k cost matrix). Memory-only changes, values identical: backed h5ad reads, chunked
   float32 cost, explicit release, one process per seed (commits `d26a354, 22ae9f0, 5c3b73a`).

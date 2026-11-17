@@ -158,7 +158,7 @@ from the viral barcode there.
    - A3.2 (seeds 0–9, pre-specified fallback): inductive OT arm ≈ transductive (|Δ| ≤ 0.002).
    - A3.3, A3.4: consistent with the primary results.
    Release: README, `scripts/00_download_geo.py`, `environment/requirements-cloud.txt`; tag
-   `v1.0-submission`. Licence/Zenodo (Q11) deferred by the author.
+   `v1.0-submission` still to be created by the author (cloud proxy blocks tag pushes; Q12). Licence/Zenodo (Q11) deferred by the author.
    Cloud lesson: POT needs ~2 GB beyond a 10k × 10k cost matrix; one OT process at a time and
    one process per seed keep it under the 5.8 GB limit.
 
