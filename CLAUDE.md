@@ -2,6 +2,11 @@
 
 Context for Claude Code sessions on this repository. Author: Victor Ikenna Kanu,
 Network Systems Lab, Kumoh National Institute of Technology (PI: Prof. Dong-Seong Kim).
+Paper authors (2026-11-17): V. I. Kanu, Williams Paul Nwadiugwu (Associate Professor,
+Bharti School of Engineering and Dept. of Biochemistry, Laurentian University, Sudbury,
+ON P3E 2C6, Canada), D.-S. Kim. Paper structure: Intro · Related work · Methods (data =
+§3.1) · Results · Discussion (Limitations as last subsection) · Conclusion (future work =
+2nd paragraph).
 
 ## Session workflow — read first
 

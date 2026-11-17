@@ -75,6 +75,38 @@
 
 ## Log (newest first)
 
+### 2026-11-17 (night) — Claude (VS Code) — Abstract, index terms, author block, restructure
+- **Author:**
+  - correct the Williams name and add his affiliation;
+  - write the abstract and check the index terms;
+  - make Limitations a Discussion subsection;
+  - give the Conclusion its own section, with future work as its second paragraph.
+- **Q10, partly answered:**
+  - Done: "Willaims" → "Williams".
+  - Done: a second thanks item: "W. P. Nwadiugwu is an Associate Professor with the Bharti
+    School of Engineering and the Department of Biochemistry, Laurentian University,
+    Sudbury, ON P3E 2C6, Canada". "Sudbury" was added because it is the city of that
+    postal code.
+  - Done: the running head is now "Kanu *et al.*" (three authors).
+  - Still open: the grade format "(MIEEE)/(SMIEEE)" is left as the author wrote it; IEEE
+    style is ", Member, IEEE" / ", Senior Member, IEEE", or none at peer review.
+- **Abstract:** 187 words. All numbers are macros (AUROC range, ≤ max mass %, RQ2 gain
+  range, RQ3 marker vs 30-PC, RQ4 statement).
+- **Index terms:** now alphabetical, as IEEE requires. "Benchmarking" became "Benchmark
+  testing" (IEEE Thesaurus term), and "cell-state forecasting", a coined phrase, became
+  "cell fate prediction". Final list: Benchmark testing, cell fate prediction, lineage
+  tracing, neural differentiation, optimal transport, single-cell RNA sequencing.
+- **Restructure:**
+  - Limitations is now §5.4, the last subsection of the Discussion.
+  - §6 Conclusion is its own section: a findings paragraph, then a future-work paragraph
+    with four directions (lineage-informed couplings, other systems and OT variants, the
+    Jerber transfer, real perturbation data).
+  - The Introduction's roadmap sentence is updated.
+- **Bibliography:** scDisentangle author names fixed ("S. El Mejjad", "R. El Fatimy",
+  "F. Z. El Hajji").
+- **Build:** clean, 10 pages including references. Remaining: author biographies (IEEE
+  needs a photo and about 100 words per author).
+
 ### 2026-11-17 (evening) — Claude (VS Code) — Limitations and Conclusion written
 - **Author:** "write the limitations and conclusion section."
 - **Pulled `cae3f47`, `1186581`:** the author added co-author Willaims Paul Nwadiugwu and

@@ -27,23 +27,43 @@
 \title{Lineage-Grounded Evaluation of Optimal-Transport Couplings and Marker States
 in Human Neural Differentiation}
 
-\author{Victor~Ikenna~Kanu (MIEEE), Willaims~Paul~Nwadiugwu (SMIEEE)
+\author{Victor~Ikenna~Kanu (MIEEE), Williams~Paul~Nwadiugwu (SMIEEE)
         and~Dong-Seong~Kim (SMIEEE)%
 \IEEEcompsocitemizethanks{\IEEEcompsocthanksitem V.~I.~Kanu and D.-S.~Kim are with the
 Network Systems Lab, Kumoh National Institute of Technology, Gumi, South Korea.\protect\\
-E-mail: vkanu@kumoh.ac.kr}}
+E-mail: vkanu@kumoh.ac.kr
+\IEEEcompsocthanksitem W.~P.~Nwadiugwu is an Associate Professor with the Bharti School of
+Engineering and the Department of Biochemistry, Laurentian University, Sudbury,
+ON P3E~2C6, Canada.}}
 
 \markboth{IEEE/ACM Transactions on Computational Biology and Bioinformatics}%
-{Kanu and Kim: Lineage-Grounded Evaluation of Couplings and Marker States}
+{Kanu \MakeLowercase{\textit{et al.}}: Lineage-Grounded Evaluation of Couplings and Marker States}
 
 \IEEEtitleabstractindextext{%
 \begin{abstract}
-% Written last, from the final results.
+Models of cell differentiation built from single-cell snapshots assume that inferred
+couplings, usually from optimal transport (OT), link cells to their descendants, and that
+low-dimensional marker states capture cell fate. We test both assumptions against measured
+clonal lineage. In split-barcoding data that link sister cells across three transitions of
+human neural differentiation, entropic OT ranked a cell's
+sisters above chance (AUROC \rqOneAUROCMinT--\rqOneAUROCMaxT) and recovered the clonal
+fate composition of most early progenitor clusters. Yet at most \rqOneMassPctMaxT\% of a
+cell's transported mass reached its sisters, and a nearest-neighbour coupling placed
+similar mass on them. With exact sister pairs, forecasts of a two-score marker state beat
+a constant baseline by only \rqTwoTrueGainMinPct--\rqTwoTrueGainMaxPct\% of its error,
+inside a pre-registered equivalence margin. Marker states predicted clonal fate above
+chance (macro-AUROC \rqThreeAUCPgDMinT--\rqThreeAUCPgDMaxT) but below a transcriptomic
+representation (\rqThreeAUCPCMinT--\rqThreeAUCPCMaxT). At the measured OT mismatch rates,
+simulated per-cell perturbation effects were estimated no better than with random pairing,
+while mean effects stayed unbiased. OT couplings are thus reliable for population-level
+quantities but not for cell-level correspondence, and marker states, not couplings, limit
+forecasting. We provide a pre-registered, leakage-controlled protocol and an evaluation
+checklist.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Single-cell RNA sequencing, lineage tracing, optimal transport, cell-state
-forecasting, benchmarking, neural differentiation.
+Benchmark testing, cell fate prediction, lineage tracing, neural differentiation, optimal
+transport, single-cell RNA sequencing.
 \end{IEEEkeywords}}
 
 \maketitle
@@ -111,8 +131,9 @@ are condensed into a checklist for evaluating couplings and marker states agains
 \end{enumerate}
 
 Section~\ref{sec:related} reviews related work, Section~\ref{sec:methods} describes the data
-and methods, Section~\ref{sec:results} reports the results, and
-Sections~\ref{sec:discussion} and~\ref{sec:conclusion} discuss them and their limits.
+and methods, and Section~\ref{sec:results} reports the results.
+Section~\ref{sec:discussion} discusses them and their limitations, and
+Section~\ref{sec:conclusion} concludes with future work.
 
 % ---------------------------------------------------------------------------
 \section{Related Work}\label{sec:related}
@@ -789,8 +810,8 @@ Pre-register settings; date every amendment & $\varepsilon$ fixed before results
 \end{table}
 
 % ---------------------------------------------------------------------------
-\section{Limitations and Conclusion}\label{sec:conclusion}
-\emph{Limitations.} Six limits bound these conclusions.
+\subsection{Limitations}\label{sec:limitations}
+Six limits bound these conclusions.
 \begin{enumerate}
 \item \emph{The ground truth is sisters, not descendants.} Sister cells share an ancestor
 three to four divisions back and then diverge, so recovering a sister is likely harder than
@@ -822,17 +843,29 @@ principal component. Real perturbation responses are more complex, so RQ4 shows 
 pairing error propagates, not how large it is for a specific perturbation.
 \end{enumerate}
 
-\emph{Conclusion.} Measured lineage shows that entropic OT couplings in human neural
-differentiation capture shared ancestry above chance and recover population-level fate
-composition at early transitions. They do not, however, link individual cells to their
-sisters. Two-score marker states carry some fate information, but much less than the
-transcriptome. Even with exact sister pairs they support forecasts that are practically
-equivalent to a constant. OT couplings should therefore be used for population quantities,
-not as cell-level correspondences. Low-dimensional marker states should be benchmarked
-against richer representations before being used to describe fate, and claims about either
-should be checked against lineage where it exists (Table~\ref{tab:checklist}). Next steps
-are lineage-informed couplings, tests in other differentiation systems, and the
-pre-specified transfer of the fate-bias axis.
+% ---------------------------------------------------------------------------
+\section{Conclusion}\label{sec:conclusion}
+Measured lineage shows that entropic OT couplings in human neural differentiation capture
+shared ancestry above chance and recover population-level fate composition at early
+transitions. They do not, however, link individual cells to their sisters. Two-score marker
+states carry some fate information, but much less than the transcriptome. Even with exact
+sister pairs they support forecasts that are practically equivalent to a constant. OT
+couplings should therefore be used for population quantities, not as cell-level
+correspondences. Low-dimensional marker states should be benchmarked against richer
+representations before being used to describe fate, and claims about either should be
+checked against lineage where it exists (Table~\ref{tab:checklist}).
+
+Future work will follow four directions. The first is couplings that use lineage directly:
+barcodes observed in a subset of cells could constrain or calibrate the transport plan, and
+the protocol here can measure whether that closes the gap to sister recovery. The second is
+other systems. The same tests should be repeated on lineage-traced data from other cell
+lines, protocols and branching regimes, and with growth-informed and alternative-embedding
+OT, to establish how general the gap is. The third is the pre-specified transfer of the
+lineage-derived fate-bias axis to an independent dopaminergic differentiation
+dataset~\cite{Jerber_2021}, which will test whether it describes fate beyond the data it
+was learned from. The fourth is replacing the simulated perturbation of RQ4 with real
+perturbation data, to measure how large the per-cell pairing error is for a specific
+treatment.
 
 % ---------------------------------------------------------------------------
 % ---------------------------------------------------------------------------
