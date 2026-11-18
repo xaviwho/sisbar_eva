@@ -325,6 +325,102 @@ Transition & Replicate & Clones & Enrichment & AUROC & Top-10 (\%) & Enrichment 
 """)
 
 
+def fig1():
+    """Overview schematic (no result values): lineage ground truth and analysis flow."""
+    from matplotlib.patches import Circle, FancyBboxPatch, FancyArrowPatch
+    W, H, YB = COL2, 2.75, 0.10  # drawing coordinates in inches; bottom YB cropped
+    fig = plt.figure(figsize=(W, H - YB))
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.set_xlim(0, W); ax.set_ylim(YB, H); ax.axis("off")
+    C1, C2 = C_ORANGE, C_PURPLE  # two clones
+
+    def box(x0, y0, x1, y1, title, body, ec=INK, fc="white", lw=0.7, ts=7, bs=6.3):
+        ax.add_patch(FancyBboxPatch((x0, y0), x1 - x0, y1 - y0, boxstyle="round,pad=0,rounding_size=0.05",
+                                    ec=ec, fc=fc, lw=lw))
+        ax.text((x0 + x1) / 2, y1 - 0.07, title, ha="center", va="top", fontsize=ts, fontweight="bold")
+        if body:
+            ax.text((x0 + x1) / 2, y1 - 0.25, body, ha="center", va="top", fontsize=bs, color=INK2,
+                    linespacing=1.3)
+
+    def arrow(p, q, color=INK, lw=0.8, ls="-", cs="arc3"):
+        ax.add_patch(FancyArrowPatch(p, q, arrowstyle="-|>", mutation_scale=7, color=color, lw=lw,
+                                     ls=ls, connectionstyle=cs, shrinkA=0, shrinkB=0))
+
+    def cell(x, y, c, r=0.065, later=False):
+        ax.add_patch(Circle((x, y), r, fc=c if not later else "white", ec=c, lw=1.2 if later else 0.5))
+        if later:
+            ax.add_patch(Circle((x, y), r * 0.45, fc=c, ec="none"))
+
+    # ---- (a) lineage ground truth
+    ax.text(0.04, H - 0.06, "a", fontsize=9, fontweight="bold", va="top")
+    ax.text(1.0, H - 0.08, "Lineage ground truth", ha="center", va="top", fontsize=7, fontweight="bold")
+    cell(0.65, 2.30, C1, 0.08); cell(1.35, 2.30, C2, 0.08)
+    ax.text(1.0, 2.30, "barcoded\nprogenitors", ha="center", va="center", fontsize=5.8, color=INK2)
+    for xc, c in ((0.65, C1), (1.35, C2)):
+        arrow((xc, 2.20), (xc, 1.98), color=INK2, lw=0.6)
+        for dx in (-0.21, -0.07, 0.07, 0.21):
+            cell(xc + dx, 1.90, c, 0.055)
+    ax.text(1.0, 2.09, "3–4 divisions", ha="center", va="center", fontsize=5.8, color=INK2)
+    ax.plot([1.0, 1.0], [1.70, 0.62], color=INK2, lw=0.6, ls=(0, (2, 2)))
+    ax.text(1.0, 1.72, "split", ha="center", va="bottom", fontsize=5.8, color=INK2,
+            bbox=dict(fc="white", ec="none", pad=0.5))
+    for x0, lab in ((0.12, "profiled at $t$"), (1.08, "profiled at $t{+}1$")):
+        ax.add_patch(FancyBboxPatch((x0, 0.68), 0.80, 0.86, boxstyle="round,pad=0,rounding_size=0.05",
+                                    ec=INK2, fc="#F7F7F7", lw=0.5))
+        ax.text(x0 + 0.40, 1.57, lab, ha="center", va="bottom", fontsize=6)
+    for (x, y, c) in ((0.32, 1.12, C1), (0.55, 0.88, C1), (0.70, 1.20, C2), (0.38, 0.84, C2)):
+        cell(x, y, c)
+    for (x, y, c) in ((1.30, 1.15, C1), (1.62, 0.90, C1), (1.70, 1.22, C2), (1.36, 0.86, C2)):
+        cell(x, y, c, later=True)
+    arrow((0.40, 1.16), (1.23, 1.17), color=C1, lw=0.7, cs="arc3,rad=-0.25")
+    ax.text(0.82, 1.38, "sisters", ha="center", va="bottom", fontsize=5.8, color=C1)
+    ax.text(1.0, 0.55, "I→II, II→III, III→IV\n3 biological replicates each", ha="center", va="top",
+            fontsize=6, color=INK2, linespacing=1.3)
+
+    # ---- (b) analysis flow
+    X0, X1 = 2.15, 7.10
+    ax.text(2.05, H - 0.06, "b", fontsize=9, fontweight="bold", va="top")
+    yb0, yb1 = 1.98, 2.62
+    box(X0 + 0.10, yb0, 3.35, yb1, "scRNA-seq", "both stages,\nper replicate")
+    box(3.60, yb0, 5.05, yb1, "Expression space", "CP10k, log(1+x), 2,000 HVGs,\n30 PCs; panel scores Pg, D")
+    box(5.30, yb0, X1, yb1, "Couplings $W$", "entropic OT (balanced, unbalanced;\n$\\varepsilon$ grid), kNN, independent",
+        ec=C_OT, lw=1.0)
+    arrow((3.35, 2.30), (3.60, 2.30)); arrow((5.05, 2.30), (5.30, 2.30))
+    gap = 0.10
+    wq = (X1 - X0 - 3 * gap) / 4
+    xs = [X0 + i * (wq + gap) for i in range(4)]
+    yq0, yq1 = 0.86, 1.56
+    rq = [("RQ1 Coupling recovery", "own-clone mass vs chance,\nAUROC, top-$k$,\nfate agreement (TVD)"),
+          ("RQ2 Forecasting", "train on true / OT /\nindependent pairs;\ntest on held-out true pairs"),
+          ("RQ3 Fate prediction", "(P, D), (Pg, D), 30-PC,\nfate-bias axis $\\to$\nclone's later fate"),
+          ("RQ4 Mismatch cost", "simulated effect;\nper-cell RMSE, bias\nat mismatch rate $m$")]
+    for x, (t, b) in zip(xs, rq):
+        box(x, yq0, x + wq, yq1, t, b, ts=6.6, bs=6.0)
+    # bus from expression space and couplings to all four questions
+    ybus = 1.78
+    ax.plot([4.325, 4.325], [yb0, ybus], color=INK, lw=0.8)
+    ax.plot([6.20, 6.20], [yb0, ybus], color=C_OT, lw=0.8)
+    ax.plot([xs[0] + wq / 2, xs[3] + wq / 2], [ybus, ybus], color=INK, lw=0.8)
+    for x in xs:
+        arrow((x + wq / 2, ybus), (x + wq / 2, yq1))
+    # ground truth into the questions
+    arrow((1.88, 1.11), (X0, 1.11), color=C_TRUE, lw=1.0)
+    ax.text((1.88 + X0) / 2, 1.16, "sister\nlinks", ha="center", va="bottom", fontsize=5.8)
+    # RQ1 measured mismatch feeds RQ4
+    yarc = 0.74
+    ax.plot([xs[0] + wq / 2, xs[0] + wq / 2, xs[3] + wq / 2], [yq0, yarc, yarc], color=C_OT, lw=0.8)
+    arrow((xs[3] + wq / 2, yarc), (xs[3] + wq / 2, yq0), color=C_OT)
+    ax.text((xs[1] + xs[2] + wq) / 2, yarc - 0.03, "measured mismatch rate $m$ = 1 $-$ own-clone mass",
+            ha="center", va="top", fontsize=5.8, color=C_OT)
+    # protocol strip
+    ax.add_patch(FancyBboxPatch((X0, 0.16), X1 - X0, 0.24, boxstyle="round,pad=0,rounding_size=0.04",
+                                ec="none", fc=BAND))
+    ax.text((X0 + X1) / 2, 0.28, "Protocol: clone-level splits (70/15/15)  ·  training-only scaling and PCA  ·  "
+            "20 seeds  ·  paired intervals, Holm  ·  $\\delta$ fixed in advance",
+            ha="center", va="center", fontsize=6)
+    save(fig, "fig1_overview.pdf")
+
+
 def fig2(fw):
     p = fw[(fw.cellset == "primary") & ~fw.uncapped & (fw.rep == "pooled")]
     fig, axes = plt.subplots(2, 3, figsize=(COL2, 3.15), sharex=True, sharey="row",
@@ -1259,6 +1355,7 @@ def check_wording():
 
 
 def main():
+    fig1()
     rq1()
     rq2()
     rq3()
