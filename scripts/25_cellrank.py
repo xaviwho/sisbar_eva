@@ -135,7 +135,7 @@ def summarise():
     frows, arows = [], []
     obs3, _ = rq3.load(CELLSET)
     for tr, g in cells.groupby("transition"):
-        classes = [c[3:] for c in g.columns if c.startswith("cr_")]
+        classes = [c[3:] for c in g.columns if c.startswith("cr_") and g[c].notna().all()]   # this transition only
         nclo = g.groupby("early_cluster").clone.nunique()
         for clu in nclo[nclo >= rq1.FATE_MIN_CLONES].index:
             gc = g[g.early_cluster == clu]
