@@ -94,7 +94,11 @@ def run_job(obs, transition, rep):
         # typing error in this environment for pools > ~8k cells; same 30-NN graph definition
         sc.pp.neighbors(a, n_neighbors=30, use_rep="X_pca", random_state=0, transformer="sklearn")
         k = cr.kernels.RealTimeKernel(a, time_key="time", couplings={(0, 1): P})
-        k.compute_transition_matrix(self_transitions="connectivities", conn_weight=0.2)
+        # within-stage connectivities: CellRank recomputes neighbours per time point via
+        # scanpy; pass the amendment's 30-NN graph in the RQ1 space (exact kNN, see above)
+        k.compute_transition_matrix(self_transitions="connectivities", conn_weight=0.2,
+                                    conn_kwargs=dict(n_neighbors=30, use_rep="X_pca",
+                                                     transformer="sklearn", random_state=0))
         g = cr.estimators.GPCCA(k)
         term = pd.Series([np.nan] * len(i0) + list(late_cls), index=a.obs_names, dtype=object)
         g.set_terminal_states(states=term.astype("category"))
