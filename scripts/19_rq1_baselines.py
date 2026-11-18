@@ -89,7 +89,7 @@ def row_stats(W, efg, ce, cl, nn10, coupling):
             continue
         w = w / tot
         nz = w[w > 0]
-        rec.update(valid=True, m=float(w[pos].sum()), auroc=float(rq1.mw_auroc(w, pos)),
+        rec.update(valid=True, n_pos_w=int((w > 0).sum()), m=float(w[pos].sum()), auroc=float(rq1.mw_auroc(w, pos)),
                    ap=float(average_precision_score(pos, w)),
                    n_eff=float(np.exp(-(nz * np.log(nz)).sum())), w_nn10=float(w[nn10[r]].sum()),
                    **topk_expect(w, pos))
@@ -157,8 +157,16 @@ def run_job(obs, transition, rep):
     chk = f.merge(ref, on=["cell_id", "coupling"], suffixes=("", "_ref"))
     n_ref = len(ref)
     assert len(chk) == n_ref, (tag, len(chk), n_ref)
-    for c in ("m", "m0", "auroc", "top1", "top5", "top10"):
+    for c in ("m", "m0", "auroc"):
         assert np.allclose(chk[c], chk[c + "_ref"], atol=1e-6, equal_nan=True), (tag, c)
+    # top-k: RQ1 broke exact ties by index (stable argsort); here ties use the uniform
+    # expectation. They can differ only for OT rows whose top 10 includes exactly tied
+    # weights (underflow to 0 at small eps); those rows are exempt and counted.
+    tied = chk.coupling.str.startswith("OT_") & (chk.n_pos_w < 10)
+    for c in ("top1", "top5", "top10"):
+        ok = np.isclose(chk[c], chk[c + "_ref"], atol=1e-6, equal_nan=True)
+        assert (ok | tied).all(), (tag, c)
+    f["topk_tie_exempt"] = f.cell_id.isin(chk[tied & ~np.isclose(chk.top10, chk.top10_ref, atol=1e-6)].cell_id) & f.coupling.str.startswith("OT_")
     CACHE.mkdir(parents=True, exist_ok=True)
     f.drop(columns="cell").to_csv(ck, index=False)
     print(tag, "done; RQ1 reproduced on", n_ref, "rows", flush=True)
@@ -196,7 +204,9 @@ def summarise():
         f"input {rq1.OBS.relative_to(ROOT)} sha256 {rq1.sha256(rq1.OBS)}",
         f"input {rq1.QC.relative_to(ROOT)} sha256 {rq1.sha256(rq1.QC)}",
         "input RQ1 embeddings and potentials: data/interim/rq1/primary_*_{emb,bal_*,unb_*}.npz",
-        "check: RQ1 couplings reproduce results/06_rq1/cells_forward.csv.gz per cell (m, m0, AUROC, top-k)",
+        "check: RQ1 couplings reproduce results/06_rq1/cells_forward.csv.gz per cell (m, m0, AUROC; top-k "
+        "except OT rows with exact ties in the top 10, counted in cells_forward 'topk_tie_exempt': "
+        f"{int(f.get('topk_tie_exempt', pd.Series(dtype=bool)).fillna(False).astype(bool).sum())} rows)",
         "note: 'enrichment' = clone-weighted mean of per-cell m/m0, as RQ1"]) + "\n")
 
 
