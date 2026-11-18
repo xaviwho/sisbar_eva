@@ -6,7 +6,7 @@ anndata and numpy unchanged): /home/claude/venv_cr/bin/python scripts/25_cellran
 Per transition x replicate (primary cell set, capped RQ1 pool, RQ1 30-PC embedding):
   * AnnData of the pool cells with obsm X_pca = RQ1 embedding and a categorical time key
     (early stage, later stage); within-stage connectivities from a 30-NN graph in that space
-    (scanpy.pp.neighbors, n_neighbors 30, use_rep X_pca);
+    (scanpy.pp.neighbors, n_neighbors 30, use_rep X_pca, exact kNN);
   * RealTimeKernel with couplings {(early, later): RQ1 balanced OT plan, eps 0.05} (rebuilt from
     the cached potentials), CellRank defaults otherwise, self_transitions = "connectivities",
     conn_weight = 0.2; transition matrix with threshold = "auto" (default);
@@ -90,7 +90,9 @@ def run_job(obs, transition, rep):
     a.obs["time"] = pd.Categorical([0] * len(i0) + [1] * len(i1), categories=[0, 1], ordered=True)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        sc.pp.neighbors(a, n_neighbors=30, use_rep="X_pca", random_state=0)
+        # exact kNN (transformer "sklearn"): the default approximate search fails with a numba
+        # typing error in this environment for pools > ~8k cells; same 30-NN graph definition
+        sc.pp.neighbors(a, n_neighbors=30, use_rep="X_pca", random_state=0, transformer="sklearn")
         k = cr.kernels.RealTimeKernel(a, time_key="time", couplings={(0, 1): P})
         k.compute_transition_matrix(self_transitions="connectivities", conn_weight=0.2)
         g = cr.estimators.GPCCA(k)
