@@ -1,0 +1,7 @@
+git_commit e808ea2e425106df6cdd3174e1ff3b0d8479a65c
+plan: ANALYSIS_PLAN.md amendment A4.5 (2026-11-18, second review round, exploratory)
+python 3.13.18 scanpy 1.12.5 POT 0.9.7.post1 numpy 2.5.3
+input results/03_objects/cell_obs.csv.gz sha256 c4a43ad240fb68c4ebaec31080e4e4e85eb50c9ea1c68e037baac999cac34ae4
+input results/04_qc/cell_qc.csv.gz sha256 7f821c13c3df65c7a0d388da8b20b6fbc3a9fed79bfeb9213bfdfb26584de0b2
+input data/raw/cellcycle/regev_lab_cell_cycle_genes.txt sha256 eb666ba4f7b7a8b2845e1586d42687feaf813e9fa1fdadba89dacd4093411ac0 (from the scanpy tutorial zip https://www.dropbox.com/s/3dby3bjsaf5arrw/cell_cycle_vignette_files.zip, sha256 6557fe2a2761d1550d41edf61b26c6d5ec9b42b4933d56c3161164a595f145ab)
+check: kNN in the RQ1 space reproduces RQ1 kNN own-clone mass per cell
