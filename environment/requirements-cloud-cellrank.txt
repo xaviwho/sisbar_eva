@@ -1,0 +1,2 @@
+# Isolated venv for A4.7 only (python -m venv --system-site-packages, then pip install cellrank==2.4.0);
+# it adds, on top of requirements-cloud.txt: cellrank==2.4.0 docrep==0.3.2 pygpcca==1.1.0 rich==15.0.0 

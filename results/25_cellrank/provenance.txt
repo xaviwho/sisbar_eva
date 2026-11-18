@@ -1,0 +1,8 @@
+git_commit 1d6489ff382d3500e8fcd179fe087a494b2b14a0
+plan: ANALYSIS_PLAN.md amendment A4.7 (2026-11-18, second review round, exploratory)
+python 3.13.18 cellrank 2.4.0 scanpy 1.12.5 numpy 2.5.3
+environment: venv with system site packages + cellrank 2.4.0 (pygpcca 1.1.0, docrep 0.3.2, rich 15.0.0)
+input results/03_objects/cell_obs.csv.gz sha256 c4a43ad240fb68c4ebaec31080e4e4e85eb50c9ea1c68e037baac999cac34ae4
+input results/04_qc/cell_qc.csv.gz sha256 7f821c13c3df65c7a0d388da8b20b6fbc3a9fed79bfeb9213bfdfb26584de0b2
+input RQ1 embeddings, labels and balanced eps 0.05 potentials: data/interim/rq1/primary_*
+input RQ3 per-seed results: results/08_rq3/per_seed.csv
