@@ -511,6 +511,7 @@ fateMeasNBetterTwo,4
 fateMeasNClustersTwo,5
 fateMeasNBetterThree,2
 fateMeasNClustersThree,6
+fateMeasNBetterAll,9
 fateMeasSwitchMaxDiffOne,0.003
 tvdMeasOTGABAs,0.45
 tvdMeasIndGABAs,0.39

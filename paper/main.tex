@@ -43,8 +43,9 @@ ON P3E~2C6, Canada.}}
 \begin{abstract}
 Models of cell differentiation built from single-cell snapshots assume that inferred
 couplings, usually from optimal transport (OT), link cells to their descendants, and that
-low-dimensional marker states capture cell fate. We test both assumptions against measured
-clonal lineage. In split-barcoding data that link sister cells across three transitions of
+low-dimensional marker states capture cell fate. We test both against measured clonal
+lineage, using sister cells that share an ancestor three to four divisions back as the
+ground truth. In split-barcoding data that link sisters across three transitions of
 human neural differentiation, entropic OT ranked a cell's
 sisters above chance (AUROC \rqOneAUROCMinT--\rqOneAUROCMaxT) and recovered the clonal
 fate composition of most early progenitor clusters. Yet at most \rqOneMassPctMaxT\% of a
@@ -57,9 +58,9 @@ chance (macro-AUROC \rqThreeAUCPgDMinT--\rqThreeAUCPgDMaxT) but below a transcri
 representation (\rqThreeAUCPCMinT--\rqThreeAUCPCMaxT). At the measured OT mismatch rates,
 simulated per-cell perturbation effects were estimated no better than with random pairing,
 while mean effects stayed unbiased. In this system, OT couplings thus agree with lineage at
-the population level for most early progenitors but not at the level of individual cells.
-We provide a pre-specified, leakage-controlled protocol, public code and an evaluation
-checklist.
+the population level for most early progenitors but do not recover individual sister
+cells. We provide a pre-specified protocol with clone-level splits, public code and an
+evaluation checklist.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -129,7 +130,7 @@ transcriptomic representation (\rqThreeAUCPCMinT--\rqThreeAUCPCMaxT).
 \item A quantification of what pairing error costs a perturbation model. At the
 mismatch rates measured for OT (\rqFourMeasMin--\rqFourMeasMax), per-cell effect estimates
 are as poor as under random pairing, while population mean effects remain unbiased.
-\item A reproducible, leakage-controlled protocol and checklist. The protocol uses
+\item A reproducible protocol and checklist. The protocol uses
 clone-level splits, training-only representation fitting and an analysis plan time-stamped
 before any result, and generates every reported number from saved outputs. Its lessons
 are condensed into a checklist for evaluating couplings and marker states against lineage.
@@ -143,13 +144,13 @@ are condensed into a checklist for evaluating couplings and marker states agains
 % ---------------------------------------------------------------------------
 \section{Related Work}\label{sec:related}
 
-Single-cell lineage tracing provides a direct way to connect transcriptional state with developmental outcome. Barcode-based approaches have been used to map clonal relationships across successive stages of human neural differentiation, providing an experimental reference for evaluating inferred cell-to-cell relationships~\cite{You_2023}. More generally, lineage-tracing studies have shown that transcriptional landscapes can link a cell's observed state to its later fate, while also emphasizing that state-to-fate relationships are not necessarily deterministic~\cite{Weinreb_2020}. These observations motivate evaluating a coupling not only by whether it follows a smooth transcriptional trajectory, but also by whether it recovers experimentally observed sister relationships and supports prediction of later cell states. In this work, the SISBAR barcode links are therefore treated as ground truth for coupling recovery, while the later sister-cell annotations provide a separate target for state and fate prediction.
+Single-cell lineage tracing provides a direct way to connect transcriptional state with developmental outcome. Barcode-based approaches have been used to map clonal relationships across successive stages of human neural differentiation, providing an experimental reference for evaluating inferred cell-to-cell relationships~\cite{You_2023}. More generally, lineage-tracing studies have shown that transcriptional landscapes can link a cell's observed state to its later fate, while also emphasizing that state-to-fate relationships are not necessarily deterministic~\cite{Weinreb_2020}. Reviews of lineage-tracing technologies stress that clonal barcodes record shared ancestry, not the future state of the profiled cell itself~\cite{Spanjaard_2017}, which is the target we evaluate here. Trajectory-inference methods have been benchmarked extensively, but against reference trajectories rather than measured lineage~\cite{Saelens_2019}. Fate-mapping frameworks such as CellRank~2 combine transport-based and other kernels into fate probabilities~\cite{Weiler_2024}, and moscot and moslin scale optimal transport across time and can incorporate lineage information when it is measured~\cite{Klein_2025,Lange_2024}. These observations motivate evaluating a coupling not only by whether it follows a smooth transcriptional trajectory, but also by whether it recovers experimentally observed sister relationships and supports prediction of later cell states. In this work, the SISBAR barcode links are therefore treated as ground truth for coupling recovery, while the later sister-cell annotations provide a separate target for state and fate prediction.
 
 Optimal transport has become a useful framework for relating single-cell populations observed at different developmental stages. Entropic regularization enables computationally tractable couplings~\cite{Cuturi_2013}, and optimal-transport analyses have been used to infer developmental trajectories from single-cell expression data~\cite{Schiebinger_2019}. Unbalanced formulations further allow mass to be created or removed, which is relevant when cell populations proliferate, die, or are incompletely observed~\cite{Chizat_2018}. These methods, however, define biologically plausible transport plans from expression geometry; they do not by themselves establish that the transported mass corresponds to experimentally linked descendants. The present study consequently separates transport construction from validation: balanced and unbalanced couplings are compared with k-nearest-neighbour and independent references against barcode-defined sister pairs.
 
 A related literature focuses on predicting cellular responses or future states from single-cell representations. Latent-space arithmetic has been proposed for transferring perturbation responses across cell types, studies, and species~\cite{lotfollahi2018generative}, while more recent work has explored disentangled representations for counterfactual single-cell perturbation prediction and noted that existing methods often fail to beat simple baselines~\cite{mejjad2026scdisentangle}. Benchmarking studies have likewise stressed comparison with constant and simple baselines~\cite{Kanu_TCBB} and evaluation of generalisation beyond the conditions represented during training, where no method consistently transferred across cell types~\cite{li2026systematic}. These concerns are particularly important when the target pairs are inferred rather than observed: a model may appear predictive because the coupling preserves broad cell-state similarity, even when it does not recover lineage. We therefore train and evaluate state predictors on different pairing constructions but test every model on the same held-out barcode-defined pairs.
 
-Finally, leakage-aware evaluation is essential for claims about generalisation in biological machine learning. Empirical work has shown that leakage through feature selection and through repeated subjects drastically inflates predictive performance when information crosses the train--test boundary~\cite{rosenblatt2023effects}, and that harmonisation can similarly exploit target information under site-specific class imbalance~\cite{nieto2026impact}. Our clone-level splits, training-only representation fitting, and independent negative-control pairing address the analogous risk in lineage-grounded forecasting. The gap left by these studies is a direct, multi-stage comparison of optimal-transport couplings against experimentally measured lineage links, together with an evaluation of whether marker-state representations retain predictive information about true descendants and fates under leakage-controlled testing.
+Finally, leakage-aware evaluation is essential for claims about generalisation in biological machine learning. Empirical work has shown that leakage through feature selection and through repeated subjects drastically inflates predictive performance when information crosses the train--test boundary~\cite{rosenblatt2023effects}, and that harmonisation can similarly exploit target information under site-specific class imbalance~\cite{nieto2026impact}. Our clone-level splits, training-only representation fitting, and independent negative-control pairing address the analogous risk in lineage-grounded forecasting. The gap left by these studies is a direct, multi-stage comparison of optimal-transport couplings against experimentally measured lineage links, together with an evaluation of whether marker-state representations retain predictive information about sister cells and clonal fates when tested on held-out clones.
 
 % ---------------------------------------------------------------------------
 \section{Methods}\label{sec:methods}
@@ -322,7 +323,7 @@ version applies the same metrics to column-normalised couplings.
 
 \emph{Fate agreement.} Each later cell carries a cluster label $\ell_j$: the authors' label
 for clone-table cells, otherwise a majority vote of the 15 nearest clone-table cells of the
-same stage and replicate. Using one-hot vectors $\mathbf{e}_\ell$, each early cell has a
+same stage and replicate (ties: smallest summed distance). Using one-hot vectors $\mathbf{e}_\ell$, each early cell has a
 predicted and a clonal fate distribution:
 \begin{equation}
 \hat{\mathbf{p}}_i=\sum_{j\in\mathcal{L}}w_{ij}\,\mathbf{e}_{\ell_j},\qquad
@@ -461,14 +462,26 @@ metric; it covers every representation against chance and every pair of represen
 
 In RQ2 a difference counts as equivalent only if its whole interval lies in $(-\delta,\delta)$,
 with $\delta=0.01$ MAE fixed in advance as in~\cite{Kanu_TCBB}. Because each state
-component is scaled to $[0,1]$, $\delta$ is 1\% of the state range. An interval that merely
-contains zero is not equivalence. Each $\bar d$ is also reported as a percentage of the
+component is scaled to $[0,1]$, $\delta$ is 1\% of the state range and
+\rqTwoDeltaPctOne--\rqTwoDeltaPctThree\% of the constant-median error; we treat a gain below it as too small to change how a cell's state
+would be read. An interval that merely contains zero is not equivalence.
+
+\emph{Estimands.} RQ1 scores couplings as they are used in practice: fitted once on all
+cells of both stages (transductive), then compared with the barcodes, which the coupling
+never sees. In RQ2 no sister of a test clone is a training target, and state scaling,
+models and representations are fitted on training clones only; the coupling that supplies
+OT training targets is the RQ1 coupling and therefore transductive. A post-review
+inductive analysis refits gene selection, scaling, PCA, cost scale, Sinkhorn potentials and
+the full plan on each split without validation and test clones. Each $\bar d$ is also reported as a percentage of the
 constant-median MAE. RQ1--RQ3 are repeated without doublet-flagged cells as a pre-specified
 sensitivity analysis. Each analysis script was committed before it ran, and every output
 records the git commit and the SHA-256 of its inputs. Every number in this paper is
-generated from those outputs. The code, the analysis plan with its dated changes, and all
-generated outputs are available at \url{https://github.com/xaviwho/sisbar_eva}. The plan
-was committed (commit \texttt{65cd70d}) before any analysis result existed.
+generated from those outputs. The repository (\url{https://github.com/xaviwho/sisbar_eva})
+contains every script, the environment specifications, a script that downloads the GEO data
+and the authors' barcode table and checks their SHA-256 values, the analysis plan with its
+dated changes, and all result tables used here; large intermediates (expression objects,
+couplings) are regenerated by the scripts. The plan was committed (commit
+\texttt{65cd70d}) before any analysis result existed.
 
 \begin{table}[!t]
 \centering
@@ -535,7 +548,7 @@ The heaviest later cell was a sister for \rqOneTopOnePctOne\%, \rqOneTopOnePctTw
 \rqOneTopOnePctThree\% of early cells, and a sister was among the ten heaviest for
 \rqOneTopTenPctOne\%, \rqOneTopTenPctTwo\% and \rqOneTopTenPctThree\% (chance
 \rqOneTopTenChancePctOne\%, \rqOneTopTenChancePctTwo\% and \rqOneTopTenChancePctThree\%).
-Cell-level lineage is therefore not recovered.
+Individual sister cells are therefore not recovered.
 
 The conclusion does not depend on the entropy setting: across the full grid the balanced
 coupling's AUROC ranged from \rqOneBalAUROCMin{} to \rqOneBalAUROCMax. Unbalanced
@@ -575,7 +588,8 @@ compared them by total-variation distance (TVD). Later cells outside the clone t
 labels transferred by a $k$-nearest-neighbour vote. OT ($\varepsilon=0.05$) was closer to
 the clonal distribution than the independent coupling for \fateNBetterOne{} of
 \fateNClustersOne{} clusters at I$\to$II, \fateNBetterTwo{} of \fateNClustersTwo{} at
-II$\to$III and \fateNBetterThree{} of \fateNClustersThree{} at III$\to$IV. The clearest
+II$\to$III and \fateNBetterThree{} of \fateNClustersThree{} at III$\to$IV. These counts are
+descriptive: clusters are correlated, and the intervals reflect clones, not replicates. The clearest
 gains were for the ventral-midbrain progenitors: I-NPvMB (TVD \tvdOTOneNPvMB{} vs.\
 \tvdIndOneNPvMB) and II-NPvMB (\tvdOTTwoNPvMB{} vs.\ \tvdIndTwoNPvMB). II-NPaHB
 (\tvdOTTwoNPaHB{} vs.\ \tvdIndTwoNPaHB) and II-NPMHB (\tvdOTTwoNPMHB{} vs.\
@@ -786,11 +800,12 @@ The mismatch rates measured in RQ1 for the fixed OT coupling were
 \rqFourMeasMin--\rqFourMeasMax. These are the primary rate, 1 $-$ own-clone mass
 (\rqFourMassOne, \rqFourMassTwo{} and \rqFourMassThree{} for the three transitions), and
 the secondary rate, 1 $-$ top-1 recall. At these rates the per-cell RMSE was
-\rqFourRatioMinPct--\rqFourRatioMaxPct\% of its value under fully random pairing. Pairing
-by OT is thus, at the level of the individual cell, indistinguishable from pairing at
-random. Because sisters are not the same cell, these rates are upper bounds on the pairing
-error that matters for perturbation models; but they show that OT agreement at the
-population level does not establish cell-level correspondence. The correlation between
+\rqFourRatioMinPct--\rqFourRatioMaxPct\% of its value under fully random pairing. In this
+scalar model, where a wrong partner is a random cell, pairing at OT's measured rates is
+thus indistinguishable from random pairing. Because sisters are not the same cell, these
+rates are upper bounds on the pairing error that matters for perturbation models, and the
+model does not use where OT places its remaining mass. They show that OT agreement at the
+population level does not by itself imply recovery of individual sisters. The correlation between
 estimated and true per-cell effects stayed at \rqFourROneMin--\rqFourROneMax{} even at
 $m=1$. This follows from the design: each treated cell carries its own effect, so a random
 partner adds noise that is uncorrelated with the effect but no bias. The correlation is
@@ -828,16 +843,18 @@ level.
 \rqOneEnrMinT--\rqOneEnrMaxT{} times the chance mass on sister cells and ranked them above
 other later cells (AUROC \rqOneAUROCMinT--\rqOneAUROCMaxT). It was also closer to the clonal
 fate composition than the independent coupling for \fateNBetterAll{} of
-\fateNClustersAll{} early clusters. Yet at most \rqOneMassPctMaxT\% of an early cell's mass
+\fateNClustersAll{} early clusters, and for \fateMeasNBetterAll{} on measured labels alone
+(descriptive counts). Yet at most \rqOneMassPctMaxT\% of an early cell's mass
 reached its sisters, and its heaviest partner was a sister for at most
 \rqOneTopOnePctMaxT\% of cells. On measured labels alone the fate gains held for the
 ventral-midbrain and most hindbrain progenitors but not for two III$\to$IV clusters, so the
 latest transition's fate agreement depends partly on label transfer. These findings do not conflict. A population-level quantity
 averages over many cells whose individual partners are interchangeable within a state, so a
 coupling can be right in aggregate while almost every pair is wrong. The kNN coupling put a
-similar share of mass on sisters (\rqOneKnnEnrMinT--\rqOneKnnEnrMaxT{} times chance). This
-suggests that what OT recovers is largely transcriptional proximity, not lineage
-information added by the transport constraint. This agrees with clonal studies of haematopoiesis, in which
+similar share of mass on sisters (\rqOneKnnEnrMinT--\rqOneKnnEnrMaxT{} times chance). In
+this expression space, the transport constraint therefore added little sister mass beyond
+local transcriptional proximity; this does not show that OT adds nothing in other spaces or
+settings. This agrees with clonal studies of haematopoiesis, in which
 much fate bias was not explained by transcriptional state and methods that infer dynamics
 from state alone predicted clonal fate only modestly~\cite{Weinreb_2020}.
 
@@ -848,9 +865,9 @@ model. Under its effect model, at the measured mismatch rates
 stayed unbiased, as (\ref{eq:rq4}) predicts for this construction, and the per-cell error
 did not depend on the shape of an additive effect. In this system and
 configuration, OT couplings therefore agreed with lineage on population quantities for most
-early progenitors, with the exceptions in Fig.~\ref{fig:fate}. They did not provide
-cell-to-cell correspondence, so heterogeneous responses read off OT-paired cells would here
-be dominated by pairing noise.
+early progenitors, with the exceptions in Fig.~\ref{fig:fate}. They did not recover
+individual sister cells, so under the scalar mismatch model heterogeneous responses read
+off OT-paired cells would here be dominated by pairing noise.
 
 \emph{Marker states are a bottleneck.} The two-score state carries fate information
 (macro-AUROC \rqThreeAUCPgDMinT--\rqThreeAUCPgDMaxT, above chance at every transition), but
@@ -945,14 +962,15 @@ settings were fixed before they were run, but they were not part of the original
 
 % ---------------------------------------------------------------------------
 \section{Conclusion}\label{sec:conclusion}
-Measured lineage shows that entropic OT couplings in human neural differentiation capture
-shared ancestry above chance and recover population-level fate composition at early
-transitions. They do not, however, link individual cells to their sisters. Two-score marker
+In one human embryonic stem cell line differentiated with one protocol, measured lineage
+shows that entropic OT couplings capture shared ancestry above chance and recover
+population-level fate composition at early transitions. They do not, however, link
+individual cells to their sisters. Two-score marker
 states carry some fate information, but much less than the transcriptome. Even with exact
 sister pairs they support forecasts that are practically equivalent to a constant, and only
 a richer input revealed an advantage of true over OT pairs. In
 settings like this one, OT couplings should therefore be used for population quantities,
-checked cluster by cluster, and not as cell-level correspondences. Low-dimensional marker states should be benchmarked against richer
+checked cluster by cluster, and not as cell-to-sister correspondences. Low-dimensional marker states should be benchmarked against richer
 representations before being used to describe fate, and claims about either should be
 checked against lineage where it exists (Table~\ref{tab:checklist}).
 
