@@ -7,13 +7,14 @@ top 200 by rank, the first 200 HVG columns here); linear effect e_i = 0.5 + 0.25
 (z1 = standardised PC1 of §4) on the 200 effect genes; sparse effect (A3.6) = the same e_i on
 the top 20 effect genes only.
 
-Per replicate, seed s (0-99) and effect:
+Per replicate, seed s (0-19, amendment A6) and effect:
   * cells split at random into a control half (first floor(n/2) of a permutation) and a
-    treated half, rng = np.random.default_rng([s, rep]); treated profiles = own profile + e_i
+    treated half, rng = np.random.default_rng([s, rep]); each half capped at 4,000 cells (A6:
+    the first 4,000 of the half in the permutation); treated profiles = own profile + e_i
     on the effect genes (the oracle partner of a treated cell is its own pre-effect profile);
   * space: the §4 HVG set (kept fixed; HVGs are not reselected on the treated profiles), scaled
     (scanpy scale, max_value 10) and 30 PCs (arpack, random_state 0) fitted on the pooled
-    halves; cost = squared Euclidean treated x control / its median;
+    (capped) halves; cost = squared Euclidean treated x control / its median;
   * partners: oracle; balanced entropic OT eps = 0.05 (POT sinkhorn_log, solved at eps 0.1 then
     0.05 warm-started, as RQ1), (i) a partner sampled from the row and (ii) the barycentric
     partner sum_j w_ij L_j; kNN (k = 10) in the same space, sampled and averaged; a uniform
@@ -53,7 +54,8 @@ rq1 = _load("rq1", "06_rq1_coupling.py")
 CACHE = ROOT / "data/interim/rq4_struct"
 OUT = ROOT / "results/21_rq4_structured"
 rq1.CACHE = CACHE / "pot"
-N_SEEDS = 100
+N_SEEDS = 20          # A6
+CAP = 4000            # A6: cells per half
 
 
 def prepare(rep):
@@ -115,7 +117,8 @@ def run(rep, seeds):
                 continue
             t0 = time.time()
             perm = np.random.default_rng([s, rep]).permutation(n)
-            C, T = perm[: n // 2], perm[n // 2:]
+            h = n // 2
+            C, T = perm[:h][:CAP], perm[h:][:CAP]          # A6 cap per half
             e = e_all[T]
             Hp = np.vstack([H[C], H[T]])
             Hp[len(C):, :G] += e[:, None]
@@ -185,7 +188,7 @@ def summarise():
     import scanpy
     (OUT / "provenance.txt").write_text("\n".join([
         f"git_commit {commit}{' (DIRTY scripts/)' if dirty else ''}",
-        "plan: ANALYSIS_PLAN.md amendment A4.1(b) (2026-11-18, second review round, exploratory)",
+        "plan: ANALYSIS_PLAN.md amendment A4.1(b), with A6 (4,000-cell cap per half, 20 seeds) (2026-11-18, exploratory)",
         f"python {sys.version.split()[0]} scanpy {scanpy.__version__} POT {ot.__version__} numpy {np.__version__}",
         f"input {rq4.OBS.relative_to(ROOT)} sha256 {rq4.sha256(rq4.OBS)}",
         f"input {rq4.QC.relative_to(ROOT)} sha256 {rq4.sha256(rq4.QC)}",

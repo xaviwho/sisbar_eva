@@ -372,3 +372,12 @@ accuracy, how much error does mismatching add to the estimated response?
   50-draw summaries for constants and Ridge, the 10-draw summaries for the random forest, and,
   for comparability, the constants and Ridge also summarised on d = 0–9. Nothing else in A4
   changes.
+- **A6 (2026-11-18) — compute reduction for A4.1(b) only (written before any A4.1(b) result
+  existed; approved by the author).** As written, A4.1(b) needs balanced OT between halves of
+  up to ~9,800 cells (replicate 2); one seed × effect took over 20 min, so 100 seeds × 2
+  effects × 3 replicates cannot be completed (a single timing run was stopped before
+  finishing and discarded). Change: per seed, after the random split into halves, each half is
+  capped at 4,000 cells (the first 4,000 of that half in the seed's permutation; replicate 1,
+  1,324/1,325 cells per half, is not capped); the 30-PC space, OT and kNN are fitted on the
+  capped halves; **20 seeds** (s = 0–19) instead of 100; both effects (linear, sparse) kept;
+  summaries are 2.5/97.5% percentiles over the 20 seeds. Nothing else in A4 changes.
