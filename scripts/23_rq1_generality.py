@@ -80,12 +80,15 @@ def embed(a0, n_hvg, n_pc):
 
 def cc_score(a0, early_mask):
     import scanpy as sc
-    genes = [g for g in CC_GENES.read_text().split() if g in set(a0.var_names)]
+    # var_names are Ensembl IDs; the list holds symbols -> match on var['symbol']
+    wanted = set(CC_GENES.read_text().split())
+    cols = np.where(a0.var["symbol"].isin(wanted).to_numpy())[0]
+    assert len(cols) > 0
     a = a0[early_mask].copy()
     sc.pp.normalize_total(a, target_sum=1e4)
     sc.pp.log1p(a)
-    x = np.asarray(a[:, genes].X.mean(1)).ravel()
-    return (x - x.mean()) / x.std(), len(genes)
+    x = np.asarray(a.X[:, cols].mean(1)).ravel()
+    return (x - x.mean()) / x.std(), len(cols)
 
 
 def cost(X0, X1):
