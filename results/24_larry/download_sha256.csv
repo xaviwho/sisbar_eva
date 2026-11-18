@@ -1,0 +1,7 @@
+file,url,bytes,sha256
+GSM4185642_stateFate_inVitro_cell_barcodes.txt.gz,https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM4185nnn/GSM4185642/suppl/GSM4185642_stateFate_inVitro_cell_barcodes.txt.gz,595644,ec5396aaf38526f43d4d1b67997e2ef88cc9c227bd76d92250ca0077ae25d49f
+GSM4185642_stateFate_inVitro_clone_matrix.mtx.gz,https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM4185nnn/GSM4185642/suppl/GSM4185642_stateFate_inVitro_clone_matrix.mtx.gz,197607,3ec9c54e9b1b53697f2a247609014c903e6670cc28a5cf0d8016810a101a7148
+GSM4185642_stateFate_inVitro_gene_names.txt.gz,https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM4185nnn/GSM4185642/suppl/GSM4185642_stateFate_inVitro_gene_names.txt.gz,66130,0e4513b828461b9ea1c48740a14686d417f06ff0137c4ae61a780a2c4ae0303d
+GSM4185642_stateFate_inVitro_library_names.txt.gz,https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM4185nnn/GSM4185642/suppl/GSM4185642_stateFate_inVitro_library_names.txt.gz,2586,6237a8527854a514ee6ed8188ba97d8d9f25bb83af8fa0297942019e35129801
+GSM4185642_stateFate_inVitro_metadata.txt.gz,https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM4185nnn/GSM4185642/suppl/GSM4185642_stateFate_inVitro_metadata.txt.gz,2215288,d98f67d01aa5d9aa3f8000466d6bf19bdb0596ecdc3eb7ef896b6f6ff49b55a2
+GSM4185642_stateFate_inVitro_normed_counts.mtx.gz,https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM4185nnn/GSM4185642/suppl/GSM4185642_stateFate_inVitro_normed_counts.mtx.gz,2065697092,f0736087e71f039baaa3d735f6fde87f391eb8df89c6a8223593e37ab48e2564
