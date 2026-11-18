@@ -115,6 +115,41 @@
 
 ## Log (newest first)
 
+### 2026-11-19 — Claude (cloud workspace) — A6 written; A4.5, A4.6, A4.7 done; A4.1(b), A4.2 running
+- **Amendment A6** (`038439a`, approved by the author, before any A4.1(b) result): A4.1(b) halves capped
+  at 4,000 cells, 20 seeds (one replicate-2 seed took > 20 min as written).
+- **Cell-cycle list for A4.5:** the scanpy tutorial's own file (Dropbox zip used by the tutorial),
+  97 genes (S = first 43), 96 present; SHA-256 in `results/23_rq1_generality/provenance.txt`. No amendment.
+- **Workspace:** restarted twice under memory pressure (three jobs); lanes reduced to two; all
+  per-job caches survived. Memory/implementation fixes (no setting changed): A4.5 gene symbols via
+  `var['symbol']`, counts freed before OT (embedding with 2,000/30 verified equal to RQ1's);
+  A4.7 exact kNN for every 30-NN graph (approximate search fails with a numba error), and the 30-NN
+  settings passed to CellRank's within-stage connectivities (its defaults were not 30-NN).
+- **A4.5 generality** (`results/23_rq1_generality/`; all solves converged). **The RQ1 picture holds
+  in every space:** OT AUROC 0.61 / 0.64–0.65 / 0.60 (15 PCs, 50 PCs, 4,000 HVGs; RQ1 0.61 / 0.64 /
+  0.59); kNN ≈ 0.50; partner error R at III→IV 0.95–0.98. **Growth-informed balanced OT helps
+  modestly, most at III→IV:** AUROC 0.66 (λ 0.5) and 0.69 (λ 1) vs 0.59; R 0.87 / 0.85 vs 0.96;
+  I→II/II→III AUROC 0.62–0.68. Growth-informed unbalanced OT is lower (AUROC 0.53–0.60).
+- **A4.6 LARRY** (`results/24_larry/`; all solves converged). Pools: day 2→4 all 1,544 cross-stage
+  clones fit under the cap, so the three pools share their foreground and differ only in background
+  (pooled CIs there count clones three times; per-pool rows given); day 4→6 pools hold 654–754
+  clones. **OT recovers lineage better in LARRY than in SISBAR:** AUROC 0.74 / 0.77 (balanced ε 0.05;
+  0.73–0.78 over ε), AP 0.012 / 0.021 vs chance 0.0005 / 0.0011 (25×/20×), R 0.47 / 0.31. kNN ranks at
+  chance (AUROC 0.50–0.51) but its R is no worse (0.40 / 0.22). Gaussian kernel AUROC 0.59 / 0.71.
+  Fate agreement (authors' labels): OT close for committed early types (e.g. d2 Neutrophil 0.05 vs
+  independent 0.77) but worse than independent for d4 Undifferentiated (0.19 vs 0.13).
+  → For the paper: the SISBAR result is not a generic failure of OT; lineage recovery depends on the
+  system (haematopoiesis over 2 days vs neural differentiation over 8–15 days).
+- **A4.7 CellRank 2** (`results/25_cellrank/`; cellrank 2.4.0 in an isolated venv,
+  `environment/requirements-cloud-cellrank.txt`). Fate agreement tracks OT (same plan); better for
+  III-NPvMB (TVD 0.23 vs OT 0.35, independent 0.45), similar elsewhere. As an RQ3 predictor (no
+  fitting): macro-AUROC 0.66 / 0.77 / 0.60 — above (Pg, D) at I→II (+0.05 [0.02, 0.08]) and II→III
+  (+0.06 [0.04, 0.08]), below it at III→IV (−0.05 [−0.07, −0.04]), and below 30-PC and the fate axis
+  everywhere (−0.04 to −0.17).
+- **Still running:** A4.2 (III→IV done; II→III 13/20; I→II started in a second process); A4.1(b)
+  (replicate 1 done, replicate 3 15/20, then replicate 2). Earlier this session: A4.3, A4.4, A4.1(a)
+  (entry below).
+
 ### 2026-11-18 — Claude (cloud workspace) — A5 written; A4.3, A4.4, A4.1(a) done
 - **Amendment A5** (`4bbd7d1`, before any A4.2 run, approved by the author): in A4.2's sampled
   designs, constants and Ridge on all 50 draws, random forest on draws 0–9 only (compute: ~70 h
