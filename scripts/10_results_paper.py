@@ -1197,6 +1197,7 @@ Transition & Pairs & Model & $\Delta$ [95\% interval] & $\Delta$ (\%) & Within-s
         put(f"fateMeasNBetter{TN[t]}", int(mm.better.sum()))
         put(f"fateMeasNClusters{TN[t]}", len(mm))
         assert int(kq.better.sum()) == int(M[f"fateNBetter{TN[t]}"])  # k15 reproduces RQ1
+    put("fateMeasNBetterAll", sum(int(M[f"fateMeasNBetter{TN[t]}"]) for t in TR))
     # I->II clusters that switch from OT-better (all labels) to OT-worse (measured labels)
     k1 = pw[(pw.transition == "I->II") & (pw.labels == "k15")].set_index("early_cluster")
     m1 = pw[(pw.transition == "I->II") & (pw.labels == "measured")].set_index("early_cluster")
