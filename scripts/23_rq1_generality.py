@@ -58,18 +58,17 @@ def load_counts(d):
         a = ad.read_h5ad(rq1.LIBS / f"{lib}.h5ad", backed="r")
         parts.append(a[ids.to_numpy()].to_memory())
         a.file.close()
-    a = ad.concat(parts)[d.cell_id.to_numpy()].copy()
+    a = ad.concat(parts, merge="same")[d.cell_id.to_numpy()].copy()   # keep var['symbol']
     a.obs["library"] = d.library.to_numpy()
     return a
 
 
 def embed(a0, n_hvg, n_pc):
     import scanpy as sc
-    a = a0.copy()
-    a.layers["counts"] = a.X.copy()
+    a = a0.copy()          # X holds raw counts: seurat_v3 on X = RQ1's layer="counts" (memory only)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        sc.pp.highly_variable_genes(a, flavor="seurat_v3", n_top_genes=n_hvg, batch_key="library", layer="counts")
+        sc.pp.highly_variable_genes(a, flavor="seurat_v3", n_top_genes=n_hvg, batch_key="library")
         sc.pp.normalize_total(a, target_sum=1e4)
         sc.pp.log1p(a)
         a = a[:, a.var.highly_variable].copy()
@@ -211,8 +210,13 @@ def run_job(obs, transition, rep):
               & (ref.rep == rep) & (ref.coupling == "kNN")].set_index("cell_id").m
     assert np.allclose(pd.Series(mk, index=e.cell_id.to_numpy()[efg]).loc[ref.index], ref, atol=1e-9), tag
     del Wk
-    for space, (nh, npc) in SPACES.items():
-        X = embed(a0, nh, npc)
+    import gc
+    embs = {space: embed(a0, nh, npc) for space, (nh, npc) in SPACES.items()}
+    z_cc, n_cc = cc_score(a0, st == s0)
+    del a0
+    gc.collect()                          # memory only: counts freed before any OT
+    for space in SPACES:
+        X = embs[space]
         X0, X1 = X[i0], X[i1]
         score(knn_W(X0, X1), "kNN", space)
         M = cost(X0, X1)
@@ -222,8 +226,6 @@ def run_job(obs, transition, rep):
         score(rq1.plan_from_potentials(M[efg], 0.05, lu[efg], lv), "OT_bal_eps0.05", space)
         del M
         print(tag, space, f"{time.time() - t0:.0f}s", flush=True)
-    z_cc, n_cc = cc_score(a0, st == s0)
-    del a0
     M = cost(Xr[i0].astype(np.float32), X1r.astype(np.float32))
     for lam in LAMBDAS:
         a = np.exp(lam * z_cc)
