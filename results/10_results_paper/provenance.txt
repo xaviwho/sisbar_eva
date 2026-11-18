@@ -1,4 +1,4 @@
-git_commit 57fd1c1ced7644801bc4adfcab2e58dd6e0e022f
+git_commit c8c2feb493e73e703a11eaf6c8ab16211ffb6c55
 plan: ANALYSIS_PLAN.md approved at 65cd70d (amendments A1-A3; A3 = post-review additions)
 python 3.11.9 pandas 2.3.3 numpy 2.4.6 matplotlib 3.11.2
 environment: Windows (VS Code session)

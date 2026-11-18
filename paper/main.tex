@@ -159,7 +159,23 @@ both made before the analyses they affect, are recorded there with dates: a memo
 solver for one robustness job, and the tie-break rule for fate labels. After peer review we
 added seven exploratory analyses, whose settings were fixed in a further dated entry before
 any of them was run; they are labelled as post-review additions and reported in
-Tables~S6--S13. Table~\ref{tab:methods} lists the settings.
+Tables~S6--S13. Fig.~\ref{fig:overview} summarises the data and the analysis flow, and
+Table~\ref{tab:methods} lists the settings.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig1_overview.pdf}
+\caption{Study overview. (a) Lineage ground truth: barcoded progenitors divide three to four
+times, the culture is split, and one half is profiled at stage $t$ and the other at $t{+}1$, so
+a shared barcode links sister cells across the transition. (b) Analysis flow. Couplings
+between consecutive stages are computed in one expression space and scored against the
+sister links (RQ1). The same cells are used to forecast the sister's later marker state from
+true, OT or independent training pairs (RQ2), to predict a clone's later fate from four
+representations of its early cell (RQ3), and to propagate the mismatch rate measured in RQ1
+into a simulated perturbation estimate (RQ4). All analyses share the protocol in the bottom
+strip.}
+\label{fig:overview}
+\end{figure*}
 
 \subsection{Lineage data and ground truth}\label{sec:data}
 We use the single-cell split-barcoding (SISBAR) data of~\cite{You_2023}. H9 human embryonic

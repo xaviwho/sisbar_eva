@@ -87,6 +87,14 @@
 
 ## Log (newest first)
 
+### 2026-11-18 — Claude (VS Code) — Fig. 1 overview added
+- The outline's Fig. 1 (data and method flow) was missing. Added `fig1()` to
+  `scripts/10_results_paper.py` → `paper/figures/fig1_overview.pdf`: (a) split-barcoding
+  sister links, (b) expression space → couplings → RQ1–RQ4, RQ1 mismatch rate → RQ4, protocol
+  strip. Settings only, no result values. Placed at the start of Methods; figures now number
+  1–6 in step with their file names. Main text 12 pages; page 12 holds only the last
+  references, so biographies must fit there (12-page budget).
+
 ### 2026-11-18 — Claude (VS Code) — post-review results written into the paper; release tagged
 - Generator `scripts/10_results_paper.py` extended (`post_review()`, committed `57fd1c1` before
   running; provenance clean). New macros and supplementary Tables S6–S13 (S6 30-PC input,
