@@ -134,7 +134,7 @@
   clones fit under the cap, so the three pools share their foreground and differ only in background
   (pooled CIs there count clones three times; per-pool rows given); day 4→6 pools hold 654–754
   clones. **OT recovers lineage better in LARRY than in SISBAR:** AUROC 0.74 / 0.77 (balanced ε 0.05;
-  0.73–0.78 over ε), AP 0.012 / 0.021 vs chance 0.0005 / 0.0011 (25×/20×), R 0.47 / 0.31. kNN ranks at
+  0.71–0.78 over ε), AP 0.012 / 0.021 vs chance 0.0005 / 0.0011 (27×/20×), R 0.47 / 0.31. kNN ranks at
   chance (AUROC 0.50–0.51) but its R is no worse (0.40 / 0.22). Gaussian kernel AUROC 0.59 / 0.71.
   Fate agreement (authors' labels): OT close for committed early types (e.g. d2 Neutrophil 0.05 vs
   independent 0.77) but worse than independent for d4 Undifferentiated (0.19 vs 0.13).
