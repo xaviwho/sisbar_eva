@@ -1,0 +1,7 @@
+git_commit 1fc77f8b6e7e3aa5c5b0249d94fd484e021eb053
+plan: ANALYSIS_PLAN.md amendment A4.1(a) (2026-11-18, second review round, exploratory)
+python 3.13.18 numpy 2.5.3 pandas 3.0.5
+input results/03_objects/cell_obs.csv.gz sha256 c4a43ad240fb68c4ebaec31080e4e4e85eb50c9ea1c68e037baac999cac34ae4
+input results/04_qc/cell_qc.csv.gz sha256 7f821c13c3df65c7a0d388da8b20b6fbc3a9fed79bfeb9213bfdfb26584de0b2
+input RQ1 embeddings and potentials: data/interim/rq1/primary_*_{emb,bal_0.05,unb_0.05}.npz
+check: own-clone mass per cell equals results/06_rq1/cells_forward.csv.gz (1e-6)
