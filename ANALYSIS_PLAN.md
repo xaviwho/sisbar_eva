@@ -267,3 +267,98 @@ accuracy, how much error does mismatching add to the estimated response?
     per-cell metrics for clones whose viral-barcode set is a single barcode. *Disclosure:* a
     preliminary version of this check was computed during review triage on 2026-11-17,
     before this entry was written (OT AUROC unchanged to ±0.01).
+- **A4 (2026-11-18) — second review round (exploratory; not pre-registered).** Added in
+  response to the second set of reviews. Every setting below is fixed here before any of
+  these analyses is run; the primary analyses and the A3 results are unchanged. Primary
+  cell set, capped pools (background ≤ 8,000 per stage, seed as in §0), the RQ1 30-PC
+  embedding and cost (squared Euclidean / median) unless stated. In the paper these are
+  labelled post-review additions.
+  - **A4.1 Structured partners for RQ4.**
+    - *(a) Lineage-grounded partner error (all three transitions, per replicate).* For each
+      early foreground cell i with at least one later sister, the partner error of a
+      coupling is D(i) = Σ_j w_ij · mean_{s ∈ sisters(i)} ‖x_j − x_s‖², in the RQ1 30-PC
+      space, with w the row-normalised coupling over all later cells. Couplings: OT
+      balanced ε = 0.05 (the RQ2/RQ4 coupling), unbalanced τ = 0.9 ε = 0.05, kNN (k = 10),
+      independent (uniform). Floor: sister-to-sister distance D_sis(i) = mean over pairs of
+      distinct later sisters of the same clone (clones with ≥ 2 later sisters only). Reported:
+      clone-weighted means of D, and the normalised partner error
+      R = (D_coupling − D_sis)/(D_indep − D_sis) (0 = as good as a sister, 1 = random), with
+      1,000-resample clone-bootstrap CIs, pooled and per replicate. Also reported per row:
+      effective number of partners exp(H(w_i·)) and the weight on the 10 nearest later cells.
+    - *(b) Simulation with structured partners (II→III stage-III cells, per replicate, as §4).*
+      Cells are split at random (seed s) into a control half and a treated half; treated
+      cells receive the §4 linear effect (and, as a second effect, the A3.6 sparse effect).
+      Each treated cell's estimate is T_i − L_partner over the effect genes; its error is
+      measured against its own pre-effect profile (the oracle). Partners: (i) oracle (own
+      profile; error 0), (ii) balanced entropic OT between treated and control halves,
+      ε = 0.05, cost = squared Euclidean in a 30-PC PCA (2,000 HVGs, §4 pipeline) fitted on the
+      pooled halves, divided by its median: sampled partner from the row (per-cell RMSE, r,
+      bias) and barycentric partner Σ_j w_ij L_j; (iii) kNN (k = 10) in the same space,
+      sampled and averaged; (iv) uniform random control. 100 seeds; 2.5/97.5% intervals.
+      Reported with the row statistics of (a). This replaces the scalar-mismatch reading of
+      §4 for the structured question; §4 is still reported as the scalar case.
+  - **A4.2 RQ2 target designs.** Splits, sampled early cells and true sisters as in §2 (the
+    07 replay). For OT and independent training pairs, three target designs:
+    (i) sampled (the §2 design), with 50 draws per split (draw seed d = 0–49);
+    (ii) expected: ȳ_i = Σ_{j∈𝒜} w_ij y_j / Σ_{j∈𝒜} w_ij (for independent pairs, the mean of 𝒜);
+    (iii) foreground-only: 𝒜 restricted to later cells of training clones, sampled (50
+    draws) and expected. Inputs (Pg, D) and 30-PC (A3.1 pipeline). Models: constant median,
+    constant mean, Ridge, random forest (Transformer omitted, as in A3.4). 20 splits. Reported:
+    Δ vs constant median and vs the true-lineage model, with split-stability intervals, and
+    the foreground share of sampled OT targets (mass of the restricted row on training-clone
+    cells) by transition × replicate.
+  - **A4.3 Fate labels and per-cluster uncertainty.**
+    - (i) Label-transfer accuracy: for every measured later cell, its label is predicted by
+      the §1 rule (k = 15 vote among clone-table cells of the same stage and replicate)
+      excluding all cells of its own clone (leave-one-clone-out). Accuracy and balanced
+      accuracy by transition × replicate, and per-cluster recall.
+    - (ii) Paired differences: TVD(OT) − TVD(independent) and TVD(OT) − TVD(kNN) per early
+      cluster (≥ 20 clones), with all labels and with measured labels only (A3.5 rule), with
+      1,000-resample clone-bootstrap intervals (paired: the same resampled clones), pooled and
+      per replicate (clusters with ≥ 10 clones in that replicate).
+    - (iii) Counts: cross-stage clones and foreground cells per transition × replicate ×
+      early cluster.
+  - **A4.4 Proximity baselines and ranking metrics (RQ1).** Additional couplings, each on
+    the same pools and cost: kNN with k ∈ {5, 10, 20, 50} (uniform over the k nearest later
+    cells); a row-normalised Gaussian kernel w_ij ∝ exp(−C_ij/ε), ε ∈ {0.01, 0.05, 0.1} (no
+    column constraint); mutual nearest neighbours with k = 10 (uniform over mutual
+    neighbours; rows without a mutual neighbour are reported as coverage and excluded from
+    that coupling's metrics). Metrics: those of §1 plus average precision with the sisters as
+    positives (ties: sklearn average_precision_score; chance = s/n) and the row statistics of
+    A4.1(a). Applied also to the existing OT couplings so all rows are comparable.
+  - **A4.5 Within-dataset generality of RQ1.** Balanced OT ε = 0.05 and kNN (k = 10) in
+    three further expression spaces: 15 PCs and 50 PCs of the 2,000 HVGs, and 30 PCs of
+    4,000 HVGs. Growth-informed OT in the RQ1 space: row marginal a_i ∝ exp(λ z_i), with z_i
+    the standardised mean log-expression of the Tirosh et al. (2016) S-phase and G2/M genes
+    (as shipped with scanpy's cell-cycle tutorial list) in early cell i, λ ∈ {0.5, 1}; both
+    balanced and unbalanced (τ = 0.9), ε = 0.05. Metrics and summaries as §1, incl. fate
+    agreement and A4.1(a).
+  - **A4.6 Second lineage dataset: LARRY in vitro haematopoiesis (Weinreb et al. 2020).**
+    - *Data:* GEO GSE140802, sample GSM4185642 (stateFate_inVitro): normalised counts,
+      clone matrix, metadata, gene names; SHA-256 recorded at download. Time points days 2,
+      4, 6. A clone is a column of the clone matrix. Transitions day 2→4 and day 4→6 (one
+      step, as for SISBAR); cross-stage clones have cells at both time points of a transition.
+    - *Pools:* the deposited counts are already total-count normalised, so expression is
+      log(1+x) of them; 2,000 HVGs with scanpy flavor "seurat" (batch = Library), scaled
+      (clip 10), 30 PCs, fitted per pool on all its cells. Foreground cells are sampled by
+      whole cross-stage clones (seed r) until each time point has ≤ 6,000 foreground cells;
+      background cells are added up to 8,000 per time point. Three pools per transition
+      (seeds r = 0, 1, 2) play the role of replicates (clone subsamples, not biological
+      replicates; reported as such).
+    - *Couplings and metrics:* exactly as §1 (balanced and unbalanced τ = 0.9 over the ε grid,
+      kNN k = 10, independent) plus the A4.4 baselines and metrics and A4.1(a). Fate agreement
+      uses the authors' cell-type annotation for every later cell (no label transfer); early
+      clusters = day-2 (or day-4) annotations with ≥ 20 cross-stage clones.
+    - *Expectation stated before running:* none beyond §1's; results are reported whether or
+      not they match SISBAR.
+  - **A4.7 Established fate-mapping baseline: CellRank 2.** Per transition × replicate, a
+    CellRank 2 RealTimeKernel is built from the same balanced OT plan (ε = 0.05) between
+    stages plus within-stage connectivity kernels (CellRank defaults; self_transitions =
+    "connectivities", conn_weight = 0.2, 30-NN graph in the RQ1 space). Terminal states are
+    the later-stage fate classes of §3 (later cells labelled with their cluster, ≥ 30-clone
+    rule, rest "other"); fate probabilities are computed for early cells. Scored (a) as
+    fate agreement (TVD against the clonal fate distribution, as §1) and (b) as RQ3 fate
+    prediction: a clone's predicted fate distribution is the mean over its early cells,
+    macro-AUROC on the test clones of each of the 20 RQ3 splits (no fitting), compared with
+    the RQ3 representations. If CellRank 2 cannot be installed or run within the workspace
+    limits, this is recorded and the item is dropped, not substituted.

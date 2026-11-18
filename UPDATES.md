@@ -15,6 +15,34 @@
 
 ## Open instructions (author → Claude)
 
+- [ ] 2026-11-18 — **(Cloud) Second review round: ANALYSIS_PLAN amendment A4, items
+  A4.1–A4.7.** Approved by the author (goal: acceptance at TCBB).
+  - **The rule:** every setting is fixed in A4. Follow it exactly; any deviation becomes a new
+    dated amendment, written before the affected run. Commit each script before running it;
+    each writes `results/NN_*/provenance.txt` and first checks that it reproduces the
+    original analysis where they overlap. One OT job at a time (5.8 GB limit).
+  - **Order (cheapest first), scripts and outputs:**
+    - A4.3 fate labels and per-cluster paired differences → `scripts/18_fate_uncertainty.py`,
+      `results/18_fate_unc/`.
+    - A4.4 proximity baselines and average precision → `scripts/19_rq1_baselines.py`,
+      `results/19_rq1_baselines/`.
+    - A4.1(a) lineage-grounded partner error → `scripts/20_partner_error.py`,
+      `results/20_partner_error/` (needs the RQ1 plans; reuse the saved potentials).
+    - A4.1(b) RQ4 with structured partners → `scripts/21_rq4_structured.py`,
+      `results/21_rq4_structured/`.
+    - A4.2 RQ2 target designs → `scripts/22_rq2_targets.py`, `results/22_rq2_targets/`.
+    - A4.5 RQ1 in other spaces and with growth-informed OT → `scripts/23_rq1_generality.py`,
+      `results/23_rq1_generality/`.
+    - A4.6 LARRY → `scripts/00b_download_larry.py` (GEO GSE140802, GSM4185642 files, SHA-256
+      check) and `scripts/24_larry_rq1.py`, `results/24_larry/`. Data under git-ignored
+      `data/`.
+    - A4.7 CellRank 2 → `scripts/25_cellrank.py`, `results/25_cellrank/`. If CellRank 2
+      cannot be installed or run within the limits, record that in the log and skip; do not
+      substitute another method.
+  - **Outputs:** per-cell/per-seed CSVs plus a summary CSV per item; add the new packages to
+    `environment/requirements-cloud.txt`. Do not write paper text. Log what changes a claim,
+    as last time. Afterwards, tell the author to recreate the `v1.0-submission` tag on the
+    final commit (VS Code session does it).
 - [ ] Later — Jerber D30 transfer of the RQ3 fate-bias axis (needs Jerber data; separate
   plan amendment).
 
@@ -86,6 +114,24 @@
 ---
 
 ## Log (newest first)
+
+### 2026-11-18 — Claude (VS Code) — second review triaged; amendment A4; wording fixes
+- Second review (three AI reviewers, major revision). Author: target is acceptance at TCBB,
+  so all requested analyses are planned, including a second dataset.
+- Already addressed, now stated clearly in the paper: estimands (RQ1 transductive by design;
+  RQ2 primary transductive coupling, inductive refit of every step as post-review check);
+  measured-label fate counts reported next to all-label counts and called descriptive;
+  shared-ancestry/sister wording replaces "descendant"/"cell-level correspondence" in the
+  abstract, RQ4 text, Discussion and Conclusion; scope limited to one line and protocol;
+  δ justification; repository contents; label-transfer tie rule.
+- RQ4 text now calls the existing analysis the scalar-mismatch model; its claims are
+  revisited when A4.1 lands. The kNN sentence is softened until A4.4 lands.
+- Related Work: Saelens 2019, Weiler 2024 (CellRank 2), Klein 2025 (moscot), Lange 2024
+  (moslin), Spanjaard & Junker 2017. The reviewers' "Spanjaard and Junker (2025)" is a
+  Methods in Molecular Biology protocol chapter (LINNAEUS), not a review; the 2017 review is
+  cited instead. All entries verified against Crossref.
+- New open instruction: (Cloud) A4.1–A4.7. Page budget: the main text is at 12 pages before
+  biographies; once A4 lands, robustness detail moves to the supplement.
 
 ### 2026-11-18 — Claude (VS Code) — Fig. 1 overview added
 - The outline's Fig. 1 (data and method flow) was missing. Added `fig1()` to
