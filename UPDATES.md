@@ -115,6 +115,46 @@
 
 ## Log (newest first)
 
+### 2026-11-18 — Claude (cloud workspace) — A5 written; A4.3, A4.4, A4.1(a) done
+- **Amendment A5** (`4bbd7d1`, before any A4.2 run, approved by the author): in A4.2's sampled
+  designs, constants and Ridge on all 50 draws, random forest on draws 0–9 only (compute: ~70 h
+  → ~15 h). Nothing else in A4 changes.
+- **A4.3 fate labels** (`scripts/18_fate_uncertainty.py`, `results/18_fate_unc/`). Per-cell fate
+  vectors reproduce A3.5 exactly (204 rows).
+  - Leave-one-clone-out label-transfer accuracy (k = 15): 0.87 / 0.93 / 0.91 (I→II / II→III /
+    III→IV); balanced accuracy 0.77 / 0.93 / 0.86. Lowest: III→IV replicate 3, balanced 0.60.
+  - Paired TVD differences (pooled, 1,000 paired clone resamples). **What holds with both label
+    sets:** OT better than independent for I-NPaHB, I-NPvMB, II-NPMHB, II-NPaHB, II-NPpHB,
+    II-NPvMB and III-NPvMB (measured: −0.22 [−0.27, −0.12]); OT worse than independent for
+    I-NbpHB, II-Motors and III-NPpHB (measured: +0.09 [+0.06, +0.12]). OT better than kNN in
+    most clusters.
+  - **Changes a claim:** the A3.5 sign flips for III-GABAs and III-Gluts are **not distinguishable
+    from zero** with either label set (CIs include 0), and III-NPaHB "OT worse than independent"
+    holds with transferred labels (+0.21 [+0.10, +0.27]) but not with measured labels (+0.00
+    [−0.13, +0.12]). III-Motors: OT better with transferred labels, CI includes 0 with measured.
+- **A4.4 proximity baselines** (`scripts/19_rq1_baselines.py`, `results/19_rq1_baselines/`). RQ1
+  couplings reproduce RQ1 per cell (m, m0, AUROC; top-k for all but 136 OT rows whose top 10
+  holds exactly tied weights — underflow at small ε — where RQ1 broke ties by index and A4.4
+  uses the uniform-tie expectation; check refined in `1fc77f8`, before any result was read).
+  - AUROC (pooled): OT balanced ε 0.05 0.61 / 0.64 / 0.59; Gaussian kernel 0.54 / 0.57 / 0.52;
+    kNN k = 5–50 0.50–0.51; MNN 0.50. **The Gaussian kernel's AUROC, AP and top-k are identical
+    for every ε** (a row-normalised monotone kernel ranks by distance alone), so OT's higher
+    AUROC over distance ranking comes from its column (marginal) constraint, not from proximity.
+  - Average precision: OT 0.0045 / 0.0066 / 0.0038 vs chance 0.00025 / 0.00048 / 0.00036
+    (13–18×); Gaussian 0.0037 / 0.0060 / 0.0026; kNN ≈ 0.001.
+  - Own-clone mass enrichment depends strongly on the baseline's spread (kNN5 5.1× / 4.1× /
+    5.4×, kNN50 2.4× / 2.9× / 1.2×); OT 4.0× / 4.2× / 2.8×. MNN (k = 10) covers only 46% / 52% /
+    19% of early cells. Report enrichment alongside the effective number of partners (OT ≈ 1,500;
+    kNN = k).
+- **A4.1(a) partner error** (`scripts/20_partner_error.py`, `results/20_partner_error/`). Own-clone
+  mass reproduces RQ1 per cell. Normalised partner error R (0 = as close as a sister, 1 =
+  random), pooled: OT balanced 0.42 [0.26, 0.58] / 0.43 [0.34, 0.51] / 0.96 [0.90, 1.02];
+  OT unbalanced 0.34 / 0.50 / 0.94; kNN 0.31 / 0.50 / 0.85. **At III→IV OT partners are as far
+  from the sisters as random cells**; at I→II and II→III they sit about halfway. kNN is no worse
+  than OT on this measure. OT puts 4–7% of its mass on the 10 nearest later cells.
+- Next: A4.1(b) (~7 h), A4.2 (with A5), A4.5, A4.6, A4.7. Cell-cycle gene list for A4.5: the
+  scanpy-tutorial URL tried returned 404; to locate before A4.5 (amendment if not found).
+
 ### 2026-11-18 — Claude (VS Code) — second review triaged; amendment A4; wording fixes
 - Second review (three AI reviewers, major revision). Author: target is acceptance at TCBB,
   so all requested analyses are planned, including a second dataset.
