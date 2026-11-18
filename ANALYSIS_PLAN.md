@@ -362,3 +362,13 @@ accuracy, how much error does mismatching add to the estimated response?
     macro-AUROC on the test clones of each of the 20 RQ3 splits (no fitting), compared with
     the RQ3 representations. If CellRank 2 cannot be installed or run within the workspace
     limits, this is recorded and the item is dropped, not substituted.
+- **A5 (2026-11-18) — compute reduction for A4.2 only (written before any A4.2 run).** As
+  written, the two sampled designs of A4.2 need 50 draws × 20 splits × 2 couplings × 2 inputs
+  ≈ 8,000 cross-validated random-forest fits per transition (≈ 70 h on the 2-CPU workspace),
+  which cannot be completed. Change, approved by the author on 2026-11-18: in the sampled
+  designs ((i) and the sampled part of (iii)), constant median, constant mean and Ridge are
+  fitted on all 50 draws (d = 0–49); the random forest is fitted on draws d = 0–9 only. The
+  expected-target designs are unchanged (one fit per split, all models). Reported: the
+  50-draw summaries for constants and Ridge, the 10-draw summaries for the random forest, and,
+  for comparability, the constants and Ridge also summarised on d = 0–9. Nothing else in A4
+  changes.
