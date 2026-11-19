@@ -114,9 +114,11 @@ with A5 (A4.2: RF on draws 0–9) and A6 (A4.1(b): 4,000-cell halves, 20 seeds).
     true-lineage model falls from +0.030 to +0.010.
   - **I→II and II→III:** every design is within δ of the constant for (Pg, D) (OT −1.9% to −4.4%);
     with (Pg, D), OT-trained models are as good as or slightly better than true-lineage models
-    (Δ vs true −0.003 to +0.001). With 30-PC input at II→III, OT designs beat the constant by more
-    than δ (−7.3% to −8.4%, CIs below −0.01) but stay worse than the true-lineage 30-PC model
-    (+0.007 to +0.008). Expected vs sampled targets change little (≤ 1.3 points).
+    (Δ vs true −0.003 to +0.001). With 30-PC input at II→III, OT designs improve on the constant by
+    −7.3% to −8.4% (Δ −0.010 to −0.012; CIs cross −δ, so neither equivalent nor clearly beyond δ)
+    and stay worse than the true-lineage 30-PC model (+0.006 to +0.008). Expected vs sampled targets
+    differ by ≤ 1.4 points at I→II and II→III; at III→IV the expected design roughly halves the
+    background artefact (Ridge, (Pg, D), OT: −5.8% vs −11.1%).
   - Independent pairing: within δ of the constant everywhere except the sampled III→IV artefact
     (Proposition 1 holds once background targets are removed).
 - Workspace restarted twice during A4 (memory, three jobs); all runs resumed from per-job caches;

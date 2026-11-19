@@ -167,7 +167,7 @@ from the viral barcode there.
    halves and 20 seeds). Claims affected (details in UPDATES.md log 2026-11-18 to 2026-11-20):
    - RQ4: with structured (OT/kNN) partners, per-cell effect error is small (RMSE 0.04–0.05 vs
      0.12–0.26 random; r 0.98–0.99); the §4 ceiling applies to random mismatch only.
-   - RQ2: OT training targets are 80–97% background cells; the III→IV gain over the constant
+   - RQ2: OT training targets are 78–97% background cells; the III→IV gain over the constant
      disappears when targets are restricted to training clones (background artefact).
    - RQ1: OT's ranking edge over distance comes from the marginal constraint (Gaussian kernel
      AUROC 0.52–0.57); partner error R = 0.42 / 0.43 / 0.96 (kNN no worse); results hold in other
