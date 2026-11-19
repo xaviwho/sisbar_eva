@@ -1,0 +1,6 @@
+git_commit 13bea62240a82a8444150485ac908e7dbd07a8f1
+plan: ANALYSIS_PLAN.md amendment A4.1(b), with A6 (4,000-cell cap per half, 20 seeds) (2026-11-18, exploratory)
+python 3.13.18 scanpy 1.12.5 POT 0.9.7.post1 numpy 2.5.3
+input results/03_objects/cell_obs.csv.gz sha256 c4a43ad240fb68c4ebaec31080e4e4e85eb50c9ea1c68e037baac999cac34ae4
+input results/04_qc/cell_qc.csv.gz sha256 7f821c13c3df65c7a0d388da8b20b6fbc3a9fed79bfeb9213bfdfb26584de0b2
+check: effect genes and effect equal the §4 (09) and A3.6 caches; oracle error 0

@@ -1,0 +1,6 @@
+git_commit 13bea62240a82a8444150485ac908e7dbd07a8f1
+plan: ANALYSIS_PLAN.md amendment A4.2 with A5 (RF on draws 0-9) (2026-11-18, exploratory)
+python 3.13.18 sklearn 1.9.1 numpy 2.5.3 pandas 3.0.5
+input data/interim/cell_scores.csv.gz sha256 a80e4c6c2f0de2d90552f629deb1aa53962082ce6356a052ca1aff09f75ceeae
+input splits: data/interim/rq2_draws (07 replay); A3.4 fits for sampled (Pg, D) draws 0-9 (data/interim/rq2_redraw), reproduced per split for constants and Ridge
+input true-lineage MAE: results/07_rq2/per_seed.csv, results/12_rq2_pc/per_seed.csv
