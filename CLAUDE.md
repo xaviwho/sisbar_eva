@@ -162,6 +162,24 @@ from the viral barcode there.
    Cloud lesson: POT needs ~2 GB beyond a 10k × 10k cost matrix; one OT process at a time and
    one process per seed keep it under the 5.8 GB limit.
 
+9. ~~Second review round A4.1–A4.7 (cloud).~~ Done 2026-11-20 (`results/18_fate_unc` …
+   `results/25_cellrank`; amendments A5 = A4.2 RF on 10 of 50 draws, A6 = A4.1(b) 4,000-cell
+   halves and 20 seeds). Claims affected (details in UPDATES.md log 2026-11-18 to 2026-11-20):
+   - RQ4: with structured (OT/kNN) partners, per-cell effect error is small (RMSE 0.04–0.05 vs
+     0.12–0.26 random; r 0.98–0.99); the §4 ceiling applies to random mismatch only.
+   - RQ2: OT training targets are 80–97% background cells; the III→IV gain over the constant
+     disappears when targets are restricted to training clones (background artefact).
+   - RQ1: OT's ranking edge over distance comes from the marginal constraint (Gaussian kernel
+     AUROC 0.52–0.57); partner error R = 0.42 / 0.43 / 0.96 (kNN no worse); results hold in other
+     PCA/HVG spaces; growth-informed OT helps modestly at III→IV (AUROC 0.66–0.69).
+   - LARRY: OT recovers lineage better (AUROC 0.74–0.77, R 0.47 / 0.31) — system-dependent.
+   - Fate agreement: III-GABAs/III-Gluts sign flips are within noise; III-NPaHB "OT worse"
+     holds with transferred labels only; III-NPvMB OT better holds with both.
+   - CellRank 2 (isolated venv, `environment/requirements-cloud-cellrank.txt`): fate prediction
+     below 30-PC and the fate axis everywhere.
+   Cloud lesson: three jobs that each load full pools exceed memory and restart the workspace;
+   run at most two, with one OT-heavy job.
+
 ## Research questions
 
 - **RQ1 Coupling recovery:** own-clone OT mass vs chance and vs nearest neighbour;

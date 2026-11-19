@@ -15,34 +15,6 @@
 
 ## Open instructions (author → Claude)
 
-- [ ] 2026-11-18 — **(Cloud) Second review round: ANALYSIS_PLAN amendment A4, items
-  A4.1–A4.7.** Approved by the author (goal: acceptance at TCBB).
-  - **The rule:** every setting is fixed in A4. Follow it exactly; any deviation becomes a new
-    dated amendment, written before the affected run. Commit each script before running it;
-    each writes `results/NN_*/provenance.txt` and first checks that it reproduces the
-    original analysis where they overlap. One OT job at a time (5.8 GB limit).
-  - **Order (cheapest first), scripts and outputs:**
-    - A4.3 fate labels and per-cluster paired differences → `scripts/18_fate_uncertainty.py`,
-      `results/18_fate_unc/`.
-    - A4.4 proximity baselines and average precision → `scripts/19_rq1_baselines.py`,
-      `results/19_rq1_baselines/`.
-    - A4.1(a) lineage-grounded partner error → `scripts/20_partner_error.py`,
-      `results/20_partner_error/` (needs the RQ1 plans; reuse the saved potentials).
-    - A4.1(b) RQ4 with structured partners → `scripts/21_rq4_structured.py`,
-      `results/21_rq4_structured/`.
-    - A4.2 RQ2 target designs → `scripts/22_rq2_targets.py`, `results/22_rq2_targets/`.
-    - A4.5 RQ1 in other spaces and with growth-informed OT → `scripts/23_rq1_generality.py`,
-      `results/23_rq1_generality/`.
-    - A4.6 LARRY → `scripts/00b_download_larry.py` (GEO GSE140802, GSM4185642 files, SHA-256
-      check) and `scripts/24_larry_rq1.py`, `results/24_larry/`. Data under git-ignored
-      `data/`.
-    - A4.7 CellRank 2 → `scripts/25_cellrank.py`, `results/25_cellrank/`. If CellRank 2
-      cannot be installed or run within the limits, record that in the log and skip; do not
-      substitute another method.
-  - **Outputs:** per-cell/per-seed CSVs plus a summary CSV per item; add the new packages to
-    `environment/requirements-cloud.txt`. Do not write paper text. Log what changes a claim,
-    as last time. Afterwards, tell the author to recreate the `v1.0-submission` tag on the
-    final commit (VS Code session does it).
 - [ ] Later — Jerber D30 transfer of the RQ3 fate-bias axis (needs Jerber data; separate
   plan amendment).
 
@@ -74,6 +46,7 @@
 
 ## Done
 
+- [x] 2026-11-18 — (Cloud) Second review round A4.1–A4.7 (with amendments A5, A6) → scripts 00b, 18–25, results `results/18_fate_unc` … `results/25_cellrank`; see logs 2026-11-18 to 2026-11-20. Done 2026-11-20. Tag `v1.0-submission` to be recreated from VS Code.
 - [x] 2026-11-17 — (VS Code) A3.7 single-barcode sensitivity and paper text for A3.1–A3.7:
   generator `57fd1c1` (Tables S6–S13), paper text in the commit after it. 2026-11-18.
 - [x] 2026-11-18 — Q12: tag `v1.0-submission` created and pushed from the author's machine.
@@ -114,6 +87,42 @@
 ---
 
 ## Log (newest first)
+
+### 2026-11-20 — Claude (cloud workspace) — A4 complete (A4.1(b), A4.2 done)
+All A4 items are finished; results in `results/18_fate_unc` … `results/25_cellrank`. Settings as A4
+with A5 (A4.2: RF on draws 0–9) and A6 (A4.1(b): 4,000-cell halves, 20 seeds).
+- **A4.1(b) RQ4 with structured partners** (`results/21_rq4_structured/`; 20 seeds × 3 replicates ×
+  2 effects; all OT solves converged). **Changes the RQ4 claim.** With partners chosen by OT or kNN
+  from a control population (not a scalar random-mismatch rate), per-cell effect error is small:
+  linear effect RMSE 0.04–0.05 (OT sampled), 0.03 (OT barycentric), vs 0.12–0.26 for a random
+  control; Pearson r with the true effect 0.98–0.99 (random 0.88–0.91). Sparse effect: OT sampled
+  RMSE 0.12–0.14, barycentric 0.09, random 0.33–0.44; r 0.87–0.95 (random 0.39–0.83). Bias ≈ 0 for
+  OT (|bias| ≤ 0.004); kNN has a small negative bias with the linear effect (−0.012 to −0.015).
+  OT rows here: ~65–775 effective partners, 27–49% of mass on the 10 nearest controls.
+  → The §4 result (per-cell error at the random ceiling for mismatch ≥ 0.996) describes **random**
+  mismatch. Partners that are wrong as lineage but close in state give accurate per-cell effects
+  in this simulation, because the simulated effect varies smoothly with state (PC1). The paper should
+  say that lineage mismatch does not by itself imply per-cell effect error; what matters is how far
+  partners are in the effect-relevant directions (A4.1(a) measures this for lineage).
+- **A4.2 RQ2 target designs** (`results/22_rq2_targets/`; 20 splits; 50 draws for constants/Ridge,
+  draws 0–9 for RF; A3.4 fits reproduced for every reused draw).
+  - **OT targets are mostly background:** the A-restricted OT row puts only 3–7% (I→II), 13–22%
+    (II→III) and 4–6% (III→IV) of its mass on later cells of training clones.
+  - **The III→IV "gain over the constant" is a background artefact.** Sampled design: −11.1% (Ridge,
+    (Pg, D), OT), −12.7% (independent); restricting targets to training-clone cells removes it
+    (fg_expected −1.2% OT, 0.0% independent, both inside δ), and the model's excess error over the
+    true-lineage model falls from +0.030 to +0.010.
+  - **I→II and II→III:** every design is within δ of the constant for (Pg, D) (OT −1.9% to −4.4%);
+    with (Pg, D), OT-trained models are as good as or slightly better than true-lineage models
+    (Δ vs true −0.003 to +0.001). With 30-PC input at II→III, OT designs beat the constant by more
+    than δ (−7.3% to −8.4%, CIs below −0.01) but stay worse than the true-lineage 30-PC model
+    (+0.007 to +0.008). Expected vs sampled targets change little (≤ 1.3 points).
+  - Independent pairing: within δ of the constant everywhere except the sampled III→IV artefact
+    (Proposition 1 holds once background targets are removed).
+- Workspace restarted twice during A4 (memory, three jobs); all runs resumed from per-job caches;
+  no result was produced by an interrupted run.
+- **Tag:** please recreate `v1.0-submission` on the final commit from the VS Code session (the
+  cloud proxy blocks tag pushes).
 
 ### 2026-11-19 — Claude (cloud workspace) — A6 written; A4.5, A4.6, A4.7 done; A4.1(b), A4.2 running
 - **Amendment A6** (`038439a`, approved by the author, before any A4.1(b) result): A4.1(b) halves capped
