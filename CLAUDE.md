@@ -162,9 +162,9 @@ from the viral barcode there.
    Cloud lesson: POT needs ~2 GB beyond a 10k × 10k cost matrix; one OT process at a time and
    one process per seed keep it under the 5.8 GB limit.
 
-9. ~~Second review round A4.1–A4.7 (cloud).~~ Done 2026-11-20 (`results/18_fate_unc` …
+9. ~~Second review round A4.1–A4.7 (cloud).~~ Done 2026-11-19 (`results/18_fate_unc` …
    `results/25_cellrank`; amendments A5 = A4.2 RF on 10 of 50 draws, A6 = A4.1(b) 4,000-cell
-   halves and 20 seeds). Claims affected (details in UPDATES.md log 2026-11-18 to 2026-11-20):
+   halves and 20 seeds). Claims affected (details in UPDATES.md log 2026-11-18 to 2026-11-19):
    - RQ4: with structured (OT/kNN) partners, per-cell effect error is small (RMSE 0.04–0.05 vs
      0.12–0.26 random; r 0.98–0.99); the §4 ceiling applies to random mismatch only.
    - RQ2: OT training targets are 78–97% background cells; the III→IV gain over the constant
@@ -179,6 +179,13 @@ from the viral barcode there.
      below 30-PC and the fate axis everywhere.
    Cloud lesson: three jobs that each load full pools exceed memory and restart the workspace;
    run at most two, with one OT-heavy job.
+10. ~~A4 results in the paper.~~ Done 2026-11-19 (VS Code): Tables S14–S21, Fig. 6(b)
+   structured partners, Results subsection on LARRY, claims revised as in item 9. Post-review
+   method details live in the supplement's "Supplementary methods" section; the main text
+   keeps the partner-error equation and a one-paragraph summary. Main text is exactly 12
+   pages; any addition must be paid for by a cut. Biographies are commented out (author:
+   not needed at submission); they count toward the 12 pages at the final stage (Q13).
+   Response-to-reviewers letter: not yet written (author's call).
 
 ## Research questions
 

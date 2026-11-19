@@ -556,3 +556,150 @@ sbAUROCThree,0.60
 sbNClonesThree,488
 sbPctMultiThree,12.8
 sbMaxAbsAUROCDiff,0.008
+gaussAUROCMin,0.52
+gaussAUROCMax,0.57
+gaussAUROCOne,0.54
+gaussAUROCTwo,0.57
+gaussAUROCThree,0.52
+apOTRatioMin,10
+apOTRatioMax,18
+knnAllAUROCMin,0.50
+knnAllAUROCMax,0.51
+knnFiveEnr,4.1--5.4
+knnFiftyEnr,1.2--2.9
+mnnCov,19--52
+otNeffMin,"1{,}478"
+otNeffMax,"1{,}678"
+otWnnTenPct,4--7
+peOTOne,0.42
+peOTCIOne,"[0.26, 0.58]"
+peOTTwo,0.43
+peOTCITwo,"[0.34, 0.51]"
+peOTThree,0.96
+peOTCIThree,"[0.90, 1.02]"
+peUnbOne,0.34
+peUnbCIOne,"[0.18, 0.49]"
+peUnbTwo,0.50
+peUnbCITwo,"[0.42, 0.58]"
+peUnbThree,0.94
+peUnbCIThree,"[0.87, 0.99]"
+peKnnOne,0.31
+peKnnCIOne,"[0.17, 0.45]"
+peKnnTwo,0.50
+peKnnCITwo,"[0.42, 0.58]"
+peKnnThree,0.84
+peKnnCIThree,"[0.78, 0.90]"
+strSeeds,20
+strOTSampRMSE,0.04--0.05
+strOTSampR,0.98--0.99
+strOTBaryRMSE,0.03
+strOTBaryR,0.99
+strKnnSampRMSE,0.04--0.05
+strKnnSampR,0.98--0.99
+strKnnAvgRMSE,0.03--0.04
+strKnnAvgR,0.99
+strRandRMSE,0.12--0.26
+strRandR,0.87--0.91
+strOTRMSEMax,0.05
+strOTR,0.98--0.99
+strSpOTSampRMSE,0.12--0.14
+strSpOTSampR,0.87--0.91
+strSpOTBaryRMSE,0.09--0.10
+strSpOTBaryR,0.93--0.95
+strSpKnnSampRMSE,0.12--0.13
+strSpKnnSampR,0.88--0.90
+strSpKnnAvgRMSE,0.08--0.09
+strSpKnnAvgR,0.94--0.95
+strSpRandRMSE,0.33--0.44
+strSpRandR,0.39--0.83
+strSpOTRMSEMax,0.14
+strSpOTR,0.87--0.95
+strOTMaxAbsBias,0.004
+strKnnBias,\ensuremath{-}0.015 to \ensuremath{-}0.012
+strNeff,66--775
+strWnnTenPct,27--49
+fgShareOne,3--7
+fgShareTwo,13--22
+fgShareThree,4--6
+tdThreeSampOTPct,\ensuremath{-}11.1
+tdThreeSampIndPct,\ensuremath{-}12.7
+tdThreeExpOTPct,\ensuremath{-}5.8
+tdThreeFgExpOTPct,\ensuremath{-}1.2
+tdThreeFgExpIndPct,0.0
+tdThreeFgPct,\ensuremath{-}4.1 to $+$3.0
+tdThreeVsTrueSamp,0.030
+tdThreeVsTrueFg,0.010
+tdEarlyOTPct,\ensuremath{-}4.4 to \ensuremath{-}1.1
+tdEarlyVsTrue,\ensuremath{-}0.003 to $+$0.001
+tdTwoPCOTPct,\ensuremath{-}8.4 to \ensuremath{-}6.4
+tdTwoPCOTVsTrue,0.006--0.009
+ltAccOne,0.86
+ltBaccOne,0.77
+ltAccTwo,0.93
+ltBaccTwo,0.92
+ltAccThree,0.91
+ltBaccThree,0.86
+ltBaccMin,0.60
+fpNClusters,17
+fpBothBetter,7
+fpBothWorse,3
+fpTransNPaHB,"$+$0.21 [$+$0.10, $+$0.27]"
+fpMeasNPaHB,"0.00 [\ensuremath{-}0.13, $+$0.12]"
+fpTransNPvMB,"\ensuremath{-}0.14 [\ensuremath{-}0.21, \ensuremath{-}0.03]"
+fpMeasNPvMB,"\ensuremath{-}0.22 [\ensuremath{-}0.27, \ensuremath{-}0.12]"
+fpKnnBetter,13
+fpKnnN,17
+genOTAUROC,0.60--0.65
+genKnnAUROC,0.50
+genOTRThree,0.95--0.98
+grAUROCHalfOne,0.62
+grRHalfOne,0.38
+grAUROCHalfTwo,0.66
+grRHalfTwo,0.36
+grAUROCHalfThree,0.66
+grRHalfThree,0.87
+grAUROCOneOne,0.63
+grROneOne,0.43
+grAUROCOneTwo,0.67
+grROneTwo,0.39
+grAUROCOneThree,0.69
+grROneThree,0.85
+grUnbAUROC,0.53--0.60
+larryNClonesA,"1{,}544"
+larryNClonesB,654--754
+larryAUROCA,0.74
+larryAPRA,27
+larryRA,0.47
+larryEnrA,12
+larryKnnRA,0.40
+larryGaussAUROCA,0.59
+larryAUROCPoolsA,0.73--0.74
+larryAUROCB,0.77
+larryAPRB,20
+larryRB,0.31
+larryEnrB,16
+larryKnnRB,0.22
+larryGaussAUROCB,0.71
+larryAUROCPoolsB,0.77
+larryOTEpsAUROC,0.71--0.78
+larryKnnAUROC,0.50--0.53
+larryPoolMaxDev,0.004
+larryFateNBetterA,4
+larryFateNA,5
+larryFateNBetterB,7
+larryFateNB,8
+larryTvdOTNeu,0.05
+larryTvdIndNeu,0.77
+larryTvdOTUnd,0.19
+larryTvdIndUnd,0.13
+crAUROCOne,0.66
+crVsPgDOne,"0.05 [0.02, 0.08]"
+crAUROCTwo,0.77
+crVsPgDTwo,"0.06 [0.04, 0.08]"
+crAUROCThree,0.60
+crVsPgDThree,"\ensuremath{-}0.05 [\ensuremath{-}0.07, \ensuremath{-}0.04]"
+crVsPCFate,\ensuremath{-}0.04 to \ensuremath{-}0.17
+crFateNBetterInd,13
+crFateNBetterOT,4
+crFateN,17
+crTvdNPvMB,0.23

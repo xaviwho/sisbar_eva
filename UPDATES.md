@@ -44,9 +44,17 @@
   play the negative-control role, and a control added after the results needs to be
   labelled as such.
 
+- **Q13 (2026-11-19, non-blocking) — biographies.** The main text is exactly 12 pages
+  without biographies. The IEEE Computer Society overlength policy counts references *and
+  biographies* in the 12 pages; biographies are normally supplied at final submission.
+  Options when accepted: (a) cut about half a page then; (b) pay the overlength charge for a
+  13th page. Placeholders are commented out at the end of `main.tex`.
+
 ## Done
 
-- [x] 2026-11-18 — (Cloud) Second review round A4.1–A4.7 (with amendments A5, A6) → scripts 00b, 18–25, results `results/18_fate_unc` … `results/25_cellrank`; see logs 2026-11-18 to 2026-11-20. Done 2026-11-20. Tag `v1.0-submission` to be recreated from VS Code.
+- [x] 2026-11-19 — (VS Code) A4 results into the paper, page budget, tag (this log entry).
+
+- [x] 2026-11-18 — (Cloud) Second review round A4.1–A4.7 (with amendments A5, A6) → scripts 00b, 18–25, results `results/18_fate_unc` … `results/25_cellrank`; see logs 2026-11-18 to 2026-11-19. Done 2026-11-19. Tag `v1.0-submission` to be recreated from VS Code.
 - [x] 2026-11-17 — (VS Code) A3.7 single-barcode sensitivity and paper text for A3.1–A3.7:
   generator `57fd1c1` (Tables S6–S13), paper text in the commit after it. 2026-11-18.
 - [x] 2026-11-18 — Q12: tag `v1.0-submission` created and pushed from the author's machine.
@@ -88,7 +96,36 @@
 
 ## Log (newest first)
 
-### 2026-11-20 — Claude (cloud workspace) — A4 complete (A4.1(b), A4.2 done)
+### 2026-11-19 — Claude (VS Code) — A4 results written into the paper
+- Generator `scripts/10_results_paper.py`: `second_review()` (committed `26d1cd2` before
+  running; fixes `9baa14d`, `19379c9`, `b3c211d`; final provenance clean at `b3c211d`).
+  New macros, supplementary Tables S14–S21 (baselines, partner error, structured RQ4, RQ2
+  target designs, paired fate differences, generality, LARRY, CellRank 2). Fig. 6 redrawn:
+  (a) scalar mismatch, (b) structured partners (the correlation panel moved to text).
+  Wording claims are asserted in the script (Gaussian AUROC identical over ε; restricted
+  III→IV designs all inside δ; independent non-equivalent only for sampled III→IV; II→III
+  30-PC OT intervals straddle −δ; the three both-label "OT worse" clusters; GABAs/Gluts CIs
+  include 0; CellRank below 30-PC and fate axis everywhere).
+- **Claims revised in `main.tex`:** abstract, contributions 1 and 3, Discussion, Conclusion.
+  RQ4 now reports both the scalar model and structured partners (partner distance, not
+  mismatch rate, sets per-cell cost). kNN claim replaced by the baseline/partner-error result
+  (OT's ranking edge comes from the column constraint; partners not clearly closer than
+  kNN). RQ2 III→IV gain attributed to background targets. Fate: paired intervals; the
+  III-GABAs/Gluts "reversals" removed (within noise). New Results subsection "A second
+  lineage system" (LARRY). CellRank 2 in RQ3. Checklist: 3 rows added, 2 revised.
+  Limitations: generality and RQ4 paragraphs rewritten. Tirosh 2016 added (Crossref-checked);
+  CellRank 2 author name fixed (Pe'er).
+- **Page budget:** Related Work condensed; post-review method details moved to a
+  supplementary-methods section; several Results/Discussion passages shortened. Main text 12
+  pages exactly (page 12 full); abstract 249 words. Supplement 14 pages with its own
+  bibliography; no overfull boxes or undefined references in either.
+- **Biographies:** commented out in `main.tex` (author: not needed). The Computer Society
+  12-page limit counts biographies, so they would need about half a page more at the final
+  stage; see Q13.
+- Cloud log dates corrected (its clock was a day ahead: 2026-11-20 → 2026-11-19).
+- Not done (author's instruction): response-to-reviewers letter.
+
+### 2026-11-19 — Claude (cloud workspace) — A4 complete (A4.1(b), A4.2 done) [dated 2026-11-20 by the cloud clock; corrected]
 All A4 items are finished; results in `results/18_fate_unc` … `results/25_cellrank`. Settings as A4
 with A5 (A4.2: RF on draws 0–9) and A6 (A4.1(b): 4,000-cell halves, 20 seeds).
 - **A4.1(b) RQ4 with structured partners** (`results/21_rq4_structured/`; 20 seeds × 3 replicates ×

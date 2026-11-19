@@ -3,6 +3,7 @@
 \documentclass[10pt,journal,compsoc]{IEEEtran}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
+\usepackage{cite}
 \usepackage[hidelinks]{hyperref}
 \renewcommand{\thetable}{S\arabic{table}}
 \renewcommand{\theHtable}{S\arabic{table}}
@@ -10,16 +11,62 @@
 \begin{document}
 \title{Supplementary Material for\ ``Lineage-Grounded Evaluation of Optimal-Transport
 Couplings and Marker States in Human Neural Differentiation''}
-\author{Victor~Ikenna~Kanu and~Dong-Seong~Kim}
+\author{Victor~Ikenna~Kanu, Williams~Paul~Nwadiugwu and~Dong-Seong~Kim}
 \maketitle
 
 \noindent Pre-specified sensitivity analyses (doublet-flagged cells excluded), the
 pre-specified cap-robustness check (run with the memory-efficient block-wise Sinkhorn
 solver) and per-replicate coupling recovery (Tables~S1--S5).
-Tables~S6--S13 report exploratory analyses added after peer review. Their settings were
-fixed in a dated entry of the analysis plan before any of them was run; they were not part
-of the original plan. Primary cell set throughout.
+Tables~S6--S21 report exploratory analyses added after peer review in two rounds
+(S6--S13 and S14--S21). Their settings were fixed in dated entries of the analysis plan
+before any of them was run; they were not part of the original plan. Two were reduced in
+size before they were run to fit the available computing: in Table~S17 the random forest
+uses 10 of the 50 target draws, and Table~S16 uses 20 seeds with each half capped at
+4{,}000 cells. Primary cell set throughout.
 All values are generated from the saved per-cell and per-seed result files.
+
+\section*{Supplementary methods: post-review analyses}
+Partner error, $R$, is defined in the main text. Notation follows the main text: $C_{ij}$ is the median-scaled cost, $w_{ij}$ the row-normalised coupling, $\mathcal{A}$ the set of admissible training targets.
+
+\emph{Proximity baselines.} kNN couplings with $k\in\{5,10,20,50\}$, a row-normalised
+Gaussian kernel $w_{ij}\propto\exp(-C_{ij}/\varepsilon)$ without column constraint
+($\varepsilon\in\{0.01,0.05,0.1\}$), and mutual nearest neighbours ($k=10$) were scored with
+the RQ1 metrics plus average precision (AP; chance $s_i/n$).
+
+\emph{Structured partners in RQ4.} Per seed, the stage-III cells are split at random into a
+control and a treated half (each capped at 4{,}000 cells; 20 seeds). Treated cells receive
+the effect of the main-text RQ4 simulation; each is paired with a control cell that is random, sampled from
+its kNN ($k=10$) or OT row ($\varepsilon=0.05$, fitted between the halves in their own 30-PC
+space), or the row average (barycentric). The same linear and a sparse effect are used.
+
+\emph{Training targets in RQ2.} For OT and independent pairs we compare the sampled target
+of the main-text RQ2 design with the row-weighted mean target, each with $\mathcal{A}$ either
+as before or restricted to later cells of training clones, for both the (Pg, D) and the
+30-PC input. Sampled designs use 50 draws per split (10 for the random forest).
+
+\emph{Other spaces and growth.} OT ($\varepsilon=0.05$) and kNN were recomputed with 15 or
+50 PCs and with 4{,}000 HVGs. Growth-informed OT replaces $\mathbf{a}$ by
+$a_i\propto\exp(\lambda\tilde g_i)$, $\lambda\in\{0.5,1\}$, where $\tilde g_i$ is the
+standardised mean expression of the S-phase and G2/M genes of~\cite{Tirosh_2016}, balanced
+and unbalanced.
+
+\emph{Fate labels.} Label transfer is scored by leave-one-clone-out accuracy on the authors'
+labels, and OT-minus-reference TVD differences get paired clone-bootstrap intervals, with all
+labels and with measured labels only.
+
+\emph{Second dataset.} LARRY in vitro haematopoiesis~\cite{Weinreb_2020} (GEO GSE140802)
+barcodes progenitors and profiles their clones on days 2, 4 and 6. A clone is a barcode,
+and the transitions are day 2$\to$4 and 4$\to$6. The deposited counts are already
+normalised, so expression is $\log(1+x)$ of them, with 2{,}000 HVGs (library as batch) and
+30 PCs. Each transition uses three pools, each a subsample of whole cross-stage clones (at
+most 6{,}000 foreground cells per day) plus background, 8{,}000 cells per day. The pools
+stand in for replicates but are not biological replicates. Couplings and metrics are as
+above; fate agreement uses the authors' annotation of every cell, with no label transfer.
+
+\emph{CellRank 2.} A real-time kernel built from the balanced OT plan
+($\varepsilon=0.05$), with within-stage connectivity kernels (weight 0.2), gives
+fate probabilities towards the later fate classes~\cite{Weiler_2024}. They are scored by TVD
+and, without fitting, as an RQ3 predictor on the same test clones.
 
 \input{tables/tab_s1_rq1_sensitivity}
 \input{tables/tab_s2_rq2_sensitivity}
@@ -34,5 +81,17 @@ All values are generated from the saved per-cell and per-seed result files.
 \input{tables/tab_s11_fate_labels}
 \input{tables/tab_s12_rq4_effects}
 \input{tables/tab_s13_single_barcode}
+\clearpage
+\input{tables/tab_s14_baselines}
+\input{tables/tab_s15_partner_error}
+\input{tables/tab_s16_rq4_structured}
+\input{tables/tab_s17_rq2_targets}
+\input{tables/tab_s18_fate_paired}
+\input{tables/tab_s19_generality}
+\input{tables/tab_s20_larry}
+\input{tables/tab_s21_cellrank}
+
+\bibliographystyle{IEEEtran}
+\bibliography{sisbar_refs}
 
 \end{document}
