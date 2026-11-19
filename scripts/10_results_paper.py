@@ -1838,7 +1838,7 @@ Transition & Early cell type (clones) & OT & kNN & Independent \\
             rows2.append(f"{TLAB[t] if i == 0 else ''} & {f(r.auroc_cellrank) if i == 0 else ''} & {lab} & {f(r.auroc_other)} & "
                          f"{f(r.delta)} [{f(r.ci_lo)}, {f(r.ci_hi)}]" + r" \\")
         rows2.append(r"\addlinespace")
-    write_table("tab_s21_cellrank", rf"""\begin{{table}}[!t]
+    write_table("tab_s21_cellrank", rf"""\begin{{table*}}[!t]
 \centering
 \caption{{Post-review addition: CellRank~2~\cite{{Weiler_2024}} fate probabilities (real-time
 kernel from the balanced OT plan, $\varepsilon=0.05$, with within-stage connectivity kernels,
