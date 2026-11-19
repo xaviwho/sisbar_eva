@@ -124,6 +124,11 @@
   stage; see Q13.
 - Cloud log dates corrected (its clock was a day ahead: 2026-11-20 → 2026-11-19).
 - Not done (author's instruction): response-to-reviewers letter.
+- Final proofread of the compiled main text and supplement: post-review table range
+  (S6–S21), Table 2 caption (post-review row), label-transfer accuracy wording, a repeated
+  "again", duplicated "six positives" (now the generated count), supplement opening
+  sentence. Main 12 pages, supplement 14; no overfull boxes, undefined references or
+  internal labels.
 
 ### 2026-11-19 — Claude (cloud workspace) — A4 complete (A4.1(b), A4.2 done) [dated 2026-11-20 by the cloud clock; corrected]
 All A4 items are finished; results in `results/18_fate_unc` … `results/25_cellrank`. Settings as A4
