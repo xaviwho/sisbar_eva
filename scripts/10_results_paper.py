@@ -1514,7 +1514,7 @@ Transition & Replicate & Clones & OT balanced & OT unbalanced & kNN ($k=10$) \\
 \centering
 \caption{{Post-review addition: RQ4 with structured partners (II$\to$III stage-III cells; per
 seed, a random control half and a treated half, each capped at 4{{,}}000 cells; {M['strSeeds']}
-seeds; 95\% intervals over seeds). Treated cells carry the effect of Section~2.6; partners are
+seeds; 95\% intervals over seeds). Treated cells carry the RQ4 effect of the main text; partners are
 drawn from the control half: a random cell, a cell sampled from the kNN ($k=10$) or OT
 ($\varepsilon=0.05$, fitted between the halves in their own 30-PC space) row, or the row
 average (kNN averaged, OT barycentric). The oracle partner (the cell's own untreated profile)
