@@ -1865,7 +1865,7 @@ Transition & CellRank 2 & Representation & AUROC & Difference \\
 {chr(10).join(rows2[:-1])}
 \bottomrule
 \end{{tabular}}
-\end{{table}}
+\end{{table*}}
 """)
 
 
