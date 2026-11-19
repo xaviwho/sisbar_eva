@@ -928,25 +928,41 @@ def rq4():
 
 
 def fig6(g, est):
-    fig, axes = plt.subplots(1, 2, figsize=(COL1, 1.75), sharex=True, gridspec_kw=dict(wspace=0.45))
-    fig.subplots_adjust(left=0.13, right=0.98, top=0.8, bottom=0.21)
+    # (a) scalar mismatch (random wrong partners); (b) structured partners (A4.1(b), linear effect)
+    st = pd.read_csv(R / "21_rq4_structured/summary.csv")
+    st = st[st.effect == "linear"]
+    fig, axes = plt.subplots(1, 2, figsize=(COL1, 1.85), sharey=True,
+                             gridspec_kw=dict(wspace=0.12, width_ratios=[1, 1.25]))
+    fig.subplots_adjust(left=0.13, right=0.99, top=0.8, bottom=0.30)
     cols = {1: C_OT, 2: C_UNB, 3: C_KNN}
     mks = {1: "o", 2: "s", 3: "^"}
-    for k, (ax, (met, ylab)) in enumerate(zip(axes, (("rmse", "Per-cell effect RMSE"),
-                                                     ("r", "Pearson r with true effect")))):
-        for rep in (1, 2, 3):
-            q = g[g.rep == rep].sort_values("m")
-            ax.fill_between(q.m, q[f"{met}_lo"], q[f"{met}_hi"], color=cols[rep], alpha=0.2, lw=0)
-            ax.plot(q.m, q[met], color=cols[rep], marker=mks[rep], ms=2.6, mfc="white", mew=0.8,
-                    lw=0.9, label=f"Replicate {rep}")
-            mm = est[(est.rep == rep) & (est.rate_kind == "1-own_clone_mass")]
-            ax.plot(mm.m, mm[met], ls="none", marker="*", ms=6.5, color=INK, mew=0, zorder=5,
-                    label="RQ1-measured OT rate" if rep == 1 else None)
-        ax.set_xlabel("Mismatch rate m")
-        ax.set_ylabel(ylab)
-        ax.set_xticks([0, 0.5, 1])
-        ax.set_xticklabels(["0", "0.5", "1"])
-        panel(ax, "ab"[k], x=-0.38)
+    ax = axes[0]
+    for rep in (1, 2, 3):
+        q = g[g.rep == rep].sort_values("m")
+        ax.fill_between(q.m, q.rmse_lo, q.rmse_hi, color=cols[rep], alpha=0.2, lw=0)
+        ax.plot(q.m, q.rmse, color=cols[rep], marker=mks[rep], ms=2.6, mfc="white", mew=0.8,
+                lw=0.9, label=f"Replicate {rep}")
+        mm = est[(est.rep == rep) & (est.rate_kind == "1-own_clone_mass")]
+        ax.plot(mm.m, mm.rmse, ls="none", marker="*", ms=6.5, color=INK, mew=0, zorder=5,
+                label="RQ1-measured OT rate" if rep == 1 else None)
+    ax.set_xlabel("Mismatch rate m (random partners)")
+    ax.set_ylabel("Per-cell effect RMSE")
+    ax.set_xticks([0, 0.5, 1])
+    ax.set_xticklabels(["0", "0.5", "1"])
+    panel(ax, "a", x=-0.38)
+    ax = axes[1]
+    order = ["random", "kNN_sampled", "OT_sampled", "kNN_averaged", "OT_barycentric"]
+    labs = ["Random", "kNN\nsamp.", "OT\nsamp.", "kNN\navg.", "OT\nbary."]
+    for rep, dx in ((1, -0.18), (2, 0.0), (3, 0.18)):
+        for i, pt in enumerate(order):
+            r = one(st, rep=rep, partner=pt)
+            ax.errorbar(i + dx, r.rmse, yerr=[[r.rmse - r.rmse_lo], [r.rmse_hi - r.rmse]], color=cols[rep],
+                        marker=mks[rep], ms=2.6, mfc="white", mew=0.8, lw=0.8, capsize=0)
+    ax.set_xticks(range(len(order)))
+    ax.set_xticklabels(labs, fontsize=6)
+    ax.set_xlim(-0.5, len(order) - 0.5)
+    ax.set_xlabel("Partner from control half", labelpad=1)
+    panel(ax, "b", x=-0.08)
     h, l = axes[0].get_legend_handles_labels()
     fig.legend([h[0], h[2], h[3], h[1]], [l[0], l[2], l[3], l[1]], loc="upper center", ncol=4, bbox_to_anchor=(0.53, 1.0), handlelength=1.2,
                columnspacing=0.7)
@@ -1336,10 +1352,527 @@ Transition & Coupling & Clones & $n$ & AUROC & Enrichment & Top-10 (\%) \\
 """)
 
 
+# ============================================================ second review round (A4, A5, A6)
+# Exploratory additions after the second review; settings fixed in ANALYSIS_PLAN.md A4
+# (2026-11-18), with compute reductions A5 (A4.2) and A6 (A4.1(b)) written before those runs.
+# Main text cites them as post-review additions; full results in Tables S14-S22.
+INPUTS += [R / p for p in (
+    "18_fate_unc/label_transfer_accuracy.csv", "18_fate_unc/paired_tvd.csv",
+    "19_rq1_baselines/summary.csv", "20_partner_error/summary.csv",
+    "21_rq4_structured/summary.csv", "22_rq2_targets/summary.csv",
+    "22_rq2_targets/ot_foreground_share.csv", "23_rq1_generality/summary.csv",
+    "23_rq1_generality/solves.csv", "24_larry/summary.csv", "24_larry/solves.csv",
+    "24_larry/fate_agreement.csv", "25_cellrank/rq3_comparison.csv",
+    "25_cellrank/fate_agreement.csv")]
+LT = ["d2->d4", "d4->d6"]
+LN = dict(zip(LT, ["A", "B"]))
+LLAB = {"d2->d4": r"Day 2$\to$4", "d4->d6": r"Day 4$\to$6"}
+BASE = [(OT, "OT balanced"), ("OT_unb_eps0.05", "OT unbalanced"), ("Gauss_eps0.05", "Gaussian kernel"),
+        ("kNN5", "kNN, $k=5$"), ("kNN10", "kNN, $k=10$"), ("kNN20", "kNN, $k=20$"),
+        ("kNN50", "kNN, $k=50$"), ("MNN10", "MNN, $k=10$"), ("independent", "Independent")]
+PARTNERS = [("random", "Random"), ("kNN_sampled", "kNN, sampled"), ("OT_sampled", "OT, sampled"),
+            ("kNN_averaged", "kNN, averaged"), ("OT_barycentric", "OT, barycentric")]
+
+
+def sg(x, d=2):
+    """Signed number: explicit plus sign for positive values."""
+    s = f(x, d)
+    return "$+$" + s if (x > 0 and float(f"{x:.{d}f}") != 0) else s
+
+
+def rng_(x, d=2, scale=1.0):
+    """'a--b' (or 'a' when equal at this precision) for a series."""
+    lo, hi = f(scale * min(x), d), f(scale * max(x), d)
+    return lo if lo == hi else f"{lo}--{hi}"
+
+
+def second_review():
+    # ---- A4.4 proximity baselines (SISBAR)
+    b = pd.read_csv(R / "19_rq1_baselines/summary.csv")
+    bp = b[b.rep == "pooled"].copy()
+    bp["apr"] = bp.ap / bp.ap_chance
+    ga = bp[bp.coupling.str.startswith("Gauss")]
+    assert (ga.groupby("transition").auroc.agg(lambda x: x.max() - x.min()) < 1e-6).all()  # rank = distance (float ties)
+    g5 = ga[ga.coupling == "Gauss_eps0.05"]
+    put("gaussAUROCMin", f(g5.auroc.min()))
+    put("gaussAUROCMax", f(g5.auroc.max()))
+    for t in TR:
+        put(f"gaussAUROC{TN[t]}", f(one(g5, transition=t).auroc))
+    o = bp[bp.coupling == OT]
+    for t in TR:  # reproduces RQ1
+        assert abs(one(o, transition=t).auroc - float(M[f"rqOneAUROC{TN[t]}"].replace(r"\ensuremath{-}", "-"))) < 0.006
+    put("apOTRatioMin", f(o.apr.min(), 0))
+    put("apOTRatioMax", f(o.apr.max(), 0))
+    kn = bp[bp.coupling.isin(["kNN5", "kNN10", "kNN20", "kNN50"])]
+    put("knnAllAUROCMin", f(kn.auroc.min()))
+    put("knnAllAUROCMax", f(kn.auroc.max()))
+    put("knnFiveEnr", rng_(bp[bp.coupling == "kNN5"].enrichment, 1))
+    put("knnFiftyEnr", rng_(bp[bp.coupling == "kNN50"].enrichment, 1))
+    put("mnnCov", rng_(bp[bp.coupling == "MNN10"].coverage_cells, 0, 100))
+    put("otNeffMin", f"{o.n_eff.min():,.0f}".replace(",", "{,}"))
+    put("otNeffMax", f"{o.n_eff.max():,.0f}".replace(",", "{,}"))
+    put("otWnnTenPct", rng_(o.w_nn10, 0, 100))
+    rows = []
+    for t in TR:
+        for i, (cp, lab) in enumerate(BASE):
+            r = one(bp, transition=t, coupling=cp)
+            rows.append(f"{TLAB[t] if i == 0 else ''} & {lab} & {f(r.auroc)} [{f(r.auroc_lo)}, {f(r.auroc_hi)}] & "
+                        f"{f(r.apr, 1)} & {f(r.enrichment, 1)} [{f(r.enrichment_lo, 1)}, {f(r.enrichment_hi, 1)}] & "
+                        f"{f(r.n_eff, 0)} & {pct(r.w_nn10, 0)} & {pct(r.coverage_cells, 0)}" + r" \\")
+        rows.append(r"\addlinespace")
+    write_table("tab_s14_baselines", rf"""\begin{{table*}}[!t]
+\centering
+\caption{{Post-review addition: proximity baselines (primary set, forward, pooled over
+replicates; clone-bootstrap 95\% CIs). OT: $\varepsilon=0.05$. Gaussian kernel: row-normalised
+$\exp(-C_{{ij}}/\varepsilon)$, $\varepsilon=0.05$; its AUROC and AP are identical for
+$\varepsilon\in\{{0.01,0.05,0.1\}}$ because it ranks by distance alone. MNN: uniform over mutual
+nearest neighbours; cells without one are excluded (coverage). AP ratio: average precision
+divided by its chance level. $n_{{\mathrm{{eff}}}}$: effective number of partners
+$\exp H(\mathbf{{w}}_i)$. NN10: weight on the ten nearest later cells.}}
+\label{{tab:s14}}
+\footnotesize
+\begin{{tabular}}{{llcccccc}}
+\toprule
+Transition & Coupling & AUROC & AP ratio & Enrichment & $n_{{\mathrm{{eff}}}}$ & NN10 (\%) & Coverage (\%) \\
+\midrule
+{chr(10).join(rows[:-1])}
+\bottomrule
+\end{{tabular}}
+\end{{table*}}
+""")
+
+    # ---- A4.1(a) lineage-grounded partner error
+    p = pd.read_csv(R / "20_partner_error/summary.csv")
+    for cp, nm in ((OT, "OT"), ("OT_unb_eps0.05", "Unb"), ("kNN10", "Knn")):
+        for t in TR:
+            r = one(p, transition=t, rep="pooled", coupling=cp)
+            put(f"pe{nm}{TN[t]}", f(r.R))
+            put(f"pe{nm}CI{TN[t]}", f"[{f(r.R_lo)}, {f(r.R_hi)}]")
+    rows = []
+    for t in TR:
+        for i, rep in enumerate(["pooled", "1", "2", "3"]):
+            cells = []
+            for cp in (OT, "OT_unb_eps0.05", "kNN10"):
+                r = one(p, transition=t, rep=rep, coupling=cp)
+                cells.append(f"{f(r.R)} [{f(r.R_lo)}, {f(r.R_hi)}]")
+            r0 = one(p, transition=t, rep=rep, coupling=OT)
+            rows.append(f"{TLAB[t] if i == 0 else ''} & {'Pooled' if rep == 'pooled' else 'Rep.~' + rep} & "
+                        f"{int(r0.n_clones_floor)} & " + " & ".join(cells) + r" \\")
+        rows.append(r"\addlinespace")
+    write_table("tab_s15_partner_error", rf"""\begin{{table*}}[!t]
+\centering
+\caption{{Post-review addition: lineage-grounded partner error (primary set, RQ1 30-PC space).
+$D(i)=\sum_j w_{{ij}}\,\overline{{\|\mathbf{{z}}_j-\mathbf{{z}}_s\|^2}}$, averaged over the
+sisters $s$ of $i$; $R=(D-D_{{\mathrm{{sis}}}})/(D_{{\mathrm{{indep}}}}-D_{{\mathrm{{sis}}}})$, where
+$D_{{\mathrm{{sis}}}}$ is the distance between two sisters of the same clone (0: partners as close
+as a sister; 1: as far as a random later cell). Clone-weighted means with clone-bootstrap 95\%
+CIs over clones with at least two later sisters (clones).}}
+\label{{tab:s15}}
+\footnotesize
+\begin{{tabular}}{{llcccc}}
+\toprule
+Transition & Replicate & Clones & OT balanced & OT unbalanced & kNN ($k=10$) \\
+\midrule
+{chr(10).join(rows[:-1])}
+\bottomrule
+\end{{tabular}}
+\end{{table*}}
+""")
+
+    # ---- A4.1(b) RQ4 with structured partners
+    s = pd.read_csv(R / "21_rq4_structured/summary.csv")
+    assert s.all_ot_converged.all() and (s.n_seeds == 20).all()
+    put("strSeeds", int(s.n_seeds.max()))
+    for eff, tag in (("linear", ""), ("sparse", "Sp")):
+        e = s[s.effect == eff]
+        for pt, nm in (("OT_sampled", "OTSamp"), ("OT_barycentric", "OTBary"), ("kNN_sampled", "KnnSamp"),
+                       ("kNN_averaged", "KnnAvg"), ("random", "Rand")):
+            x = e[e.partner == pt]
+            put(f"str{tag}{nm}RMSE", rng_(x.rmse, 2))
+            put(f"str{tag}{nm}R", rng_(x.r, 2))
+        oo = e[e.partner.str.startswith("OT")]
+        put(f"str{tag}OTRMSEMax", f(oo.rmse.max()))
+        put(f"str{tag}OTR", rng_(oo.r, 2))
+    ot_s = s[s.partner.str.startswith("OT")]
+    put("strOTMaxAbsBias", f(ot_s.bias.abs().max(), 3))
+    kl = s[(s.partner.str.startswith("kNN")) & (s.effect == "linear")]
+    assert (kl.bias_hi < 0).all()
+    put("strKnnBias", f"{f(kl.bias.min(), 3)} to {f(kl.bias.max(), 3)}")
+    put("strNeff", rng_(s.ot_neff_mean, 0))
+    put("strWnnTenPct", rng_(s.ot_wnn10_mean, 0, 100))
+    rows = []
+    for eff, elab in (("linear", "Linear"), ("sparse", "Sparse (20 genes)")):
+        for i, (pt, plab) in enumerate(PARTNERS):
+            cells = []
+            for rep in (1, 2, 3):
+                r = one(s, effect=eff, partner=pt, rep=rep)
+                cells.append(f"{f(r.rmse, 3)} [{f(r.rmse_lo, 3)}, {f(r.rmse_hi, 3)}] & {f(r.r)}")
+            rows.append(f"{elab if i == 0 else ''} & {plab} & " + " & ".join(cells) + r" \\")
+        rows.append(r"\addlinespace")
+    r1 = s[s.effect == "linear"].groupby("rep").first()
+    write_table("tab_s16_rq4_structured", rf"""\begin{{table*}}[!t]
+\centering
+\caption{{Post-review addition: RQ4 with structured partners (II$\to$III stage-III cells; per
+seed, a random control half and a treated half, each capped at 4{{,}}000 cells; {M['strSeeds']}
+seeds; 95\% intervals over seeds). Treated cells carry the effect of Section~2.6; partners are
+drawn from the control half: a random cell, a cell sampled from the kNN ($k=10$) or OT
+($\varepsilon=0.05$, fitted between the halves in their own 30-PC space) row, or the row
+average (kNN averaged, OT barycentric). The oracle partner (the cell's own untreated profile)
+has error 0. OT rows: effective number of partners {M['strNeff']}; weight on the ten nearest
+controls {M['strWnnTenPct']}\%. Bias: OT within $\pm${M['strOTMaxAbsBias']}; kNN, linear effect,
+{M['strKnnBias']}.}}
+\label{{tab:s16}}
+\footnotesize
+\begin{{tabular}}{{llcccccc}}
+\toprule
+ & & \multicolumn{{2}}{{c}}{{Replicate 1}} & \multicolumn{{2}}{{c}}{{Replicate 2}} & \multicolumn{{2}}{{c}}{{Replicate 3}} \\
+\cmidrule(lr){{3-4}}\cmidrule(lr){{5-6}}\cmidrule(lr){{7-8}}
+Effect & Partner & RMSE & $r$ & RMSE & $r$ & RMSE & $r$ \\
+\midrule
+{chr(10).join(rows[:-1])}
+\bottomrule
+\end{{tabular}}
+\end{{table*}}
+""")
+
+    # ---- A4.2 RQ2 target designs
+    d = pd.read_csv(R / "22_rq2_targets/summary.csv")
+    sh = pd.read_csv(R / "22_rq2_targets/ot_foreground_share.csv")
+    for t in TR:
+        put(f"fgShare{TN[t]}", rng_(sh[sh.transition == t]["mean"], 0, 100))
+    # one row per design x model: Ridge on all draws (50), RF on draws 0-9 (A5)
+    d = d[((d.model == "Ridge") & (d.draws == "all_draws")) | ((d.model == "RandomForest") & (d.draws != "all_draws"))
+          | ((d.model == "RandomForest") & d.design.str.contains("expected"))].copy()
+    d = d.drop_duplicates(["transition", "input", "coupling", "design", "model"])
+    assert len(d) == 3 * 2 * 2 * 4 * 2
+    q = lambda **kw: one(d, **kw)
+    put("tdThreeSampOTPct", f(q(transition="III->IV", input="Pg_D", coupling="OT", design="sampled", model="Ridge").delta_pct_of_const, 1))
+    put("tdThreeSampIndPct", f(q(transition="III->IV", input="Pg_D", coupling="independent", design="sampled", model="Ridge").delta_pct_of_const, 1))
+    put("tdThreeExpOTPct", f(q(transition="III->IV", input="Pg_D", coupling="OT", design="expected", model="Ridge").delta_pct_of_const, 1))
+    put("tdThreeFgExpOTPct", f(q(transition="III->IV", input="Pg_D", coupling="OT", design="fg_expected", model="Ridge").delta_pct_of_const, 1))
+    put("tdThreeFgExpIndPct", f(q(transition="III->IV", input="Pg_D", coupling="independent", design="fg_expected", model="Ridge").delta_pct_of_const, 1))
+    fg3 = d[(d.transition == "III->IV") & d.design.str.startswith("fg")]
+    assert fg3.equivalent_to_const.all()  # both inputs, both couplings, both models
+    put("tdThreeFgPct", f"{sg(fg3.delta_pct_of_const.min(), 1)} to {sg(fg3.delta_pct_of_const.max(), 1)}")
+    put("tdThreeVsTrueSamp", f(q(transition="III->IV", input="Pg_D", coupling="OT", design="sampled", model="Ridge").delta_vs_true, 3))
+    put("tdThreeVsTrueFg", f(q(transition="III->IV", input="Pg_D", coupling="OT", design="fg_expected", model="Ridge").delta_vs_true, 3))
+    early = d[d.transition != "III->IV"]
+    pg_e = early[early.input == "Pg_D"]
+    assert pg_e.equivalent_to_const.all()
+    po = pg_e[pg_e.coupling == "OT"]
+    put("tdEarlyOTPct", f"{f(po.delta_pct_of_const.min(), 1)} to {f(po.delta_pct_of_const.max(), 1)}")
+    put("tdEarlyVsTrue", f"{sg(po.delta_vs_true.min(), 3)} to {sg(po.delta_vs_true.max(), 3)}")
+    pc2 = d[(d.transition == "II->III") & (d.input == "PC30") & (d.coupling == "OT")]
+    assert ((pc2.ci_lo < -DELTA) & (pc2.ci_hi > -DELTA)).all()  # neither equivalent nor beyond the margin
+    put("tdTwoPCOTPct", f"{f(pc2.delta_pct_of_const.min(), 1)} to {f(pc2.delta_pct_of_const.max(), 1)}")
+    put("tdTwoPCOTVsTrue", f"{f(pc2.delta_vs_true.min(), 3)}--{f(pc2.delta_vs_true.max(), 3)}")
+    ind = d[d.coupling == "independent"]
+    ne = ind[~ind.equivalent_to_const]
+    assert set(zip(ne.transition, ne.design)) == {("III->IV", "sampled")}, ne
+    DES = [("sampled", "Sampled"), ("expected", "Expected"), ("fg_sampled", "Training clones, sampled"),
+           ("fg_expected", "Training clones, expected")]
+    rows = []
+    for t in TR:
+        for inp, ilab in (("Pg_D", "(Pg, D)"), ("PC30", "30-PC")):
+            for cpl in ("OT", "independent"):
+                for i, (des, dlab) in enumerate(DES):
+                    a = q(transition=t, input=inp, coupling=cpl, design=des, model="Ridge")
+                    rf = q(transition=t, input=inp, coupling=cpl, design=des, model="RandomForest")
+                    rows.append(f"{TLAB[t] if (inp == 'Pg_D' and cpl == 'OT' and i == 0) else ''} & "
+                                f"{ilab if (cpl == 'OT' and i == 0) else ''} & {CLAB[cpl] if i == 0 else ''} & {dlab} & "
+                                f"{f(a.delta_pct_of_const, 1)} [{f(100 * a.ci_lo / a.const_median_mae, 1)}, {f(100 * a.ci_hi / a.const_median_mae, 1)}] & "
+                                f"{f(rf.delta_pct_of_const, 1)} [{f(100 * rf.ci_lo / rf.const_median_mae, 1)}, {f(100 * rf.ci_hi / rf.const_median_mae, 1)}] & "
+                                f"{f(a.delta_vs_true, 3)} & {f(rf.delta_vs_true, 3)}" + r" \\")
+            rows.append(r"\addlinespace")
+    write_table("tab_s17_rq2_targets", rf"""\begin{{table*}}[p]
+\centering
+\caption{{Post-review addition: RQ2 training-target designs (primary set, 20 splits). Sampled:
+one target drawn from the coupling row restricted to $\mathcal{{A}}$ (training-clone and
+background later cells), as in the main analysis; expected: the row-weighted mean target;
+training clones: $\mathcal{{A}}$ restricted to later cells of training clones. Sampled designs:
+Ridge over 50 target draws, random forest over draws 0--9. Model minus constant median trained
+on the same targets, \% of the constant-median MAE, with 95\% split-stability interval;
+equivalence margin $\delta=0.01$ MAE. Last two columns: MAE minus that of the same model
+trained on true sister pairs. Mean share of the OT target mass on training-clone cells, by
+replicate: {M['fgShareOne']}\%, {M['fgShareTwo']}\% and {M['fgShareThree']}\% for the three
+transitions.}}
+\label{{tab:s17}}
+\scriptsize
+\setlength{{\tabcolsep}}{{4pt}}
+\begin{{tabular}}{{llllcccc}}
+\toprule
+ & & & & \multicolumn{{2}}{{c}}{{vs.\ constant (\%)}} & \multicolumn{{2}}{{c}}{{vs.\ true pairs (MAE)}} \\
+\cmidrule(lr){{5-6}}\cmidrule(lr){{7-8}}
+Transition & Input & Pairs & Target design & Ridge & Random forest & Ridge & RF \\
+\midrule
+{chr(10).join(rows[:-1])}
+\bottomrule
+\end{{tabular}}
+\end{{table*}}
+""")
+
+    # ---- A4.3 fate labels: leave-one-clone-out transfer accuracy and paired differences
+    a = pd.read_csv(R / "18_fate_unc/label_transfer_accuracy.csv")
+    for t in TR:
+        r = one(a, transition=t, rep="pooled")
+        put(f"ltAcc{TN[t]}", f(r.accuracy))
+        put(f"ltBacc{TN[t]}", f(r.balanced_accuracy))
+    ar = a[a.rep != "pooled"]
+    put("ltBaccMin", f(ar.balanced_accuracy.min()))
+    pt = pd.read_csv(R / "18_fate_unc/paired_tvd.csv")
+    pi = pt[(pt.rep == "pooled") & (pt.comparison == f"{OT} - independent")]
+    w = pi.pivot_table(index=["transition", "early_cluster"], columns="labels", values=["diff_lo", "diff_hi"])
+    better = (w["diff_hi"]["k15"] < 0) & (w["diff_hi"]["measured"] < 0)
+    worse = (w["diff_lo"]["k15"] > 0) & (w["diff_lo"]["measured"] > 0)
+    put("fpNClusters", len(w))
+    put("fpBothBetter", int(better.sum()))
+    put("fpBothWorse", int(worse.sum()))
+    assert sorted(w.index[worse].get_level_values(1)) == ["I-NbpHB", "II-Motors", "III-NPpHB"]
+    for cl in ("III-GABAs", "III-Gluts"):  # the A3.5 'reversals' are not distinguishable from zero
+        x = w.xs(cl, level=1).iloc[0]
+        assert x["diff_lo"]["k15"] < 0 < x["diff_hi"]["k15"] and x["diff_lo"]["measured"] < 0 < x["diff_hi"]["measured"]
+    for cl, nm in (("III-NPaHB", "NPaHB"), ("III-NPvMB", "NPvMB")):
+        for lab, tg in (("k15", "Trans"), ("measured", "Meas")):
+            r = one(pi, early_cluster=cl, labels=lab)
+            put(f"fp{tg}{nm}", f"{sg(r['diff'])} [{sg(r.diff_lo)}, {sg(r.diff_hi)}]")
+    pk = pt[(pt.rep == "pooled") & (pt.comparison == f"{OT} - kNN") & (pt.labels == "k15")]
+    put("fpKnnBetter", f"{int((pk.diff_hi < 0).sum())}")
+    put("fpKnnN", f"{len(pk)}")
+    rows = []
+    for t in TR:
+        cls = sorted(pi[pi.transition == t].early_cluster.unique())
+        for i, cl in enumerate(cls):
+            cells = []
+            for comp in ("independent", "kNN"):
+                for lab in ("k15", "measured"):
+                    r = one(pt, rep="pooled", early_cluster=cl, labels=lab, comparison=f"{OT} - {comp}")
+                    cells.append(f"{f(r['diff'])} [{f(r.diff_lo)}, {f(r.diff_hi)}]")
+            n = int(one(pi, early_cluster=cl, labels="k15").n_clones)
+            rows.append(f"{TLAB[t] if i == 0 else ''} & {cl} ({n}) & " + " & ".join(cells) + r" \\")
+        rows.append(r"\addlinespace")
+    acc = "; ".join(f"{TLAB[t]} {M['ltAcc' + TN[t]]} ({M['ltBacc' + TN[t]]})" for t in TR)
+    write_table("tab_s18_fate_paired", rf"""\begin{{table*}}[!t]
+\centering
+\caption{{Post-review addition: paired fate-agreement differences (primary set, pooled over
+replicates). $\Delta$TVD = TVD(OT) $-$ TVD(reference) for the same clones, with 95\% paired
+clone-bootstrap intervals (negative: OT closer to the clonal fates); all labels (authors' plus
+$k=15$ transferred) and measured labels only. Clones in parentheses. Leave-one-clone-out
+accuracy of the label transfer (balanced accuracy in parentheses), pooled: {acc}; lowest
+per-replicate balanced accuracy {M['ltBaccMin']}.}}
+\label{{tab:s18}}
+\footnotesize
+\setlength{{\tabcolsep}}{{4pt}}
+\begin{{tabular}}{{llcccc}}
+\toprule
+ & & \multicolumn{{2}}{{c}}{{OT $-$ independent}} & \multicolumn{{2}}{{c}}{{OT $-$ kNN}} \\
+\cmidrule(lr){{3-4}}\cmidrule(lr){{5-6}}
+Transition & Early cluster & All labels & Measured & All labels & Measured \\
+\midrule
+{chr(10).join(rows[:-1])}
+\bottomrule
+\end{{tabular}}
+\end{{table*}}
+""")
+
+    # ---- A4.5 within-dataset generality
+    g = pd.read_csv(R / "23_rq1_generality/summary.csv")
+    assert pd.read_csv(R / "23_rq1_generality/solves.csv").converged.all()
+    gp = g[g.rep == "pooled"]
+    sp = gp[gp.space != "rq1"]
+    put("genOTAUROC", rng_(sp[sp.coupling == OT].auroc, 2))
+    put("genKnnAUROC", rng_(sp[sp.coupling == "kNN"].auroc, 2))
+    put("genOTRThree", rng_(sp[(sp.coupling == OT) & (sp.transition == "III->IV")].R, 2))
+    gr = gp[gp.space == "rq1"]
+    for lam, nm in (("0.5", "Half"), ("1.0", "One")):
+        for t in TR:
+            put(f"grAUROC{nm}{TN[t]}", f(one(gr, coupling=f"OT_growth_bal_lam{lam}", transition=t).auroc))
+            put(f"grR{nm}{TN[t]}", f(one(gr, coupling=f"OT_growth_bal_lam{lam}", transition=t).R))
+    put("grUnbAUROC", rng_(gr[gr.coupling.str.startswith("OT_growth_unb")].auroc, 2))
+    SPL = [("hvg2000_pc15", "2{,}000 HVGs, 15 PCs"), ("hvg2000_pc50", "2{,}000 HVGs, 50 PCs"),
+           ("hvg4000_pc30", "4{,}000 HVGs, 30 PCs")]
+    rows = []
+    for t in TR:
+        k = 0
+        for spc, slab in SPL:
+            for cp, clab in ((OT, "OT balanced"), ("kNN", "kNN")):
+                r = one(gp, transition=t, space=spc, coupling=cp)
+                rows.append(f"{TLAB[t] if k == 0 else ''} & {slab if cp == OT else ''} & {clab} & "
+                            f"{f(r.auroc)} [{f(r.auroc_lo)}, {f(r.auroc_hi)}] & {f(r.enrichment, 1)} & {f(r.R)} [{f(r.R_lo)}, {f(r.R_hi)}]" + r" \\")
+                k += 1
+        for cp, clab in (("OT_growth_bal_lam0.5", r"Balanced, $\lambda=0.5$"), ("OT_growth_bal_lam1.0", r"Balanced, $\lambda=1$"),
+                         ("OT_growth_unb_lam0.5", r"Unbalanced, $\lambda=0.5$"), ("OT_growth_unb_lam1.0", r"Unbalanced, $\lambda=1$")):
+            r = one(gp, transition=t, space="rq1", coupling=cp)
+            rows.append(f" & {'Growth-informed OT' if 'bal_lam0.5' in cp and 'unb' not in cp else ''} & {clab} & "
+                        f"{f(r.auroc)} [{f(r.auroc_lo)}, {f(r.auroc_hi)}] & {f(r.enrichment, 1)} & {f(r.R)} [{f(r.R_lo)}, {f(r.R_hi)}]" + r" \\")
+        rows.append(r"\addlinespace")
+    write_table("tab_s19_generality", rf"""\begin{{table*}}[!t]
+\centering
+\caption{{Post-review addition: coupling recovery in other expression spaces and with
+growth-informed OT (primary set, forward, pooled; clone-bootstrap 95\% CIs). OT: $\varepsilon=0.05$;
+kNN: $k=10$. Growth-informed OT uses the RQ1 space with row marginal $a_i\propto\exp(\lambda
+\tilde g_i)$, $\tilde g_i$ the standardised mean expression of the S-phase and G2/M genes
+of~\cite{{Tirosh_2016}}; unbalanced: $\tau=0.9$. Partner error $R$ as in Table~S15. RQ1 space
+(2{{,}}000 HVGs, 30 PCs), for reference: OT AUROC {M['rqOneAUROCOne']}, {M['rqOneAUROCTwo']},
+{M['rqOneAUROCThree']}; $R$ {M['peOTOne']}, {M['peOTTwo']}, {M['peOTThree']}.}}
+\label{{tab:s19}}
+\footnotesize
+\begin{{tabular}}{{llcccc}}
+\toprule
+Transition & Space & Coupling & AUROC & Enrichment & $R$ \\
+\midrule
+{chr(10).join(rows[:-1])}
+\bottomrule
+\end{{tabular}}
+\end{{table*}}
+""")
+
+    # ---- A4.6 LARRY
+    l = pd.read_csv(R / "24_larry/summary.csv")
+    ls = pd.read_csv(R / "24_larry/solves.csv")
+    assert ls.converged.all()
+    l["apr"] = l.ap / l.ap_chance
+    l["pool"] = l["pool"].astype(str)
+    lpo = l[l.pool != "all_pools"]
+    lal = l[l.pool == "all_pools"]
+    put("larryNClonesA", f"{int(ls[ls.transition == 'd2->d4'].n_clones.max()):,}".replace(",", "{,}"))
+    put("larryNClonesB", rng_(ls[ls.transition == "d4->d6"].n_clones, 0))
+    for t in LT:
+        r = one(lal, transition=t, coupling=OT)
+        put(f"larryAUROC{LN[t]}", f(r.auroc))
+        put(f"larryAPR{LN[t]}", f(r.apr, 0))
+        put(f"larryR{LN[t]}", f(r.R))
+        put(f"larryEnr{LN[t]}", f(r.enrichment, 0))
+        put(f"larryKnnR{LN[t]}", f(one(lal, transition=t, coupling="kNN10").R))
+        put(f"larryGaussAUROC{LN[t]}", f(one(lal, transition=t, coupling="Gauss_eps0.05").auroc))
+        put(f"larryAUROCPools{LN[t]}", rng_(lpo[(lpo.transition == t) & (lpo.coupling == OT)].auroc, 2))
+    bal = lal[lal.coupling.str.startswith("OT_bal")]
+    put("larryOTEpsAUROC", rng_(bal.auroc, 2))
+    put("larryKnnAUROC", rng_(lal[lal.coupling.str.startswith("kNN")].auroc, 2))
+    put("larryPoolMaxDev", f(max((lpo[(lpo.transition == t) & (lpo.coupling == OT)].auroc
+                                  - one(lal, transition=t, coupling=OT).auroc).abs().max() for t in LT), 3))
+    lf = pd.read_csv(R / "24_larry/fate_agreement.csv")
+    lw = lf.pivot_table(index=["transition", "early_cluster", "n_clones"], columns="coupling", values="tvd").reset_index()
+    for t in LT:
+        x = lw[lw.transition == t]
+        put(f"larryFateNBetter{LN[t]}", int((x[OT] < x["independent"]).sum()))
+        put(f"larryFateN{LN[t]}", len(x))
+    nr = one(lw, transition="d2->d4", early_cluster="Neutrophil")
+    put("larryTvdOTNeu", f(nr[OT]))
+    put("larryTvdIndNeu", f(nr["independent"]))
+    ur = one(lw, transition="d4->d6", early_cluster="Undifferentiated")
+    put("larryTvdOTUnd", f(ur[OT]))
+    put("larryTvdIndUnd", f(ur["independent"]))
+    rows = []
+    for t in LT:
+        for i, (cp, lab) in enumerate(BASE):
+            r = one(lal, transition=t, coupling=cp)
+            pr = lpo[(lpo.transition == t) & (lpo.coupling == cp)]
+            rows.append(f"{LLAB[t] if i == 0 else ''} & {lab} & {f(r.auroc)} ({rng_(pr.auroc, 2)}) & {f(r.apr, 1)} & "
+                        f"{f(r.enrichment, 1)} & {f(r.R)} ({rng_(pr.R, 2)}) & {f(r.n_eff, 0)} & {pct(r.coverage_cells, 0)}" + r" \\")
+        rows.append(r"\addlinespace")
+    rows2 = []
+    for t in LT:
+        x = lw[lw.transition == t].sort_values("early_cluster")
+        for i, (_, r) in enumerate(x.iterrows()):
+            rows2.append(f"{LLAB[t] if i == 0 else ''} & {r.early_cluster} ({int(r.n_clones)}) & {f(r[OT])} & "
+                         f"{f(r['kNN10'])} & {f(r['independent'])}" + r" \\")
+        rows2.append(r"\addlinespace")
+    nfg = ls.groupby("transition")[["n_early_fg", "n_later_fg"]].agg(["min", "max"])
+    write_table("tab_s20_larry", rf"""\begin{{table*}}[!t]
+\centering
+\caption{{Post-review addition: second lineage dataset, LARRY in vitro haematopoiesis
+\cite{{Weinreb_2020}} (GEO GSE140802). Per transition, three pools, each a subsample of whole
+cross-stage clones (at most 6{{,}}000 foreground cells per time point) plus background cells
+(8{{,}}000 cells per time point); pools are clone subsamples, not biological replicates. At day
+2$\to$4 all {M['larryNClonesA']} cross-stage clones fit in every pool, so the pools differ only
+in background cells; at day 4$\to$6 they hold {M['larryNClonesB']} clones. Metrics as in
+Tables~S14 and S15, computed over all pools; per-pool ranges in parentheses.}}
+\label{{tab:s20}}
+\footnotesize
+\begin{{tabular}}{{llcccccc}}
+\toprule
+Transition & Coupling & AUROC (pools) & AP ratio & Enrichment & $R$ (pools) & $n_{{\mathrm{{eff}}}}$ & Coverage (\%) \\
+\midrule
+{chr(10).join(rows[:-1])}
+\bottomrule
+\end{{tabular}}
+
+\vspace{{6pt}}
+\begin{{tabular}}{{llccc}}
+\toprule
+Transition & Early cell type (clones) & OT & kNN & Independent \\
+\midrule
+{chr(10).join(rows2[:-1])}
+\bottomrule
+\end{{tabular}}
+\end{{table*}}
+""")
+
+    # ---- A4.7 CellRank 2
+    c = pd.read_csv(R / "25_cellrank/rq3_comparison.csv")
+    for t in TR:
+        put(f"crAUROC{TN[t]}", f(one(c, transition=t, comparison="CellRank2 - Pg_D").auroc_cellrank))
+        r = one(c, transition=t, comparison="CellRank2 - Pg_D")
+        put(f"crVsPgD{TN[t]}", f"{f(r.delta)} [{f(r.ci_lo)}, {f(r.ci_hi)}]")
+    lo = c[c.comparison.isin(["CellRank2 - PC30", "CellRank2 - fate_axis"])]
+    assert (lo.ci_hi < 0).all()
+    put("crVsPCFate", f"{f(lo.delta.max())} to {f(lo.delta.min())}")
+    cf = pd.read_csv(R / "25_cellrank/fate_agreement.csv")
+    cw = cf.pivot_table(index=["transition", "early_cluster", "n_clones"], columns="method", values="tvd").reset_index()
+    put("crFateNBetterInd", int((cw.CellRank2 < cw.independent).sum()))
+    put("crFateNBetterOT", int((cw.CellRank2 < cw[OT]).sum()))
+    put("crFateN", len(cw))
+    v = one(cw, early_cluster="III-NPvMB")
+    put("crTvdNPvMB", f(v.CellRank2))
+    rows = []
+    for t in TR:
+        x = cw[cw.transition == t].sort_values("early_cluster")
+        for i, (_, r) in enumerate(x.iterrows()):
+            rows.append(f"{TLAB[t] if i == 0 else ''} & {r.early_cluster} ({int(r.n_clones)}) & {f(r.CellRank2)} & "
+                        f"{f(r[OT])} & {f(r.independent)}" + r" \\")
+        rows.append(r"\addlinespace")
+    rows2 = []
+    for t in TR:
+        for i, (cmp_, lab) in enumerate((("P_tcbb_D", "(P, D)"), ("Pg_D", "(Pg, D)"), ("PC30", "30-PC"), ("fate_axis", "Fate-bias axis"))):
+            r = one(c, transition=t, comparison=f"CellRank2 - {cmp_}")
+            rows2.append(f"{TLAB[t] if i == 0 else ''} & {f(r.auroc_cellrank) if i == 0 else ''} & {lab} & {f(r.auroc_other)} & "
+                         f"{f(r.delta)} [{f(r.ci_lo)}, {f(r.ci_hi)}]" + r" \\")
+        rows2.append(r"\addlinespace")
+    write_table("tab_s21_cellrank", rf"""\begin{{table}}[!t]
+\centering
+\caption{{Post-review addition: CellRank~2~\cite{{Weiler_2024}} fate probabilities (real-time
+kernel from the balanced OT plan, $\varepsilon=0.05$, with within-stage connectivity kernels,
+weight 0.2; terminal states = later fate classes). Top: fate agreement (TVD, lower is better;
+clones in parentheses). Bottom: as an RQ3 fate predictor on the test clones of the 20 splits
+(no fitting); difference in macro-AUROC from each RQ3 representation, with 95\%
+split-stability interval.}}
+\label{{tab:s21}}
+\footnotesize
+\setlength{{\tabcolsep}}{{3pt}}
+\begin{{tabular}}{{llccc}}
+\toprule
+Transition & Early cluster & CellRank 2 & OT & Indep. \\
+\midrule
+{chr(10).join(rows[:-1])}
+\bottomrule
+\end{{tabular}}
+
+\vspace{{6pt}}
+\begin{{tabular}}{{lclcc}}
+\toprule
+Transition & CellRank 2 & Representation & AUROC & Difference \\
+\midrule
+{chr(10).join(rows2[:-1])}
+\bottomrule
+\end{{tabular}}
+\end{{table}}
+""")
+
+
 # ============================================================ output
 def write_table(name, text):
     (TAB / f"{name}.tex").write_text(
-        f"% Generated by scripts/10_results_paper.py from results/06-17. Do not edit.\n{text}",
+        f"% Generated by scripts/10_results_paper.py from results/06-25. Do not edit.\n{text}",
         encoding="utf-8")
 
 
@@ -1362,8 +1895,9 @@ def main():
     rq3()
     rq4()
     post_review()
+    second_review()
     check_wording()
-    lines = ["% Generated by scripts/10_results_paper.py from results/06_rq1 ... 17_rq2_inductive.",
+    lines = ["% Generated by scripts/10_results_paper.py from results/06_rq1 ... 25_cellrank.",
              "% Do not edit by hand."]
     lines += [rf"\newcommand{{\{k}}}{{{v}}}" for k, v in M.items()]
     (GEN / "results_numbers.tex").write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -1373,7 +1907,7 @@ def main():
     dirty = subprocess.run(["git", "status", "--porcelain", "scripts"], cwd=ROOT,
                            capture_output=True, text=True).stdout.strip()
     prov = [f"git_commit {commit}{' (DIRTY scripts/)' if dirty else ''}",
-            "plan: ANALYSIS_PLAN.md approved at 65cd70d (amendments A1-A3; A3 = post-review additions)",
+            "plan: ANALYSIS_PLAN.md approved at 65cd70d (amendments A1-A6; A3, A4 = post-review additions; A5, A6 = compute reductions for A4)",
             f"python {sys.version.split()[0]} pandas {pd.__version__} numpy {np.__version__} "
             f"matplotlib {matplotlib.__version__}",
             "environment: Windows (VS Code session)"]
